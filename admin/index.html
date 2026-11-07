@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin | The Miller Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../assets/config.js"></script>
+<style>
+:root{--spruce:#10231F;--pine:#1B3A33;--snow:#F6F8F7;--mist:#E3EBE8;--aspen:#F0B23A;--danger:#B3261E;--ok:#1E7A4B;--warn:#B26A00;--serif:'Fraunces',Georgia,serif;--sans:'Figtree',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--snow);color:var(--spruce);font:400 1rem/1.5 var(--sans)}
+h1,h2,h3{font-family:var(--serif);margin:0;line-height:1.15}
+a{color:inherit}
+:focus-visible{outline:3px solid #4F63D2;outline-offset:2px}
+.top{background:var(--spruce);color:var(--snow);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top strong{font:600 1.2rem var(--serif)}
+.top span{opacity:.75;font-size:.9rem}
+.tabs{display:flex;gap:4px;padding:10px 20px 0;overflow-x:auto;background:var(--mist);border-bottom:1px solid rgba(16,35,31,.12)}
+.tabs button{border:0;background:none;padding:10px 16px;font:600 .95rem var(--sans);color:var(--spruce);cursor:pointer;border-radius:10px 10px 0 0;white-space:nowrap}
+.tabs button[aria-current="true"]{background:var(--snow)}
+main{padding:22px 20px 80px;max-width:1200px;margin:0 auto}
+.card{background:#fff;border:1px solid rgba(16,35,31,.12);border-radius:16px;padding:20px;margin-bottom:18px}
+.card h2{font-size:1.35rem;margin-bottom:10px}
+.center{max-width:420px;margin:8vh auto;padding:0 20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat{background:#fff;border:1px solid rgba(16,35,31,.12);border-radius:16px;padding:16px}
+.stat b{display:block;font:600 2rem var(--serif)}
+.b{display:inline-block;border:1.5px solid var(--spruce);background:transparent;color:var(--spruce);border-radius:999px;padding:8px 16px;font:600 .9rem var(--sans);cursor:pointer;text-decoration:none}
+.b:hover{background:var(--mist)}
+.b.p{background:var(--aspen);border-color:var(--aspen)}
+.b.p:hover{background:#F7C65C}
+.b.d{border-color:var(--danger);color:var(--danger)}
+.b.s{padding:5px 12px;font-size:.82rem}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid rgba(16,35,31,.3);border-radius:10px;font:inherit;background:#fff;color:var(--spruce)}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-weight:600;font-size:.88rem;margin-bottom:4px}
+.fg{display:grid;gap:12px}
+.fg .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chk{display:flex;gap:10px;align-items:center}.chk input{width:auto}.chk label{margin:0}
+.help{font-size:.8rem;opacity:.7;margin-top:3px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar input,.bar select{width:auto;min-width:150px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(16,35,31,.1);font-size:.92rem;vertical-align:middle}
+th{background:var(--mist);font-size:.82rem}
+tr.click{cursor:pointer}tr.click:hover{background:#F2F6F4}
+.tw{overflow-x:auto}
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--mist);font-size:.8rem;font-weight:600}
+.tag.ok{background:#D8F0E3;color:var(--ok)}.tag.warn{background:#FFF0D1;color:var(--warn)}.tag.bad{background:#FADAD7;color:var(--danger)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px;overflow-x:auto;padding-bottom:10px}
+.col{background:var(--mist);border-radius:14px;padding:10px;min-height:200px}
+.col h3{font:700 .9rem var(--sans);margin-bottom:8px}
+.col.over{outline:3px dashed var(--aspen)}
+.kc{background:#fff;border-radius:10px;padding:10px;margin-bottom:8px;cursor:grab;font-size:.9rem;border:1px solid rgba(16,35,31,.1)}
+.kc b{display:block}.kc small{opacity:.7}
+.dbg{position:fixed;inset:0;background:rgba(16,35,31,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.dbg.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--snow);transform:translateX(100%);transition:transform .25s;z-index:41;overflow-y:auto;padding:20px}
+.drawer.open{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.x{border:0;background:none;font-size:1.8rem;cursor:pointer;line-height:1}
+.qa{display:flex;gap:8px;margin-bottom:14px}
+.note{border-top:1px solid rgba(16,35,31,.12);padding:10px 0;font-size:.92rem}
+.note small{opacity:.65}
+.info{font-size:.88rem;display:grid;gap:3px;margin:14px 0;padding:12px;border-radius:12px;background:#fff;border:1px solid rgba(16,35,31,.1)}
+.msg{min-height:1.4em;font-weight:600;margin-top:8px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--spruce);color:var(--snow);padding:10px 18px;border-radius:999px;z-index:60;font-weight:600}
+code,pre,textarea.mono{font-family:ui-monospace,Menlo,monospace;font-size:.85rem}
+pre{background:var(--mist);padding:12px;border-radius:10px;overflow-x:auto}
+.row2{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:600px){.fg .two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="../assets/site.js"></script>
+<script>
+(function(){
+'use strict';
+var C = window.MG_CONFIG || {}, esc = MG.esc;
+var $ = function(s,r){ return (r||document).querySelector(s); };
+var app = $('#app');
+var sb, user;
+var S = { tab:'dashboard', leads:[], tasks:[], lview:'list', q:'', stage:'all' };
+var STAGES = [['new','New'],['contacted','Contacted'],['nurturing','Nurturing'],['meeting','Meeting or showing'],['under_contract','Under contract'],['closed','Closed'],['lost','Lost']];
+var stageLabel = function(k){ var f = STAGES.filter(function(s){return s[0]===k})[0]; return f ? f[1] : k; };
+var fmtDate = function(d){ return d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : ''; };
+var todayStr = function(){ return new Date(Date.now() - new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10); };
+var siteBase = function(){ return (C.SITE_URL ? C.SITE_URL.replace(/\/$/,'') + '/' : new URL('../', location.href).href); };
+
+function toast(t){ var d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2200); }
+function fail(e){ console.error(e); toast('Error: ' + (e && e.message ? e.message : 'something went wrong')); }
+
+/* ---------- Drawer ---------- */
+function drawer(html){
+  var d = $('#drawer');
+  if(!d){
+    document.body.insertAdjacentHTML('beforeend','<div class="dbg" id="dbg"></div><aside class="drawer" id="drawer" role="dialog" aria-modal="true"></aside>');
+    d = $('#drawer'); $('#dbg').onclick = closeDrawer;
+  }
+  d.innerHTML = html; d.classList.add('open'); $('#dbg').classList.add('open'); d.scrollTop = 0;
+  var x = $('#dx'); if(x) x.onclick = closeDrawer;
+}
+function closeDrawer(){ var d = $('#drawer'); if(d){ d.classList.remove('open'); $('#dbg').classList.remove('open'); } }
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
+
+function download(name, text, type){
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type: type || 'text/plain'}));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- Boot and login ---------- */
+async function init(){
+  if(!MG.ready){
+    app.innerHTML = '<div class="center"><div class="card"><h2>Almost there</h2><p>Add your Supabase URL and anon key to <code>assets/config.js</code>, then reload this page. The steps are in README.md.</p></div></div>';
+    return;
+  }
+  sb = await MG.client();
+  sb.auth.onAuthStateChange(function(evt){ if(evt === 'PASSWORD_RECOVERY') setPasswordView(); });
+  var r = await sb.auth.getSession();
+  if(r.data.session){ user = r.data.session.user; await boot(); } else loginView();
+}
+function loginView(){
+  app.innerHTML = '<div class="center"><div class="card"><h2>Admin sign in</h2><form id="lf" class="fg" style="margin-top:12px">'+
+   '<div><label for="em">Email</label><input id="em" type="email" autocomplete="username" required></div>'+
+   '<div><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>'+
+   '<button class="b p" type="submit">Sign in</button><button class="b" type="button" id="fp">Email me a password reset link</button><p class="msg" id="lm" role="status"></p></form></div></div>';
+  $('#lf').onsubmit = async function(e){
+    e.preventDefault(); $('#lm').textContent = 'Signing in...';
+    var r = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });
+    if(r.error){ $('#lm').textContent = r.error.message; return; }
+    user = r.data.user; boot();
+  };
+  $('#fp').onclick = async function(){
+    var em = $('#em').value.trim(); if(!em){ $('#lm').textContent = 'Enter your email first.'; return; }
+    var r = await sb.auth.resetPasswordForEmail(em, { redirectTo: location.href.split('#')[0] });
+    $('#lm').textContent = r.error ? r.error.message : 'If that email has an account, a reset link is on its way.';
+  };
+}
+function setPasswordView(){
+  app.innerHTML = '<div class="center"><div class="card"><h2>Set a new password</h2><form id="np" class="fg" style="margin-top:12px"><div><label for="p1">New password</label><input id="p1" type="password" minlength="10" autocomplete="new-password" required><div class="help">At least 10 characters.</div></div><button class="b p" type="submit">Save password</button><p class="msg" id="nm" role="status"></p></form></div></div>';
+  $('#np').onsubmit = async function(e){
+    e.preventDefault();
+    var r = await sb.auth.updateUser({ password: $('#p1').value });
+    if(r.error){ $('#nm').textContent = r.error.message; return; }
+    var s = await sb.auth.getSession(); user = s.data.session.user; boot();
+  };
+}
+async function boot(){
+  var r = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+  if(r.error || !r.data){
+    app.innerHTML = '<div class="center"><div class="card"><h2>Not authorized</h2><p>You’re signed in, but this account isn’t an admin yet. Run this in the Supabase SQL editor:</p><pre>insert into public.admins (user_id)\nselect id from auth.users\nwhere email = \''+esc(user.email)+'\';</pre><button class="b" id="so">Sign out</button></div></div>';
+    $('#so').onclick = signOut; return;
+  }
+  var tabs = [['dashboard','Dashboard'],['leads','Leads'],['landing_pages','Landing pages'],['listings','Listings'],['posts','Blog'],['testimonials','Testimonials'],['seo','SEO']];
+  app.innerHTML = '<div class="top"><strong>The Miller Group admin</strong><span>'+esc(user.email)+' &nbsp; <button class="b s" id="so" style="color:#fff;border-color:#fff">Sign out</button></span></div>'+
+    '<div class="tabs" role="tablist">'+tabs.map(function(t){return '<button data-tab="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div><main id="view"></main>';
+  $('#so').onclick = signOut;
+  document.querySelector('.tabs').onclick = function(e){ var b = e.target.closest('[data-tab]'); if(b) go(b.dataset.tab); };
+  go(S.tab);
+}
+async function signOut(){ await sb.auth.signOut(); user = null; closeDrawer(); loginView(); }
+async function go(tab){
+  S.tab = tab; closeDrawer();
+  document.querySelectorAll('.tabs button').forEach(function(b){ b.setAttribute('aria-current', String(b.dataset.tab === tab)); });
+  var v = $('#view'); v.innerHTML = '<p>Loading...</p>';
+  try{
+    if(tab === 'dashboard') await viewDashboard(v);
+    else if(tab === 'leads') await viewLeads(v);
+    else if(tab === 'seo') await viewSeo(v);
+    else await viewModel(v, tab);
+  }catch(e){ v.innerHTML = '<div class="card"><h2>Something went wrong</h2><p>'+esc(e.message || e)+'</p><p>If this says a table doesn’t exist, run supabase/schema.sql in Supabase.</p></div>'; }
+}
+
+/* ---------- Data loaders ---------- */
+async function loadLeads(){
+  var r = await sb.from('leads').select('*').order('created_at',{ascending:false}).limit(2000);
+  if(r.error) throw r.error; S.leads = r.data;
+}
+async function loadTasks(){
+  var r = await sb.from('tasks').select('*').eq('done', false).order('due_date',{ascending:true,nullsFirst:false});
+  if(r.error) throw r.error; S.tasks = r.data;
+}
+function sourceOf(l){ return l.landing_slug ? 'Landing: '+l.landing_slug : (l.utm_source || l.source || 'direct'); }
+
+/* ---------- Dashboard ---------- */
+async function viewDashboard(v){
+  await loadLeads(); await loadTasks();
+  var wk = Date.now() - 7*864e5, t = todayStr();
+  var week = S.leads.filter(function(l){ return new Date(l.created_at) > wk; }).length;
+  var open = S.leads.filter(function(l){ return l.stage !== 'closed' && l.stage !== 'lost'; }).length;
+  var due = S.leads.filter(function(l){ return l.next_follow_up && l.next_follow_up <= t && l.stage !== 'closed' && l.stage !== 'lost'; });
+  var counts = {}; S.leads.forEach(function(l){ counts[l.stage] = (counts[l.stage]||0)+1; });
+  var src = {}; S.leads.forEach(function(l){ var k = sourceOf(l); src[k] = (src[k]||0)+1; });
+  var srcRows = Object.keys(src).sort(function(a,b){return src[b]-src[a]}).slice(0,8).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+src[k]+'</td></tr>'}).join('');
+  v.innerHTML =
+   '<div class="grid" style="margin-bottom:18px"><div class="stat"><b>'+week+'</b>New leads, last 7 days</div><div class="stat"><b>'+open+'</b>Open leads</div><div class="stat"><b>'+due.length+'</b>Follow-ups due</div><div class="stat"><b>'+(counts.closed||0)+'</b>Closed</div></div>'+
+   '<div class="card"><h2>Follow-ups due</h2>'+(due.length ? '<div class="tw"><table><tbody>'+due.map(function(l){return '<tr class="click" data-lead="'+l.id+'"><td>'+esc(l.name)+'</td><td>'+esc(l.interest||'')+'</td><td>'+fmtDate(l.next_follow_up)+'</td></tr>'}).join('')+'</tbody></table></div>' : '<p>Nothing due. Set a follow-up date on a lead to see it here.</p>')+'</div>'+
+   '<div class="card"><h2>Pipeline</h2><div class="row2">'+STAGES.map(function(s){return '<span class="tag">'+s[1]+': '+(counts[s[0]]||0)+'</span>'}).join('')+'</div></div>'+
+   '<div class="card"><h2>Where leads come from</h2>'+(srcRows ? '<table><thead><tr><th>Source</th><th>Leads</th></tr></thead><tbody>'+srcRows+'</tbody></table>' : '<p>No leads yet.</p>')+'</div>'+
+   '<div class="card"><h2>Tasks</h2><form id="tf" class="bar"><input id="tt" placeholder="New task" required style="flex:1;min-width:200px"><input id="td" type="date"><button class="b p" type="submit">Add</button></form><div id="tl"></div></div>';
+  function drawTasks(){
+    $('#tl').innerHTML = S.tasks.length ? '<table><tbody>'+S.tasks.map(function(k){
+      var lead = S.leads.filter(function(l){return l.id === k.lead_id})[0];
+      return '<tr><td style="width:36px"><input type="checkbox" data-done="'+k.id+'" aria-label="Done" style="width:auto"></td><td>'+esc(k.title)+(lead ? ' <span class="tag">'+esc(lead.name)+'</span>' : '')+'</td><td>'+(k.due_date ? fmtDate(k.due_date+'T12:00:00') : '')+'</td></tr>';
+    }).join('')+'</tbody></table>' : '<p>No open tasks.</p>';
+  }
+  drawTasks();
+  $('#tf').onsubmit = async function(e){
+    e.preventDefault();
+    var r = await sb.from('tasks').insert({ title: $('#tt').value.trim(), due_date: $('#td').value || null });
+    if(r.error) return fail(r.error); $('#tt').value = ''; await loadTasks(); drawTasks();
+  };
+  v.onclick = async function(e){
+    var cb = e.target.closest('[data-done]');
+    if(cb){ var r = await sb.from('tasks').update({done:true}).eq('id', cb.dataset.done); if(r.error) return fail(r.error); await loadTasks(); drawTasks(); return; }
+    var tr = e.target.closest('[data-lead]'); if(tr) openLead(tr.dataset.lead);
+  };
+}
+
+/* ---------- Leads ---------- */
+function filteredLeads(){
+  var q = S.q.toLowerCase();
+  return S.leads.filter(function(l){
+    if(S.stage !== 'all' && l.stage !== S.stage) return false;
+    if(!q) return true;
+    return [l.name,l.email,l.phone,l.interest,l.landing_slug,l.utm_campaign,l.address].join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+}
+async function viewLeads(v){
+  await loadLeads(); drawLeads(v);
+}
+function drawLeads(v){
+  var list = filteredLeads();
+  var body;
+  if(S.lview === 'board'){
+    body = '<div class="board">'+STAGES.map(function(s){
+      var items = list.filter(function(l){return l.stage === s[0]});
+      return '<div class="col" data-col="'+s[0]+'"><h3>'+s[1]+' ('+items.length+')</h3>'+items.map(function(l){
+        return '<div class="kc" draggable="true" data-card="'+l.id+'"><b>'+esc(l.name)+'</b><small>'+esc(l.interest||sourceOf(l))+'</small></div>';
+      }).join('')+'</div>';
+    }).join('')+'</div>';
+  }else{
+    body = '<div class="tw"><table><thead><tr><th>Received</th><th>Name</th><th>Interested in</th><th>Source</th><th>Follow up</th><th>Stage</th></tr></thead><tbody>'+
+     (list.length ? list.map(function(l){
+       return '<tr class="click" data-lead="'+l.id+'"><td>'+fmtDate(l.created_at)+'</td><td><b>'+esc(l.name)+'</b><br><small>'+esc(l.email)+'</small></td><td>'+esc(l.interest||'')+'</td><td>'+esc(sourceOf(l))+'</td><td>'+fmtDate(l.next_follow_up ? l.next_follow_up+'T12:00:00' : '')+'</td>'+
+       '<td><select data-stage="'+l.id+'" aria-label="Stage for '+esc(l.name)+'" style="min-width:140px">'+STAGES.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===l.stage?' selected':'')+'>'+s[1]+'</option>'}).join('')+'</select></td></tr>';
+     }).join('') : '<tr><td colspan="6">No leads match.</td></tr>')+'</tbody></table></div>';
+  }
+  v.innerHTML = '<div class="bar"><input id="q" placeholder="Search leads" value="'+esc(S.q)+'"><select id="sf"><option value="all">All stages</option>'+STAGES.map(function(s){return '<option value="'+s[0]+'"'+(S.stage===s[0]?' selected':'')+'>'+s[1]+'</option>'}).join('')+'</select>'+
+    '<button class="b'+(S.lview==='list'?' p':'')+'" data-view="list">List</button><button class="b'+(S.lview==='board'?' p':'')+'" data-view="board">Board</button><button class="b" id="ex">Export CSV</button><button class="b p" id="nl">Add lead</button></div>'+
+    '<p class="help" style="margin:-6px 0 12px">'+list.length+' lead'+(list.length===1?'':'s')+'</p>'+body;
+  var q = $('#q'); q.oninput = function(){ S.q = q.value; var pos = q.selectionStart; drawLeads(v); var n = $('#q'); n.focus(); n.setSelectionRange(pos,pos); };
+  $('#sf').onchange = function(){ S.stage = this.value; drawLeads(v); };
+  $('#ex').onclick = exportCsv;
+  $('#nl').onclick = newLead;
+  v.onclick = function(e){
+    var vb = e.target.closest('[data-view]'); if(vb){ S.lview = vb.dataset.view; drawLeads(v); return; }
+    if(e.target.closest('select')) return;
+    var tr = e.target.closest('[data-lead]'); if(tr) return openLead(tr.dataset.lead);
+    var kc = e.target.closest('[data-card]'); if(kc) openLead(kc.dataset.card);
+  };
+  v.onchange = async function(e){
+    var sel = e.target.closest('[data-stage]'); if(!sel) return;
+    await setStage(sel.dataset.stage, sel.value);
+  };
+  v.ondragstart = function(e){ var c = e.target.closest('[data-card]'); if(c) e.dataTransfer.setData('text/plain', c.dataset.card); };
+  v.ondragover = function(e){ var c = e.target.closest('[data-col]'); if(c){ e.preventDefault(); document.querySelectorAll('.col.over').forEach(function(x){x.classList.remove('over')}); c.classList.add('over'); } };
+  v.ondrop = async function(e){
+    var c = e.target.closest('[data-col]'); if(!c) return; e.preventDefault();
+    var id = e.dataTransfer.getData('text/plain'); if(id){ await setStage(id, c.dataset.col); drawLeads(v); }
+  };
+}
+async function setStage(id, stage){
+  var r = await sb.from('leads').update({ stage: stage }).eq('id', id);
+  if(r.error) return fail(r.error);
+  S.leads.forEach(function(l){ if(l.id === id) l.stage = stage; });
+  toast('Moved to ' + stageLabel(stage));
+}
+function csvCell(x){
+  x = x == null ? '' : (typeof x === 'object' ? JSON.stringify(x) : String(x));
+  if(/^[=+\-@]/.test(x)) x = "'" + x;
+  return /[",\n]/.test(x) ? '"' + x.replace(/"/g,'""') + '"' : x;
+}
+function exportCsv(){
+  var cols = ['created_at','name','email','phone','interest','stage','address','message','source','landing_slug','utm_source','utm_medium','utm_campaign','utm_content','utm_term','referrer','budget','deal_value','next_follow_up','tags','extra'];
+  var rows = [cols.join(',')].concat(filteredLeads().map(function(l){ return cols.map(function(c){ return csvCell(Array.isArray(l[c]) ? l[c].join('; ') : l[c]); }).join(','); }));
+  download('leads-' + todayStr() + '.csv', rows.join('\n'), 'text/csv');
+}
+function fld(name,label,val,type,extra){
+  return '<div><label for="f_'+name+'">'+label+'</label><input id="f_'+name+'" name="'+name+'" type="'+(type||'text')+'" value="'+esc(val==null?'':val)+'" '+(extra||'')+'></div>';
+}
+function newLead(){
+  drawer('<div class="dh"><h2>Add lead</h2><button class="x" id="dx" aria-label="Close">×</button></div><form id="nlf" class="fg">'+
+    fld('name','Name','','text','required')+fld('email','Email','','email','required')+fld('phone','Phone','','tel')+fld('interest','Interested in','')+
+    '<div><label for="f_message">Notes</label><textarea id="f_message" name="message"></textarea></div><button class="b p" type="submit">Save lead</button><p class="msg" id="nlm"></p></form>');
+  $('#nlf').onsubmit = async function(e){
+    e.preventDefault(); var f = e.target;
+    var r = await sb.from('leads').insert({ name: f.name.value.trim(), email: f.email.value.trim(), phone: f.phone.value || null, interest: f.interest.value || null, message: f.message.value || null, source: 'admin' });
+    if(r.error){ $('#nlm').textContent = r.error.message; return; }
+    toast('Lead added'); await loadLeads(); closeDrawer(); drawLeads($('#view'));
+  };
+}
+async function openLead(id){
+  var l = S.leads.filter(function(x){ return x.id === id; })[0]; if(!l) return;
+  var nr = await sb.from('lead_notes').select('*').eq('lead_id', id).order('created_at',{ascending:false});
+  var notes = nr.data || [];
+  var utm = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].filter(function(k){return l[k]}).map(function(k){return k.replace('utm_','')+': '+l[k]}).join(', ');
+  var extra = l.extra ? Object.keys(l.extra).map(function(k){ return esc(k)+': '+esc(l.extra[k]); }).join('<br>') : '';
+  drawer('<div class="dh"><h2>'+esc(l.name)+'</h2><button class="x" id="dx" aria-label="Close">×</button></div>'+
+   '<div class="qa">'+(l.phone ? '<a class="b s" href="tel:'+esc(l.phone)+'">Call</a><a class="b s" href="sms:'+esc(l.phone)+'">Text</a>' : '')+'<a class="b s" href="mailto:'+esc(l.email)+'">Email</a></div>'+
+   '<form id="lf" class="fg"><div class="two">'+fld('name','Name',l.name)+fld('email','Email',l.email,'email')+'</div><div class="two">'+fld('phone','Phone',l.phone,'tel')+fld('interest','Interested in',l.interest)+'</div>'+
+   '<div class="two"><div><label for="f_stage">Stage</label><select id="f_stage" name="stage">'+STAGES.map(function(s){return '<option value="'+s[0]+'"'+(s[0]===l.stage?' selected':'')+'>'+s[1]+'</option>'}).join('')+'</select></div>'+fld('next_follow_up','Next follow-up',l.next_follow_up,'date')+'</div>'+
+   '<div class="two">'+fld('budget','Budget',l.budget)+fld('deal_value','Expected deal value ($)',l.deal_value,'number','step="1000"')+'</div>'+fld('tags','Tags (comma separated)',(l.tags||[]).join(', '))+
+   '<button class="b p" type="submit">Save changes</button></form>'+
+   '<div class="info"><div><b>Received:</b> '+fmtDate(l.created_at)+'</div><div><b>Source:</b> '+esc(sourceOf(l))+'</div>'+(utm?'<div><b>Campaign:</b> '+esc(utm)+'</div>':'')+(l.referrer?'<div><b>Referrer:</b> '+esc(l.referrer)+'</div>':'')+(l.address?'<div><b>Address:</b> '+esc(l.address)+'</div>':'')+(extra?'<div>'+extra+'</div>':'')+(l.message?'<div><b>Message:</b> '+esc(l.message)+'</div>':'')+'</div>'+
+   '<h3 style="margin:18px 0 8px">Activity</h3><form id="nf" class="fg"><select id="nk" aria-label="Type"><option value="note">Note</option><option value="call">Call</option><option value="email">Email</option><option value="text">Text</option><option value="showing">Showing</option></select><textarea id="nb" placeholder="Add a note" required style="min-height:70px"></textarea><button class="b" type="submit">Add</button></form>'+
+   '<div id="nl">'+(notes.length ? notes.map(function(n){return '<div class="note"><small>'+esc(n.kind)+' | '+fmtDate(n.created_at)+'</small><br>'+esc(n.body)+'</div>'}).join('') : '<p class="help">No activity yet.</p>')+'</div>'+
+   '<h3 style="margin:18px 0 8px">Add a task</h3><form id="tkf" class="bar"><input id="tkt" placeholder="e.g. Send listings" required style="flex:1"><input id="tkd" type="date"><button class="b" type="submit">Add task</button></form>'+
+   '<div style="margin-top:24px"><button class="b d" id="dl">Delete lead</button></div>');
+  $('#lf').onsubmit = async function(e){
+    e.preventDefault(); var f = e.target;
+    var patch = { name:f.name.value.trim(), email:f.email.value.trim(), phone:f.phone.value||null, interest:f.interest.value||null, stage:f.stage.value, next_follow_up:f.next_follow_up.value||null, budget:f.budget.value||null, deal_value:f.deal_value.value===''?null:Number(f.deal_value.value), tags:f.tags.value.split(',').map(function(t){return t.trim()}).filter(Boolean) };
+    var r = await sb.from('leads').update(patch).eq('id', id); if(r.error) return fail(r.error);
+    toast('Saved'); await loadLeads(); if(S.tab === 'leads') drawLeads($('#view')); else go(S.tab);
+  };
+  $('#nf').onsubmit = async function(e){
+    e.preventDefault();
+    var r = await sb.from('lead_notes').insert({ lead_id:id, kind:$('#nk').value, body:$('#nb').value.trim() }); if(r.error) return fail(r.error);
+    openLead(id);
+  };
+  $('#tkf').onsubmit = async function(e){
+    e.preventDefault();
+    var r = await sb.from('tasks').insert({ title:$('#tkt').value.trim(), due_date:$('#tkd').value||null, lead_id:id }); if(r.error) return fail(r.error);
+    $('#tkt').value = ''; toast('Task added');
+  };
+  $('#dl').onclick = async function(){
+    if(!confirm('Delete ' + l.name + ' and all of their notes? This cannot be undone.')) return;
+    var r = await sb.from('leads').delete().eq('id', id); if(r.error) return fail(r.error);
+    toast('Deleted'); closeDrawer(); await loadLeads(); if(S.tab === 'leads') drawLeads($('#view')); else go(S.tab);
+  };
+}
+
+/* ---------- Content models (landing pages, listings, blog, testimonials) ---------- */
+var MODELS = {
+  landing_pages: { label:'Landing page', plural:'Landing pages', order:'created_at',
+    cols:[['title','Page'],['slug','Link'],['published','Status']],
+    fields:[
+      {k:'title',l:'Internal name',t:'text',req:1,help:'Only you see this. Example: Fall open house, Facebook'},
+      {k:'slug',l:'Link name',t:'text',req:1,help:'Lowercase letters, numbers and hyphens. This becomes your link.'},
+      {k:'headline',l:'Headline',t:'text',req:1},
+      {k:'subheadline',l:'Subheadline',t:'text'},
+      {k:'body_md',l:'Body',t:'textarea',help:'Simple formatting: ## Heading, - bullet, **bold**, [link text](https://...)'},
+      {k:'cta_text',l:'Button text',t:'text',req:1,def:'Send'},
+      {k:'interest',l:'Lead tag',t:'text',help:'Shown on each lead from this page, e.g. Open house'},
+      {k:'event_date',l:'Event date and time',t:'text',help:'For events and open houses. Example: Saturday, Nov 15, 1 to 3 pm'},
+      {k:'event_location',l:'Event location',t:'text'},
+      {k:'hero_image_url',l:'Image link',t:'text',help:'Paste a link to an image, or leave blank'},
+      {k:'theme',l:'Look',t:'select',opts:[['light','Light'],['dark','Dark']],def:'light'},
+      {k:'thank_you_message',l:'Thank-you message',t:'text'},
+      {k:'redirect_url',l:'Send them to this page after submitting (optional)',t:'text',help:'Useful for ad conversion tracking, e.g. thank-you.html'},
+      {k:'seo_title',l:'Search title',t:'text',help:'30 to 60 characters'},
+      {k:'seo_description',l:'Search description',t:'textarea',help:'70 to 160 characters'},
+      {k:'noindex',l:'Keep this page out of Google (recommended for ad pages)',t:'checkbox',def:true},
+      {k:'published',l:'Live',t:'checkbox'}
+    ]},
+  listings: { label:'Listing', plural:'Listings', order:'created_at',
+    cols:[['title','Listing'],['city','City'],['status','Status'],['published','Visible']],
+    fields:[
+      {k:'status',l:'Status',t:'select',opts:[['active','For sale'],['coming_soon','Coming soon'],['sold','Sold']],def:'active'},
+      {k:'title',l:'Title',t:'text',req:1},{k:'address',l:'Address',t:'text'},{k:'city',l:'City',t:'text',help:'Used by the Communities page filters'},
+      {k:'price',l:'Price ($)',t:'number'},{k:'beds',l:'Bedrooms',t:'number'},{k:'baths',l:'Bathrooms',t:'number'},{k:'sqft',l:'Square feet',t:'number'},
+      {k:'photo_url',l:'Photo link',t:'text'},{k:'link_url',l:'Details link',t:'text'},
+      {k:'featured',l:'Feature at top',t:'checkbox'},{k:'published',l:'Show on site',t:'checkbox'}
+    ]},
+  posts: { label:'Post', plural:'Blog posts', order:'created_at',
+    cols:[['title','Post'],['category','Category'],['published','Status']],
+    fields:[
+      {k:'title',l:'Title',t:'text',req:1},{k:'slug',l:'Link name',t:'text',req:1,help:'Lowercase letters, numbers and hyphens'},
+      {k:'category',l:'Category',t:'select',opts:[['Buying and selling tips','Buying and selling tips'],['Neighborhood news','Neighborhood news']],def:'Buying and selling tips'},
+      {k:'excerpt',l:'Short summary',t:'textarea'},{k:'cover_url',l:'Cover image link',t:'text'},
+      {k:'body',l:'Body',t:'textarea',big:1,help:'Simple formatting: ## Heading, - bullet, **bold**, [link text](https://...)'},
+      {k:'seo_title',l:'Search title',t:'text',help:'30 to 60 characters'},{k:'seo_description',l:'Search description',t:'textarea',help:'70 to 160 characters'},
+      {k:'published',l:'Published',t:'checkbox'}
+    ]},
+  testimonials: { label:'Testimonial', plural:'Testimonials', order:'created_at',
+    cols:[['author','Client'],['quote','Quote'],['published','Status']],
+    fields:[
+      {k:'quote',l:'Quote',t:'textarea',req:1,help:'Only use quotes you have permission to publish.'},{k:'author',l:'Name',t:'text',req:1},{k:'location',l:'City',t:'text'},{k:'published',l:'Show on site',t:'checkbox'}
+    ]}
+};
+var TEMPLATES = {
+  'Open house': {title:'Open house',slug:'open-house',headline:'Open house this weekend',subheadline:'Come see the home in person and ask us anything.',body_md:'## What to expect\n- A tour of the home\n- Neighborhood and market information\n- Time to ask questions',cta_text:'Save my spot',interest:'Open house',event_date:'[Day, date and time]',event_location:'[Address]'},
+  'Free home value': {title:'Home value',slug:'home-value',headline:'What is your home worth?',subheadline:'Get a free estimate based on recent nearby sales.',body_md:'- Based on real comparable sales\n- No pressure to list\n- We reply within one business day',cta_text:'Get my estimate',interest:'Home value estimate'},
+  'Buyer consultation': {title:'Buyer consultation',slug:'buy-in-colorado',headline:'Buying a home in Colorado? Start here.',subheadline:'Talk through your budget, neighborhoods and next steps with us.',body_md:'- Find out what you can afford\n- Compare neighborhoods\n- Learn how the process works',cta_text:'Talk to us',interest:'Buying a home'},
+  'Commercial space': {title:'Commercial space',slug:'commercial-space',headline:'Looking for commercial space in Colorado?',subheadline:'Tell us what you need and we’ll start the search.',body_md:'We help with office, retail, flex and industrial space.',cta_text:'Start my search',interest:'Leasing commercial space'},
+  'Land and development': {title:'Land and development',slug:'land-and-development',headline:'Have land? Let’s see what it could become.',subheadline:'A quick conversation about your site and what could go on it.',body_md:'- Early site screening\n- Feasibility and numbers\n- Introductions to builders and buyers',cta_text:'Talk through my site',interest:'Development or land'},
+  'Event RSVP': {title:'Event RSVP',slug:'event-rsvp',headline:'Join us for [event name]',subheadline:'RSVP to hold your spot.',body_md:'## Details\n[Add details here]',cta_text:'RSVP',interest:'Event RSVP',event_date:'[Date and time]',event_location:'[Location]'}
+};
+function slugify(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80); }
+
+async function viewModel(v, key){
+  var M = MODELS[key];
+  var r = await sb.from(key).select('*').order(M.order,{ascending:false});
+  if(r.error) throw r.error;
+  var rows = r.data;
+  if(key === 'landing_pages' && !S.leads.length){ try{ await loadLeads(); }catch(e){} }
+  var base = siteBase() + 'lp/?s=';
+  v.innerHTML = '<div class="bar"><h2 style="margin-right:auto">'+M.plural+'</h2><button class="b p" id="new">New '+M.label.toLowerCase()+'</button></div><div class="tw"><table><thead><tr>'+M.cols.map(function(c){return '<th>'+c[1]+'</th>'}).join('')+(key==='landing_pages'?'<th>Leads</th>':'')+'<th></th></tr></thead><tbody>'+
+    (rows.length ? rows.map(function(row){
+      return '<tr>'+M.cols.map(function(c){
+        var val = row[c[0]];
+        if(c[0] === 'published') return '<td><span class="tag '+(val?'ok':'')+'">'+(val?'Live':'Draft')+'</span></td>';
+        if(c[0] === 'slug' && key === 'landing_pages') return '<td><small>lp/?s='+esc(val)+'</small></td>';
+        if(c[0] === 'quote') return '<td>'+esc(String(val).slice(0,80))+'</td>';
+        return '<td>'+esc(val==null?'':val)+'</td>';
+      }).join('')+(key==='landing_pages'?'<td>'+S.leads.filter(function(l){return l.landing_slug===row.slug}).length+'</td>':'')+
+      '<td><div class="row2"><button class="b s" data-edit="'+row.id+'">Edit</button>'+(key==='landing_pages'?'<button class="b s" data-links="'+row.id+'">Links</button><button class="b s" data-dup="'+row.id+'">Duplicate</button>':'')+'</div></td></tr>';
+    }).join('') : '<tr><td colspan="9">Nothing here yet.</td></tr>')+'</tbody></table></div>';
+  $('#new').onclick = function(){ editor(key, null); };
+  v.onclick = function(e){
+    var ed = e.target.closest('[data-edit]'); if(ed) return editor(key, rows.filter(function(x){return x.id===ed.dataset.edit})[0]);
+    var lk = e.target.closest('[data-links]'); if(lk) return linksPanel(rows.filter(function(x){return x.id===lk.dataset.links})[0], base);
+    var du = e.target.closest('[data-dup]');
+    if(du){ var src = rows.filter(function(x){return x.id===du.dataset.dup})[0]; var cp = Object.assign({}, src); delete cp.id; delete cp.created_at; cp.slug = slugify(src.slug + '-copy'); cp.title = src.title + ' (copy)'; cp.published = false; editor(key, null, cp); }
+  };
+}
+function linksPanel(row, base){
+  var url = base + row.slug;
+  var chans = [['Google Ads','google','cpc'],['Facebook or Instagram ads','facebook','paid_social'],['Email','email','email'],['Flyer or QR code','flyer','print'],['Text message','sms','sms'],['Other','other','referral']];
+  drawer('<div class="dh"><h2>Links for '+esc(row.title)+'</h2><button class="x" id="dx" aria-label="Close">×</button></div>'+
+   '<p>Use a different link for each place you promote this page. The CRM will show which one brought each lead.</p>'+
+   '<div class="fg"><div><label for="ch">Where will this link be used?</label><select id="ch">'+chans.map(function(c,i){return '<option value="'+i+'">'+c[0]+'</option>'}).join('')+'</select></div>'+
+   '<div><label for="cp">Campaign name</label><input id="cp" value="'+esc(row.slug)+'"></div>'+
+   '<div><label for="lu">Your link</label><textarea id="lu" readonly style="min-height:90px"></textarea></div>'+
+   '<div class="row2"><button class="b p" id="cpy">Copy link</button><a class="b" id="opn" target="_blank" rel="noopener">Open page</a></div>'+
+   (row.published ? '' : '<p class="help">This page is a draft. Visitors will see a “not available” message until you mark it Live.</p>')+'</div>');
+  function build(){
+    var c = chans[+$('#ch').value], cp = slugify($('#cp').value) || row.slug;
+    var u = url + '&utm_source=' + c[1] + '&utm_medium=' + c[2] + '&utm_campaign=' + encodeURIComponent(cp);
+    $('#lu').value = u; $('#opn').href = u;
+  }
+  $('#ch').onchange = build; $('#cp').oninput = build; build();
+  $('#cpy').onclick = function(){ navigator.clipboard.writeText($('#lu').value).then(function(){ toast('Link copied'); }, function(){ $('#lu').select(); toast('Press copy on your keyboard'); }); };
+}
+function editor(key, row, seed){
+  var M = MODELS[key], data = row || seed || {}, isNew = !row;
+  var tpl = (key === 'landing_pages' && isNew && !seed) ? '<div><label for="tp">Start from a template</label><select id="tp"><option value="">Blank</option>'+Object.keys(TEMPLATES).map(function(k){return '<option>'+k+'</option>'}).join('')+'</select></div>' : '';
+  function val(f){ return data[f.k] != null ? data[f.k] : (f.def != null && isNew ? f.def : ''); }
+  function ctl(f){
+    var v = val(f), id = 'e_' + f.k;
+    if(f.t === 'checkbox') return '<div class="chk"><input id="'+id+'" type="checkbox"'+(v?' checked':'')+'><label for="'+id+'">'+f.l+'</label></div>';
+    var inner;
+    if(f.t === 'textarea') inner = '<textarea id="'+id+'"'+(f.big?' style="min-height:260px"':'')+'>'+esc(v)+'</textarea>';
+    else if(f.t === 'select') inner = '<select id="'+id+'">'+f.opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===v?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select>';
+    else inner = '<input id="'+id+'" type="'+(f.t==='number'?'number':'text')+'"'+(f.t==='number'?' step="any"':'')+' value="'+esc(v)+'"'+(f.req?' required':'')+'>';
+    return '<div><label for="'+id+'">'+f.l+(f.req?' *':'')+'</label>'+inner+(f.help?'<div class="help">'+esc(f.help)+'</div>':'')+'</div>';
+  }
+  drawer('<div class="dh"><h2>'+(isNew?'New ':'Edit ')+M.label.toLowerCase()+'</h2><button class="x" id="dx" aria-label="Close">×</button></div><form id="ef" class="fg">'+tpl+M.fields.map(ctl).join('')+
+    '<div class="row2"><button class="b p" type="submit">Save</button>'+(isNew?'':'<button class="b d" type="button" id="del">Delete</button>')+'</div><p class="msg" id="em" role="status"></p></form>');
+  var slugEl = $('#e_slug'), titleEl = $('#e_title');
+  if(isNew && slugEl && titleEl){ titleEl.addEventListener('input', function(){ if(!slugEl.dataset.touched) slugEl.value = slugify(titleEl.value); }); slugEl.addEventListener('input', function(){ slugEl.dataset.touched = 1; }); }
+  var tp = $('#tp');
+  if(tp) tp.onchange = function(){
+    var t = TEMPLATES[tp.value]; if(!t) return;
+    Object.keys(t).forEach(function(k){ var el = $('#e_'+k); if(el) el.value = t[k]; });
+    if(slugEl) slugEl.dataset.touched = 1;
+  };
+  $('#ef').onsubmit = async function(e){
+    e.preventDefault();
+    var payload = {};
+    M.fields.forEach(function(f){
+      var el = $('#e_' + f.k);
+      if(f.t === 'checkbox') payload[f.k] = el.checked;
+      else if(f.t === 'number') payload[f.k] = el.value === '' ? null : Number(el.value);
+      else payload[f.k] = (el.value.trim() === '' && !f.req) ? null : el.value.trim();
+    });
+    if(key === 'landing_pages'){ payload.slug = slugify(payload.slug); payload.updated_at = new Date().toISOString(); }
+    if(key === 'posts'){ payload.slug = slugify(payload.slug); if(payload.published && !(row && row.published_at)) payload.published_at = new Date().toISOString(); }
+    var r = isNew ? await sb.from(key).insert(payload) : await sb.from(key).update(payload).eq('id', row.id);
+    if(r.error){ $('#em').textContent = r.error.message.indexOf('duplicate') >= 0 ? 'That link name is already used. Pick another.' : r.error.message; return; }
+    toast('Saved'); closeDrawer(); go(key);
+  };
+  var del = $('#del');
+  if(del) del.onclick = async function(){
+    if(!confirm('Delete this ' + M.label.toLowerCase() + '? This cannot be undone.')) return;
+    var r = await sb.from(key).delete().eq('id', row.id); if(r.error) return fail(r.error);
+    toast('Deleted'); closeDrawer(); go(key);
+  };
+}
+
+/* ---------- SEO ---------- */
+var STATIC_PAGES = ['','buy.html','sell.html','home-value.html','commercial.html','development.html','communities.html','properties.html','about.html','testimonials.html','blog.html','contact.html'];
+function lenTag(n, lo, hi){
+  if(!n) return '<span class="tag bad">Missing</span>';
+  if(n < lo) return '<span class="tag warn">'+n+' (short)</span>';
+  if(n > hi) return '<span class="tag warn">'+n+' (long)</span>';
+  return '<span class="tag ok">'+n+' (good)</span>';
+}
+async function viewSeo(v){
+  var pr = await sb.from('posts').select('slug,title,excerpt,seo_title,seo_description,published');
+  var lr = await sb.from('landing_pages').select('slug,title,headline,subheadline,seo_title,seo_description,published,noindex');
+  if(pr.error) throw pr.error; if(lr.error) throw lr.error;
+  var posts = pr.data, lps = lr.data;
+  var rows = posts.map(function(p){ return ['Post', p.title, p.seo_title || p.title, p.seo_description || p.excerpt || '', p.published]; })
+    .concat(lps.filter(function(l){return !l.noindex}).map(function(l){ return ['Landing page', l.title, l.seo_title || l.headline, l.seo_description || l.subheadline || '', l.published]; }));
+  var domain = siteBase().replace(/\/$/, '');
+  v.innerHTML =
+   '<div class="card"><h2>Search snippets for your content</h2><p>Google usually shows 30 to 60 characters of a title and 70 to 160 of a description. Edit these on each post or landing page.</p>'+
+   (rows.length ? '<div class="tw"><table><thead><tr><th>Type</th><th>Content</th><th>Title length</th><th>Description length</th><th>Status</th></tr></thead><tbody>'+rows.map(function(r){
+     return '<tr><td>'+r[0]+'</td><td>'+esc(r[1])+'</td><td>'+lenTag(r[2].length,30,60)+'</td><td>'+lenTag(r[3].length,70,160)+'</td><td>'+(r[4]?'Live':'Draft')+'</td></tr>';
+   }).join('')+'</tbody></table></div>' : '<p>No posts yet. Landing pages are hidden from Google by default, so only posts and pages you turn indexing on for show up here.</p>')+'</div>'+
+   '<div class="card"><h2>Sitemap</h2><p>A sitemap tells Google which pages exist. Generate a fresh one after you publish posts, replace <code>sitemap.xml</code> in your GitHub repo with it, and submit it in Google Search Console.</p>'+
+   '<div class="fg"><div><label for="dm">Your website address</label><input id="dm" value="'+esc(domain)+'"><div class="help">Example: https://www.yourdomain.com (no slash at the end). You can also set SITE_URL in assets/config.js.</div></div>'+
+   '<div class="row2"><button class="b p" id="gs">Generate sitemap</button><button class="b" id="dl" disabled>Download sitemap.xml</button></div><textarea id="sm" class="mono" readonly style="min-height:160px" placeholder="Your sitemap will appear here"></textarea></div></div>'+
+   '<div class="card"><h2>robots.txt</h2><p>Paste your address below the Sitemap line, then save the file as <code>robots.txt</code> at the top of your repo (a starter is already included).</p><pre>User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /lp/\n\nSitemap: '+esc(domain)+'/sitemap.xml</pre></div>'+
+   '<div class="card"><h2>Where to edit page titles and descriptions</h2><p>The core pages keep their title and description at the top of each HTML file, in the <code>&lt;title&gt;</code> and <code>&lt;meta name="description"&gt;</code> tags. Give every page a unique title and description that mentions the place and the service, for example “Sell Your Home in Denver | The Miller Group”.</p></div>'+
+   '<div class="card"><h2>SEO checklist</h2><ol><li>Set <code>SITE_URL</code> in assets/config.js so canonical tags are correct.</li><li>Verify your site in Google Search Console and submit the sitemap.</li><li>Claim and complete your Google Business Profile.</li><li>Publish a post or two each month about neighborhoods and market questions you hear from clients.</li><li>Add real photos and describe them in the alt text.</li><li>Ask happy clients for reviews and add approved quotes under Testimonials.</li><li>Keep ad landing pages hidden from Google so they don’t compete with your main pages.</li></ol></div>';
+  var sitemap = '';
+  $('#gs').onclick = function(){
+    var d = $('#dm').value.trim().replace(/\/$/, ''), t = todayStr();
+    var urls = STATIC_PAGES.map(function(p){ return d + '/' + p; });
+    posts.filter(function(p){return p.published}).forEach(function(p){ urls.push(d + '/post.html?slug=' + encodeURIComponent(p.slug)); });
+    lps.filter(function(l){return l.published && !l.noindex}).forEach(function(l){ urls.push(d + '/lp/?s=' + encodeURIComponent(l.slug)); });
+    sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(function(u){ return '  <url><loc>'+esc(u)+'</loc><lastmod>'+t+'</lastmod></url>'; }).join('\n') + '\n</urlset>\n';
+    $('#sm').value = sitemap; $('#dl').disabled = false;
+  };
+  $('#dl').onclick = function(){ download('sitemap.xml', sitemap, 'application/xml'); };
+}
+
+init().catch(function(e){ console.error(e); app.innerHTML = '<div class="center"><div class="card"><h2>Couldn’t start</h2><p>'+esc(e.message || e)+'</p></div></div>'; });
+})();
+</script>
+</body>
+</html>
