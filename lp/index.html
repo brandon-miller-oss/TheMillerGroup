@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Miller Group</title>
+<meta name="description" content="">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/config.js"></script>
+<style>
+.lp-top{padding-block:18px}
+.lp-top .brand{font:700 1.35rem/1 var(--serif);text-decoration:none}
+.lp-hero{padding-block:clamp(36px,7vw,84px)}
+.lp-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,6vw,72px);align-items:start}
+.lp-hero h1{font-size:clamp(2.4rem,6vw,4.4rem);font-weight:650;font-variation-settings:'opsz' 144}
+.lp-sub{margin-top:18px;font-size:clamp(1.1rem,1.8vw,1.3rem);max-width:34rem}
+.lp-event{margin-top:24px;display:grid;gap:4px;padding:18px 22px;border-radius:20px;background:var(--aspen);color:var(--spruce);max-width:26rem;font-weight:600}
+.lp-img{margin-top:24px;border-radius:24px;max-width:100%;display:block}
+.lp-body{margin-top:26px;max-width:34rem}
+.lp-body h2,.lp-body h3{font-size:1.5rem;margin:22px 0 8px}
+.lp-body ul,.lp-body ol{padding-left:22px}
+.lp-card{background:#fff;color:var(--spruce);border-radius:28px;padding:clamp(22px,4vw,36px);box-shadow:0 20px 50px rgba(16,35,31,.18)}
+.lp-card h2{font-size:1.6rem;margin-bottom:6px}
+.lp-foot{padding-block:28px;font-size:.9rem;opacity:.8}
+.lp-dark{background:var(--spruce);color:var(--snow)}
+.lp-dark a{color:var(--snow)}
+.lp-dark .brand{color:var(--snow)}
+.lp-card a{color:var(--spruce)}
+@media (max-width:860px){.lp-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="page" class="lp-light">
+  <div class="wrap lp-top"><a class="brand" id="brand" href="../index.html">The Miller Group</a></div>
+  <div id="content"><div class="wrap lp-hero"><p>Loading...</p></div></div>
+  <div class="wrap lp-foot" id="foot"></div>
+</div>
+<script src="../assets/site.js"></script>
+<script>
+(async function(){
+  var C=window.MG_CONFIG||{}, q=new URLSearchParams(location.search), slug=(q.get('s')||'').toLowerCase();
+  var content=document.getElementById('content');
+  document.getElementById('brand').textContent=C.BUSINESS_NAME||'The Miller Group';
+  document.getElementById('foot').innerHTML=MG.esc(C.LICENSE_TEXT||'')+' Equal Housing Opportunity. <a href="../privacy-policy.html">Privacy policy</a> | <a href="../fair-housing-notice.html">Fair housing notice</a>';
+  function notFound(){
+    content.innerHTML='<div class="wrap lp-hero"><h1>This page isn’t available</h1><p class="lp-sub">It may have ended or moved. <a href="../index.html">Visit our home page</a>.</p></div>';
+  }
+  var sb=await MG.client();
+  if(!slug||!sb){return notFound()}
+  var r=await sb.from('landing_pages').select('*').eq('slug',slug).eq('published',true).maybeSingle();
+  if(r.error||!r.data){return notFound()}
+  var p=r.data;
+  MG.setMeta(p.seo_title||p.headline,p.seo_description||p.subheadline||'');
+  var robots=document.querySelector('meta[name="robots"]');
+  if(p.noindex===false){robots.remove()}
+  if(p.theme==='dark'){document.getElementById('page').className='lp-dark'}
+  var event='';
+  if(p.event_date||p.event_location){
+    event='<div class="lp-event">'+(p.event_date?'<span>When: '+MG.esc(p.event_date)+'</span>':'')+(p.event_location?'<span>Where: '+MG.esc(p.event_location)+'</span>':'')+'</div>';
+  }
+  var img=p.hero_image_url?'<img class="lp-img" src="'+MG.esc(p.hero_image_url)+'" alt="">':'';
+  content.innerHTML=
+   '<div class="wrap lp-hero"><div class="lp-grid"><div>'+
+   '<h1>'+MG.esc(p.headline)+'</h1>'+
+   (p.subheadline?'<p class="lp-sub">'+MG.esc(p.subheadline)+'</p>':'')+
+   event+img+
+   '<div class="lp-body">'+MG.md(p.body_md)+'</div></div>'+
+   '<div class="lp-card"><h2>'+MG.esc(p.cta_text)+'</h2>'+
+   '<form class="form" data-lead-form data-landing="'+MG.esc(p.slug)+'" data-interest="'+MG.esc(p.interest||p.title)+'"'+
+     (p.thank_you_message?' data-thanks="'+MG.esc(p.thank_you_message)+'"':'')+
+     (p.redirect_url?' data-redirect="'+MG.esc(p.redirect_url)+'"':'')+' novalidate style="margin-top:14px">'+
+   '<div class="field"><label for="l-name">Name</label><input id="l-name" name="name" required autocomplete="name"></div>'+
+   '<div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required autocomplete="email"></div>'+
+   '<div class="field"><label for="l-phone">Phone (optional)</label><input id="l-phone" name="phone" type="tel" autocomplete="tel"></div>'+
+   '<input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">'+
+   '<button class="btn btn-gold" type="submit">'+MG.esc(p.cta_text)+'</button>'+
+   '<p class="form-note" role="status"></p>'+
+   '<p class="fine" style="margin-top:0">By sending this you agree we may contact you about your request. See our <a href="../privacy-policy.html">privacy policy</a>.</p>'+
+   '</form></div></div></div>';
+})();
+</script>
+</body>
+</html>
