@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Starter file. Generate a fresh one in Admin > SEO after you publish posts, and replace this file. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/buy.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/sell.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/home-value.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/commercial.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/development.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/communities.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/properties.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/about.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/testimonials.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/blog.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/contact.html</loc></url>
+</urlset>

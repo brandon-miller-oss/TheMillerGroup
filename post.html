@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog Post | The Miller Group</title>
+<meta name="description" content="Read the latest from The Miller Group.">
+<meta property="og:title" content="Blog Post | The Miller Group">
+<meta property="og:description" content="Read the latest from The Miller Group.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310231F'/%3E%3Cpath d='M8 50 26 20l9 14 6-9 15 25z' fill='%23F0B23A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/config.js"></script>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<script src="assets/layout.js" data-part="header"></script>
+<main id="main">
+<section class="page-hero"><div class="wrap"><h1 id="pTitle">Loading...</h1><p id="pMeta" class="post-meta"></p></div></section>
+<section class="section"><div class="wrap"><div class="prose" id="pBody"></div>
+<p style="margin-top:40px"><a class="btn btn-gold" href="contact.html">Talk to us</a> &nbsp; <a class="link-btn" href="blog.html">Back to the blog</a></p></div></section>
+</main>
+<script src="assets/layout.js" data-part="footer"></script>
+<script src="assets/site.js"></script>
+<script>
+(async function(){
+  var slug=new URLSearchParams(location.search).get('slug'),t=document.getElementById('pTitle'),b=document.getElementById('pBody');
+  var sb=await MG.client();
+  if(!slug||!sb){t.textContent='Post not found';b.innerHTML='<p>Head back to the <a href="blog.html">blog</a>.</p>';return}
+  var r=await sb.from('posts').select('*').eq('slug',slug).eq('published',true).maybeSingle();
+  if(r.error||!r.data){t.textContent='Post not found';b.innerHTML='<p>Head back to the <a href="blog.html">blog</a>.</p>';return}
+  var p=r.data;
+  t.textContent=p.title;
+  var d=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'';
+  document.getElementById('pMeta').textContent=[p.category,d].filter(Boolean).join(' | ');
+  b.innerHTML=(p.cover_url?'<img src="'+MG.esc(p.cover_url)+'" alt="" style="width:100%;border-radius:20px;margin-bottom:20px">':'')+MG.md(p.body);
+  MG.setMeta((p.seo_title||p.title)+' | The Miller Group',p.seo_description||p.excerpt||'');
+  var ld=document.createElement('script');ld.type='application/ld+json';
+  ld.textContent=JSON.stringify({'@context':'https://schema.org','@type':'BlogPosting',headline:p.title,datePublished:p.published_at,description:p.seo_description||p.excerpt||'',author:{'@type':'Person',name:'Brandon Miller'}});
+  document.head.appendChild(ld);
+})();
+</script>
+</body>
+</html>

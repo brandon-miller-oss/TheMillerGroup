@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en" data-season="fall">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Miller Group | Colorado Homes, Commercial Space and Development</title>
+<meta name="description" content="The Miller Group helps you buy, sell, lease and build across Colorado’s Front Range and Western Slope: homes, commercial space and development land.">
+<meta property="og:title" content="The Miller Group | Live where Colorado plays">
+<meta property="og:description" content="Homes, commercial space and development land across Colorado’s Front Range and Western Slope.">
+<meta property="og:type" content="website">
+<!-- EDIT: add your final domain, e.g. <link rel="canonical" href="https://www.yourdomain.com/"> -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310231F'/%3E%3Cpath d='M8 50 26 20l9 14 6-9 15 25z' fill='%23F0B23A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"RealEstateAgent","name":"The Miller Group","areaServed":"Colorado","telephone":"+1-303-990-0702"}
+</script>
+
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/config.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<script src="assets/layout.js" data-part="header"></script>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero-copy">
+    <h1 id="hero-title">Live where Colorado plays.</h1>
+    <p class="lede">We’re a Denver real estate firm. We help people buy and sell homes, lease commercial space, and find land to build on, from the Front Range to the Western Slope.</p>
+    <div class="hero-actions">
+      <a class="btn btn-gold" href="#featured">Browse homes and spaces</a>
+      <a class="btn btn-ghost" href="#contact">Talk to us</a>
+    </div>
+    <div class="season" role="group" aria-label="Choose a season">
+      <button type="button" data-season="winter" aria-pressed="false"><span aria-hidden="true">❄️</span>Winter</button>
+      <button type="button" data-season="spring" aria-pressed="false"><span aria-hidden="true">🌷</span>Spring</button>
+      <button type="button" data-season="summer" aria-pressed="false"><span aria-hidden="true">☀️</span>Summer</button>
+      <button type="button" data-season="fall" aria-pressed="false"><span aria-hidden="true">🍂</span>Fall</button>
+    </div>
+    <p class="season-line" id="seasonLine" aria-live="polite"></p>
+  </div>
+
+  <svg class="landscape" viewBox="0 0 1440 600" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Illustrated Colorado mountain range that changes with the season">
+    <g class="sun-pos"><circle class="sun" r="64"/></g>
+    <g class="rise d1"><path class="ridge-r1" id="r1"/></g>
+    <g class="rise d2"><path class="ridge-r2" id="r2"/></g>
+    <g class="rise d3"><path class="ridge-r3" id="r3"/><g class="trees" id="treesBack" opacity=".9"></g></g>
+    <g class="rise d4"><path class="ridge-r4" id="r4"/><g class="trees" id="treesFront"></g></g>
+  </svg>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="section" id="services" aria-labelledby="services-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="services-title">What can we help you with?</h2>
+      <p>Pick the one that fits and we’ll go from there.</p>
+    </div>
+    <div class="tabs">
+      <div class="tablist" role="tablist" aria-label="What can we help with" aria-orientation="vertical">
+        <button class="tab" role="tab" id="t-buy" aria-controls="p-buy" aria-selected="true" data-interest="Buying a home">Buy a home</button>
+        <button class="tab" role="tab" id="t-sell" aria-controls="p-sell" aria-selected="false" tabindex="-1" data-interest="Selling a home">Sell a home</button>
+        <button class="tab" role="tab" id="t-comm" aria-controls="p-comm" aria-selected="false" tabindex="-1" data-interest="Leasing commercial space">Lease or buy commercial space</button>
+        <button class="tab" role="tab" id="t-dev" aria-controls="p-dev" aria-selected="false" tabindex="-1" data-interest="Development or land">Develop land</button>
+      </div>
+      <div>
+        <div class="tabpanel" role="tabpanel" id="p-buy" aria-labelledby="t-buy">
+          <h3>Buying a home in Colorado</h3>
+          <p>Condo in the city, cabin in the mountains, or a place with some land. We start by asking how you spend your weekends.</p>
+          <ul>
+            <li>We look at the neighborhood and your daily routine along with the house itself</li>
+            <li>Offer strategy for competitive listings and for slower markets</li>
+            <li>Out-of-state and second-home buyers are welcome. We handle showings and logistics remotely.</li>
+          </ul>
+          <button class="btn btn-gold" data-go="Buying a home">Start your search</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-sell" aria-labelledby="t-sell" hidden>
+          <h3>Selling your home</h3>
+          <p>Most of a good sale comes down to price, presentation, and keeping a level head when the inspection report comes back.</p>
+          <ul>
+            <li>Pricing based on recent comparable sales and what buyers are doing right now</li>
+            <li>A marketing plan built around what you love about the house</li>
+            <li>Support through inspection, appraisal and closing</li>
+          </ul>
+          <button class="btn btn-gold" data-go="Selling a home">Talk about your home’s value</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-comm" aria-labelledby="t-comm" hidden>
+          <h3>Commercial space</h3>
+          <p>We work with office, retail, flex and industrial space, including properties with a yard or outdoor storage.</p>
+          <ul>
+            <li>Tenants: we find options, tour them with you, and negotiate the lease</li>
+            <li>Landlords and owners: pricing, marketing and finding the right tenant</li>
+            <li>Buyers and investors: help with owner-user purchases and investment properties</li>
+          </ul>
+          <button class="btn btn-gold" data-go="Leasing commercial space">Tell us what you need</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="p-dev" aria-labelledby="t-dev" hidden>
+          <h3>Land and development</h3>
+          <p>If you own a parcel and wonder what it could become, or you’re looking for a site to build on, we can help you work through it.</p>
+          <ul>
+            <li>Early site screening: zoning, access, utilities and floodplain</li>
+            <li>Feasibility and pro forma help, including affordable housing projects</li>
+            <li>Introductions to builders, buyers and capital partners</li>
+          </ul>
+          <button class="btn btn-gold" data-go="Development or land">Talk through a site</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURED ================= -->
+<section class="section band" id="featured" aria-labelledby="featured-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="featured-title">Current listings and opportunities</h2>
+      <p>Homes, commercial space and land. Ask us about off-market options too.</p>
+    </div>
+    <div class="filters" role="group" aria-label="Filter listings">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="home" aria-pressed="false">Homes</button>
+      <button type="button" data-filter="commercial" aria-pressed="false">Commercial</button>
+      <button type="button" data-filter="land" aria-pressed="false">Land and development</button>
+    </div>
+    <ul class="rows" id="rows"></ul>
+    <p class="fine">Listings marked Sample are placeholders. Replace them in the LISTINGS list near the bottom of this file. Listing information deemed reliable but not guaranteed.</p>
+  </div>
+</section>
+
+<!-- ================= LIVE AND PLAY ================= -->
+<section class="section dark play" id="play" aria-labelledby="play-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="play-title">Why people live here</h2>
+      <p>Here’s what the year looks like once you’re settled in.</p>
+    </div>
+    <div class="season" role="group" aria-label="Choose a season for activities" id="playSeasons">
+      <button type="button" data-season="winter" aria-pressed="false"><span aria-hidden="true">❄️</span>Winter</button>
+      <button type="button" data-season="spring" aria-pressed="false"><span aria-hidden="true">🌷</span>Spring</button>
+      <button type="button" data-season="summer" aria-pressed="false"><span aria-hidden="true">☀️</span>Summer</button>
+      <button type="button" data-season="fall" aria-pressed="false"><span aria-hidden="true">🍂</span>Fall</button>
+    </div>
+    <ul class="play-list" id="playList" style="margin-top:34px"></ul>
+  </div>
+</section>
+
+<!-- ================= ESTIMATOR ================= -->
+<section class="section" id="numbers" aria-labelledby="numbers-title">
+  <div class="wrap calc">
+    <div>
+      <div class="section-head" style="margin-bottom:28px">
+        <h2 id="numbers-title">What would your monthly payment look like?</h2>
+        <p>Plug in a price, down payment and rate for a rough principal-and-interest number. We can dig into taxes, insurance and lenders when you’re ready.</p>
+      </div>
+      <div class="fields">
+        <div class="field"><label for="cPrice">Home price ($)</label><input id="cPrice" type="number" inputmode="numeric" min="0" step="5000" value="650000"></div>
+        <div class="field"><label for="cDown">Down payment (%)</label><input id="cDown" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="20"></div>
+        <div class="field"><label for="cRate">Interest rate (%)</label><input id="cRate" type="number" inputmode="decimal" min="0" max="25" step="0.125" value="6.75"></div>
+        <div class="field"><label for="cTerm">Loan term</label><select id="cTerm"><option value="30">30 years</option><option value="15">15 years</option></select></div>
+      </div>
+    </div>
+    <div class="result" aria-live="polite">
+      <p>Estimated monthly principal and interest</p>
+      <div class="big" id="cOut">$0</div>
+      <p id="cLoan"></p>
+      <p style="margin-top:14px;font-size:.9rem;opacity:.7">Estimate only. Excludes property taxes, insurance, HOA dues and mortgage insurance. Not a loan offer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEVELOPMENT ================= -->
+<section class="section dark" id="develop" aria-labelledby="dev-title">
+  <div class="wrap">
+    <div class="section-head" style="max-width:46rem">
+      <h2 id="dev-title">Thinking about development?</h2>
+      <p>Colorado keeps growing, and every parcel raises the same question: what could go here, and do the numbers work? Here’s how we help you find out.</p>
+    </div>
+    <ol class="steps">
+      <li><h3>Screen the site</h3><p>We check zoning, access, utilities, floodplain and market demand early, so you find the problems before you buy.</p></li>
+      <li><h3>Test the numbers</h3><p>We help build the feasibility study and pro forma for market-rate, mixed-use and affordable housing projects.</p></li>
+      <li><h3>Line up the next steps</h3><p>We introduce you to builders, buyers and capital, and stay with you through contracts, due diligence and closing.</p></li>
+    </ol>
+    <div class="dev-cta"><button class="btn btn-gold" data-go="Development or land">Tell us about your site</button></div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="section" id="about" aria-labelledby="about-title">
+  <div class="wrap about">
+    <div>
+      <h2 id="about-title">About The Miller Group</h2>
+      <div style="margin-top:24px">
+        <!-- EDIT: personalize this copy and add a headshot if you like -->
+        <p>The Miller Group is led by Brandon Miller, a Colorado native and licensed broker. He has closed more than 250 transactions across the Front Range and Western Slope.</p>
+        <p>Brandon is finishing a master’s degree in real estate development at the University of Denver. That’s why homes, commercial space and development all live under one roof here.</p>
+        <p>You’ll get straight answers and quick replies.</p>
+      </div>
+    </div>
+    <aside class="where-we-work" aria-labelledby="www-title">
+      <h3 id="www-title">Where we work</h3>
+      <ul>
+        <li>Denver and the metro area</li>
+        <li>Boulder and the northern Front Range</li>
+        <li>Summit County, including Breckenridge</li>
+        <li>Glenwood Springs and the Western Slope</li>
+        <li>Anywhere in Colorado for commercial and land deals</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="section band" id="contact" aria-labelledby="contact-title">
+  <div class="wrap contact-grid">
+    <div>
+      <h2 id="contact-title">Get in touch</h2>
+      <p>Tell us what you’re looking for. We’ll reply within one business day.</p>
+      <div class="contact-lines">
+        <a id="phoneLink" href="tel:+13039900702">303-990-0702</a>
+        <a id="emailLink" href="mailto:hello@yourdomain.com">hello@yourdomain.com</a>
+      </div>
+    </div>
+    <form class="form" id="contactForm" data-lead-form novalidate>
+      <div class="two">
+        <div class="field"><label for="fName">Name</label><input id="fName" name="name" required autocomplete="name"></div>
+        <div class="field"><label for="fEmail">Email</label><input id="fEmail" name="email" type="email" required autocomplete="email"></div>
+      </div>
+      <div class="two">
+        <div class="field"><label for="fPhone">Phone (optional)</label><input id="fPhone" name="phone" type="tel" autocomplete="tel"></div>
+        <div class="field"><label for="fInterest">I’m interested in</label>
+          <select id="fInterest" name="interest">
+            <option>Buying a home</option><option>Selling a home</option><option>Leasing commercial space</option>
+            <option>Buying or selling commercial property</option><option>Development or land</option><option>Something else</option>
+          </select></div>
+      </div>
+      <div class="field"><label for="fMsg">How can we help?</label><textarea id="fMsg" name="message"></textarea></div>
+      <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn btn-gold" type="submit" style="justify-self:start">Send message</button>
+      <p class="form-note" id="formNote" role="status"></p>
+      <p class="fine" style="margin-top:0">By sending this you agree we may contact you about your request. See our <a href="privacy-policy.html">privacy policy</a>.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<script src="assets/layout.js" data-part="footer"></script>
+
+<script src="assets/site.js"></script>
+<script>
+/* =====================================================
+   EDIT ME: site settings
+   ===================================================== */
+const CONFIG = {
+  phoneDisplay: '303-990-0702',
+  phoneTel: '+13039900702',
+  email: 'hello@yourdomain.com',
+};
+
+/* =====================================================
+   EDIT ME: listings (type: 'home' | 'commercial' | 'land')
+   ===================================================== */
+const LISTINGS = [
+  {type:'home', sample:true, title:'Mountain-view townhome', place:'Breckenridge', price:'$1,450,000', facts:'3 bed, 3 bath, near the lifts'},
+  {type:'home', sample:true, title:'Craftsman bungalow with a porch', place:'Denver', price:'$825,000', facts:'3 bed, 2 bath, fenced yard'},
+  {type:'home', sample:true, title:'Riverside home with room to roam', place:'Glenwood Springs', price:'$1,100,000', facts:'4 bed, 3 bath, mountain views'},
+  {type:'commercial', sample:true, title:'Flex warehouse with fenced yard', place:'Englewood', price:'Lease: price on request', facts:'Office, shop and outdoor storage'},
+  {type:'commercial', sample:true, title:'Street-level retail space', place:'Denver', price:'Lease: price on request', facts:'High foot traffic, corner location'},
+  {type:'land', sample:true, title:'Infill lot, zoned for multifamily', place:'Aurora', price:'Price on request', facts:'Utilities at the street'},
+  {type:'land', sample:true, title:'Mixed-use development site', place:'Lakewood', price:'Price on request', facts:'Transit nearby, feasibility available'}
+];
+
+/* =====================================================
+   EDIT ME: seasonal activities
+   ===================================================== */
+const PLAY = {
+  winter:[
+    {t:'Skiing in Summit County', d:'Breckenridge, Keystone and Arapahoe Basin are all close to each other.', town:'Breckenridge'},
+    {t:'Hot springs in Glenwood Springs', d:'A good way to end a cold day on the slopes or the trail.', town:'Glenwood Springs'},
+    {t:'Winter in Denver', d:'Heated patios, hockey games, and the National Western Stock Show in January.', town:'Denver'}
+  ],
+  spring:[
+    {t:'Rafting season', d:'The Arkansas River near Buena Vista and Salida is at its best when the high country melts.', town:'Salida'},
+    {t:'Spring skiing', d:'Arapahoe Basin keeps its snow late into the season, and the valley is warm by afternoon.', town:'Summit County'},
+    {t:'Spring in Denver', d:'Denver Botanic Gardens, new patios, and the first long evenings of the year.', town:'Denver'}
+  ],
+  summer:[
+    {t:'Red Rocks', d:'An outdoor amphitheater built into the sandstone, a short drive from downtown Denver.', town:'Morrison'},
+    {t:'Hiking the Flatirons', d:'Boulder’s trails start close to the neighborhoods.', town:'Boulder'},
+    {t:'Fly-fishing in Glenwood Springs', d:'The Roaring Fork and Colorado rivers meet right there.', town:'Glenwood Springs'},
+    {t:'Mountain biking in Fruita', d:'Red rock desert trails that draw riders from all over.', town:'Fruita'}
+  ],
+  fall:[
+    {t:'Fall colors', d:'Maroon Bells near Aspen and Guanella Pass near Georgetown are two popular spots to see the aspens.', town:'Aspen'},
+    {t:'Breweries and farmers markets', d:'Denver and Boulder both have plenty, often just a few blocks apart.', town:'Denver'},
+    {t:'Elk season in Estes Park', d:'In the fall you can hear the bulls bugling near Rocky Mountain National Park.', town:'Estes Park'}
+  ]
+};
+const SEASON_LINE = {
+  winter:'Powder days are a good reason to work from home.',
+  spring:'Rafting season starts when the snow melts.',
+  summer:'Sunrise hike, then a concert at Red Rocks that night.',
+  fall:'The aspens turn fast, so go the first weekend you can.'
+};
+
+/* ====================== Landscape ====================== */
+const W=1440,H=600;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function makeRidge(seed,base,amp,f1,f2){
+  const r=rng(seed),p1=r()*6.28,p2=r()*6.28,jit=[];
+  for(let i=0;i<=80;i++)jit.push(r());
+  const y=x=>base-amp*(.75*(1-Math.abs(Math.sin(x*f1+p1)))+.25*Math.sin(x*f2+p2)+.25)-jit[Math.abs(Math.round(x/20))%81]*amp*.05;
+  const d=()=>{let s=`M-20,${H+10}`;for(let x=-20;x<=W+20;x+=20)s+=` L${x},${y(x).toFixed(1)}`;return s+` L${W+20},${H+10}Z`};
+  return {y,d};
+}
+const R=[makeRidge(3,360,200,.0042,.011),makeRidge(8,432,150,.0058,.013),makeRidge(14,502,100,.0075,.017),makeRidge(21,562,36,.011,.023)];
+['r1','r2','r3','r4'].forEach((id,i)=>document.getElementById(id).setAttribute('d',R[i].d()));
+
+const TREE_CFG={
+  winter:{aspen:0,cap:true,flowers:false},
+  spring:{aspen:.2,cap:false,flowers:true},
+  summer:{aspen:.25,cap:false,flowers:false},
+  fall:{aspen:.7,cap:false,flowers:false}
+};
+function drawTrees(season){
+  const cfg=TREE_CFG[season];
+  [['treesBack',R[2],7,30,20,26,24],['treesFront',R[3],21,40,34,48,44]].forEach(([id,ridge,seed,step,jit,minH,varH])=>{
+    const rnd=rng(seed);let html='';
+    for(let x=-10;x<W+20;x+=step+rnd()*jit){
+      const y=ridge.y(x)+(id==='treesBack'?8:12),h=minH+rnd()*varH,w=h*.5;
+      if(rnd()<cfg.aspen){
+        html+=`<line class="trunk" x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${(y-h*.5).toFixed(1)}"/><ellipse class="leaf" cx="${x.toFixed(1)}" cy="${(y-h*.65).toFixed(1)}" rx="${(w*.55).toFixed(1)}" ry="${(h*.42).toFixed(1)}"/>`;
+      }else{
+        html+=`<path class="pine" d="M${x.toFixed(1)},${(y-h).toFixed(1)} L${(x+w/2).toFixed(1)},${y.toFixed(1)} L${(x-w/2).toFixed(1)},${y.toFixed(1)}Z"/>`;
+        if(cfg.cap)html+=`<path class="cap" d="M${x.toFixed(1)},${(y-h).toFixed(1)} L${(x+w*.2).toFixed(1)},${(y-h*.62).toFixed(1)} L${(x-w*.2).toFixed(1)},${(y-h*.62).toFixed(1)}Z"/>`;
+      }
+    }
+    if(id==='treesFront'&&cfg.flowers){
+      const cols=['#7B8FE6','#E8607F','#F0B23A','#FFFFFF'],fr=rng(99);
+      for(let i=0;i<110;i++){
+        const x=fr()*W,top=R[3].y(x)+16,y=top+fr()*(H-top-4);
+        html+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2.5+fr()*2.5).toFixed(1)}" fill="${cols[Math.floor(fr()*cols.length)]}"/>`;
+      }
+    }
+    document.getElementById(id).innerHTML=html;
+  });
+}
+
+/* ====================== Seasons ====================== */
+const root=document.documentElement;
+function currentSeason(){const m=new Date().getMonth();return m===11||m<=1?'winter':m<=4?'spring':m<=7?'summer':'fall'}
+function renderPlay(season){
+  document.getElementById('playList').innerHTML=PLAY[season].map(p=>`
+    <li class="play-row">
+      <div><h3>${p.t}</h3><p>${p.d}</p></div>
+      <button type="button" class="link-btn" data-town="${p.town}">Homes near ${p.town}</button>
+    </li>`).join('');
+}
+function setSeason(season,animate){
+  root.setAttribute('data-season',season);
+  document.querySelectorAll('.season button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.season===season)));
+  document.getElementById('seasonLine').textContent=SEASON_LINE[season];
+  const trees=document.querySelectorAll('.trees');
+  if(animate){
+    trees.forEach(t=>t.classList.add('swap'));
+    setTimeout(()=>{drawTrees(season);trees.forEach(t=>t.classList.remove('swap'))},300);
+  }else drawTrees(season);
+  renderPlay(season);
+}
+document.querySelectorAll('.season button').forEach(b=>b.addEventListener('click',()=>setSeason(b.dataset.season,true)));
+setSeason(currentSeason(),false);
+
+/* ====================== Tabs ====================== */
+const tabs=[...document.querySelectorAll('.tab')];
+function selectTab(tab,focus){
+  tabs.forEach(t=>{const on=t===tab;t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!on});
+  if(focus)tab.focus();
+}
+tabs.forEach((t,i)=>{
+  t.addEventListener('click',()=>selectTab(t,false));
+  t.addEventListener('keydown',e=>{
+    const k=e.key;let n=null;
+    if(k==='ArrowDown'||k==='ArrowRight')n=tabs[(i+1)%tabs.length];
+    if(k==='ArrowUp'||k==='ArrowLeft')n=tabs[(i-1+tabs.length)%tabs.length];
+    if(k==='Home')n=tabs[0];if(k==='End')n=tabs[tabs.length-1];
+    if(n){e.preventDefault();selectTab(n,true)}
+  });
+});
+
+/* ====================== Listings ====================== */
+const ICONS={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg>',
+  commercial:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>',
+  land:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18 9 7l4 7 3-4 5 8z"/></svg>'
+};
+const TYPE_LABEL={home:'Home',commercial:'Commercial',land:'Land and development'};
+function renderListings(filter){
+  const items=LISTINGS.filter(l=>filter==='all'||l.type===filter);
+  document.getElementById('rows').innerHTML=items.map(l=>`
+    <li class="row">
+      <div class="thumb ${l.type}" role="img" aria-label="${TYPE_LABEL[l.type]}">${ICONS[l.type]}</div>
+      <div>
+        <h3>${l.title}${l.sample?'<span class="badge">Sample</span>':''}</h3>
+        <p class="where">${l.place}</p>
+        <p class="facts">${l.facts}</p>
+      </div>
+      <div class="price">${l.price}</div>
+    </li>`).join('')||'<li class="row"><p>Nothing here right now. Ask us what’s coming.</p></li>';
+}
+document.querySelectorAll('.filters button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.filters button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  renderListings(b.dataset.filter);
+}));
+renderListings('all');
+
+/* ====================== Estimator ====================== */
+const money=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+function calc(){
+  const price=Math.max(0,+document.getElementById('cPrice').value||0);
+  const down=Math.min(100,Math.max(0,+document.getElementById('cDown').value||0));
+  const rate=Math.max(0,+document.getElementById('cRate').value||0);
+  const years=+document.getElementById('cTerm').value;
+  const loan=price*(1-down/100),n=years*12,r=rate/1200;
+  const pay=loan<=0?0:(r===0?loan/n:loan*r/(1-Math.pow(1+r,-n)));
+  document.getElementById('cOut').textContent=money(pay);
+  document.getElementById('cLoan').textContent='Loan amount: '+money(loan)+' with '+money(price*down/100)+' down';
+}
+['cPrice','cDown','cRate','cTerm'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+
+/* ====================== Contact ====================== */
+const form=document.getElementById('contactForm'),note=document.getElementById('formNote');
+function goContact(interest,msg){
+  const sel=document.getElementById('fInterest'),box=document.getElementById('fMsg');
+  if(interest)sel.value=interest;
+  if(msg&&!box.value)box.value=msg;
+  document.getElementById('contact').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>document.getElementById('fName').focus({preventScroll:true}),600);
+}
+document.addEventListener('click',e=>{
+  const go=e.target.closest('[data-go]');if(go){goContact(go.dataset.go);return}
+  const town=e.target.closest('[data-town]');if(town)goContact('Buying a home','I’m interested in homes near '+town.dataset.town+'.');
+});
+
+/* ====================== Config to page ====================== */
+['phoneLink'].forEach(id=>{const a=document.getElementById(id);a.textContent=CONFIG.phoneDisplay;a.href='tel:'+CONFIG.phoneTel});
+['emailLink'].forEach(id=>{const a=document.getElementById(id);a.textContent=CONFIG.email;a.href='mailto:'+CONFIG.email});
+</script>
+</body>
+</html>
