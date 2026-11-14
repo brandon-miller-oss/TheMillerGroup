@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /lp/
+Disallow: /server/
 
 # Note: search engines only read robots.txt at the root of a domain, so this takes effect once you use a custom domain.
 Sitemap: https://brandon-miller-oss.github.io/TheMillerGroup/sitemap.xml
