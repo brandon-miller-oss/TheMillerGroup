@@ -796,7 +796,7 @@
     };
     O.hub = {
       h1: { type: "announcement", title: "Welcome to The Miller Group", body: "Office meeting the first Tuesday of each month. Bring one listing or buyer update.", pinned: true, createdAt: ts },
-      h2: { type: "policy", title: "Policy and Procedures Manual", url: "https://example.com/ppm", mustRead: true, createdAt: ts },
+      h2: { type: "policy", title: "Policy and Procedures Manual", body: "Version 1.0, effective 2026. Every associate reads it and signs the acknowledgment in Section XXXI.", url: new URL("../agent-docs/The_Miller_Group_Policy_and_Procedures_Manual.pdf", location.href).href, mustRead: true, pinned: true, createdAt: ts },
       h3: { type: "form", title: "Independent Contractor Agreement", url: "https://example.com/ica", createdAt: ts },
       h4: { type: "training", title: "Transaction file checklist walkthrough", body: "How to submit a complete file for broker review.", createdAt: ts }
     };
