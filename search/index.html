@@ -369,7 +369,7 @@ const IDX = {
   PAGE_SIZE: 50,
   APP_URL: (SITE.SITE_URL || location.origin) + "/search/",
   // Shows the Agent tab with sample data to anyone who isn't you, for testing. Set to false at launch.
-  DEMO_AGENT: false,
+  DEMO_AGENT: SITE.DEMO_MODE === true,   // set in assets/config.js
   // Replace with the exact disclaimer text your MLS requires for IDX display.
   DISCLAIMER: "Listing information is deemed reliable but not guaranteed. IDX information is provided exclusively for consumers’ personal, non-commercial use and may not be used for any purpose other than to identify prospective properties consumers may be interested in purchasing.",
   BROKER: { name: "Brandon Miller", firm: SITE.BUSINESS_NAME || "The Miller Group", phone: SITE.PHONE || "303-990-0702" },
@@ -517,7 +517,12 @@ const Store = {
     this.emit();
   },
   enableDemo(){
-    this.demo = true; this.isAgent = true;
+    this.demo = true; this.isAgent = true; this.isBroker = true; this.crmOwner = "demo-broker";
+    this.team = {
+      "demo-broker":{ name:"Brandon Miller", title:"Employing broker", phone:IDX.BROKER.phone, email:"", slug:"brandon", areas:"Denver metro, Summit County", languages:"English" },
+      "demo-agent":{ name:"Alex Rivera", title:"Broker associate", phone:"720-555-0150", email:"", slug:"alex", areas:"Highland, Berkeley, Golden", languages:"English, Spanish" }
+    };
+    this.roster = this.team; this.refreshProfile();
     const d = n=>{ const x = new Date(); x.setDate(x.getDate()+n); return x.toLocaleDateString("en-CA"); };
     const ts = (n,h=10)=>{ const x = new Date(); x.setDate(x.getDate()+n); x.setHours(h,0,0,0); return x.toISOString(); };
     this.clients = {
@@ -559,6 +564,7 @@ const Store = {
     this.crm.cmas = { dcm1:{ name:"2210 S Fillmore St", subject:{ address:"2210 S Fillmore St", hood:"Washington Park", beds:4, baths:3, sqft:2600, year:1926, type:"Single Family Residence" }, compKeys:["S-1003","S-1004","S-1006"], adj:{ "S-1003":-25000 }, notes:"", createdAt:ts(-2), updatedAt:ts(-2) } };
     this.demoShowcase = { dsc1:{ name:"Bungalows near the parks", description:"Character homes a short walk from Wash Park and Cheesman.", keys:["S-1003","S-1004","S-1012"], createdAt:ts(-5) } };
     this.exVer++;
+    window.Office?.seedDemo?.();
   },
   async connect(){
     this.load(); this.emit();
@@ -1915,7 +1921,7 @@ async function renderAgent(){
     case "tasks": html = head("Tasks") + tasksHTML(); break;
     default: html = agentHomeHTML();
   }
-  el.innerHTML = (Store.demo ? `<p class="note-c">Demo mode: sample clients and deals. Changes stay in this browser and reset when the page reloads.</p>` : "") + html;
+  el.innerHTML = (Store.demo ? `<p class="note-c"><strong>Demo mode.</strong> Sample clients, deals, and office content, with broker access turned on. Nothing you change is saved, and reloading resets it.</p>` : "") + html;
   const pf = $("#profileForm");
   if (pf) pf.addEventListener("submit", async e=>{ e.preventDefault(); const m = $("#profileMsg");
     const slug = slugify($("#pSlug").value);

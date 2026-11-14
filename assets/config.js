@@ -17,6 +17,8 @@ window.MG_CONFIG = {
   IDX_ENDPOINT: '',                 // live listings, e.g. 'https://miller-tools.vercel.app/api/idx'
   AI_ENDPOINT: '',                  // agent AI tools, e.g. 'https://miller-tools.vercel.app/api/ai'
   DEFAULT_AGENT_SLUG: 'brandon',
+  DEMO_MODE: true,                  // testing: anyone who isn't a signed-in agent can open the Agent tab with sample data
+                                    // (nothing they change is saved). Set to false before launch.
   EMAIL_ENDPOINT: '',               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)    // clients who arrive without an agent's link are assigned to this agent
 
   // Ad tracking (optional)
