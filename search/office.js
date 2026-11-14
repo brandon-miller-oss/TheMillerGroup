@@ -640,6 +640,16 @@
   /* ===================================================================
      MENU, PANELS, EVENTS
      =================================================================== */
+  O.counts = function () {
+    return {
+      deadlines: upcomingDeadlines(7).length,
+      review: Object.values(O.deals).filter(d => d && (d.review || {}).state === "submitted").length,
+      referrals: crm("referrals").filter(r => !["paid", "lost"].includes(r.status)).length,
+      followups: followupsDue(0).length,
+      unread: Object.entries(O.hub).filter(([id, x]) => x && x.mustRead && !(S().readItems || {})[id]).length,
+      recruits: crm("recruits").filter(r => !["joined", "passed"].includes(r.stage)).length
+    };
+  };
   O.menuHTML = function (row) {
     const open = myDeals().filter(d => d.status === "pending").length;
     return `<h3 class="agent-h">Office</h3><div class="menu">

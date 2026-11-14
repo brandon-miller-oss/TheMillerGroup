@@ -3,10 +3,10 @@ let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = requ
 const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..");
 const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
 let html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
-  .replace('<script src="../assets/config.js?v=202611141040"></script>', () => `<script>${cfg}</script>`)
+  .replace('<script src="../assets/config.js?v=202611141045"></script>', () => `<script>${cfg}</script>`)
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
-  .replace('<script src="miller-cloud.js?v=202611141040"></script>', () => `<script>${fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8")}</script>`)
-  .replace('<script src="office.js?v=202611141040"></script>', () => `<script>${fs.readFileSync(path.join(dir, "office.js"), "utf8")}</script>`);
+  .replace('<script src="miller-cloud.js?v=202611141045"></script>', () => `<script>${fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8")}</script>`)
+  .replace('<script src="office.js?v=202611141045"></script>', () => `<script>${fs.readFileSync(path.join(dir, "office.js"), "utf8")}</script>`);
 const errs = [];
 const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/#agent", beforeParse(w) {
   w.structuredClone = o => JSON.parse(JSON.stringify(o)); w.scrollTo = () => {}; w.confirm = () => true; w.prompt = () => "x";
@@ -32,6 +32,13 @@ setTimeout(() => {
   check("matching clients works on a sample listing", go("o-rp:S-1003").includes("matching"));
   check("team shows sample agents", go("agents").includes("Alex Rivera"));
   const all = ["requests","buyers","sellers","tasks","inbox","notifications","tours","biz","contacts","activity","searches","listings","exclusives","openhouses","cmas","market","insights","marketing","showcase","assistant","settings","help","o-referrals","o-setup","o-import"];
+  go("home");
+  const tiles = [...w.document.querySelectorAll("#v-agent .tool")].map(b => b.dataset.panel);
+  check("every tool is a tile on Agent home", ["o-deals","o-review","o-income","o-referrals","o-followups","o-hub","o-partners","o-brand","o-recruiting","o-rp","o-likely","o-import","o-setup","listings","cmas","openhouses","marketing","assistant","settings"].every(p => tiles.includes(p)));
+  const f = w.document.querySelector("#toolFind"); f.value = "income"; f.dispatchEvent(new w.Event("input", { bubbles: true }));
+  const shown = [...w.document.querySelectorAll("#v-agent .tool")].filter(b => !b.hidden).map(b => b.dataset.panel);
+  check("Find a tool filters the tiles", shown.length === 1 && shown[0] === "o-income");
+  f.value = ""; f.dispatchEvent(new w.Event("input", { bubbles: true }));
   check("every panel renders", all.every(p => go(p).length > 30));
   w.document.querySelector("#agentTab") && w.eval('Store.saveCrm("contacts", null, { name:"Test Person" })');
   check("demo changes aren't sent anywhere", w.eval("Store.db") == null);

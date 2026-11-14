@@ -275,6 +275,18 @@ details.pay summary b{font:600 20px var(--serif)}
 details.pay label{display:block;font-size:12px;margin:10px 0 4px}
 details.pay input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
+.toolfind{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0 4px;font-size:15px}
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tool{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);min-height:132px}
+.tool:hover{border-color:var(--accent)}
+.tool .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--accent);color:var(--accent)}
+.tool .ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tool strong{font:600 17px/1.15 var(--serif)}
+.tool span.d{font-size:12px;line-height:1.35;color:var(--ink-2)}
+.tool .ct{position:absolute;top:12px;right:12px;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;line-height:22px;text-align:center}
+.tool.broker .ic{border-style:dashed}
+.toolsec[hidden],.tool[hidden]{display:none}
+@media (max-width:420px){.tools{grid-template-columns:repeat(2,1fr)}.tool{min-height:122px;padding:12px}}
 .menu{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px}
 .menu button{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:15px}
 .menu button:last-child{border-bottom:0}
@@ -346,10 +358,10 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611141040"></script>
+<script src="../assets/config.js?v=202611141045"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611141040"></script>
+<script src="miller-cloud.js?v=202611141045"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -1033,6 +1045,86 @@ function clientItems(cid){
   return items;
 }
 
+const ICONS = {
+  inbox:'<path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/>', bell:'<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 004 0"/>',
+  user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/>', users:'<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0112 0"/><path d="M16 5a3 3 0 010 6M18 19a6 6 0 00-3-5"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>', search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+  route:'<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6"/>', home:'<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+  key:'<circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l3 3"/>', door:'<path d="M6 21V4h12v17"/><path d="M4 21h16"/><circle cx="14.5" cy="12.5" r=".8"/>',
+  chart:'<path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>', pulse:'<path d="M3 12h4l2-5 4 10 2-5h6"/>',
+  doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>', megaphone:'<path d="M4 10v4h3l7 4V6L7 10z"/><path d="M18 9a4 4 0 010 6"/>',
+  star:'<path d="M12 4l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 16.3 7 19l1.2-5.6L4 9.6 9.6 9z"/>', dollar:'<path d="M12 3v18"/><path d="M16 7a4 3 0 00-4-2c-2.5 0-4 1.3-4 3s1.5 2.6 4 3 4 1.4 4 3.2S14.5 17 12 17a4 3 0 01-4-2"/>',
+  check:'<circle cx="12" cy="12" r="8"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/>', spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+  team:'<circle cx="7" cy="9" r="2.5"/><circle cx="17" cy="9" r="2.5"/><circle cx="12" cy="7" r="2.5"/><path d="M3 18a4 4 0 018 0M13 18a4 4 0 018 0"/>', file:'<path d="M5 4h10l4 4v12H5z"/><path d="M9 13l2 2 4-4"/>',
+  stamp:'<path d="M9 4h6l-1 7h-4z"/><path d="M5 14h14v3H5zM7 20h10"/>', building:'<path d="M5 21V5l7-2 7 2v16"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4"/>',
+  swap:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>', mail:'<path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/><path d="M17 3v3"/>', handshake:'<path d="M3 11l4-4 5 3 5-3 4 4"/><path d="M7 7v6l4 4 2-1 4-3V7"/>',
+  palette:'<path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2s-1-2 0-3 4 0 5-2a9 9 0 00-7-11z"/><circle cx="8" cy="10" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16" cy="10" r="1"/>',
+  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8"/>', magnet:'<path d="M6 4v8a6 6 0 0012 0V4"/><path d="M6 8h4M14 8h4"/>',
+  trend:'<path d="M4 17l5-5 4 3 7-8"/><path d="M15 7h5v5"/>', upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/>', list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+  help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 015 .5c0 1.7-2.5 2-2.5 4"/><circle cx="12" cy="17" r=".6"/>', gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>'
+};
+let toolQuery = "";
+function toolSections(){
+  const cs = contacts(), ts = tasks().filter(x=>!x.done), t = localDay(), reqs = allRequests();
+  const ohUp = Object.values(Store.crm.openhouses).filter(o=>o && o.date>=t).length;
+  const oc = window.Office ? Office.counts() : {};
+  const S = [
+    ["Clients", [
+      ["requests","Showing requests","Requests from the home search","door",reqs.filter(r=>r.status==="new").length],
+      ["inbox","Inbox","Messages with clients","inbox",Object.values(Store.threads).filter(x=>Store.unread(x,"agent")).length],
+      ["contacts","Contacts","Everyone in your book","user",0],
+      ["buyers","Buyers","Pipeline by stage","key",0],
+      ["sellers","Sellers","Pipeline by stage","home",0],
+      ["activity","Client shortlists","Homes clients saved and loved","heart",0],
+      ["searches","Saved searches","What clients are watching","search",0],
+      ["tours","Showing days","Routes and times for tours","route",Object.values(Store.crm.tours).filter(x=>x && (x.date||"")>=t).length],
+      ["notifications","Activity feed","Saves, loves, notes, and requests","bell",unseenCount()]]],
+    ["Listings and market", [
+      ["listings","Listings","Your listings and their activity","building",0],
+      ["exclusives","Off-market & coming soon","Homes not on the MLS","star",0],
+      ["openhouses","Open houses","Schedule and sign-in sheet","door",ohUp],
+      ["cmas","CMAs","Comps and a suggested price","chart",0],
+      ["market","Market pulse","Prices and pace by neighborhood","pulse",0],
+      ["insights","Insights","Client engagement over time","trend",0]]],
+    ["Office", [
+      ["o-deals","Transactions","Contract dates and documents","file",oc.deadlines||0],
+      ["o-review","Broker review","Files waiting for approval","stamp",oc.review||0,true],
+      ["o-income","My income","Commission, fees, and expenses","dollar",0],
+      ["o-referrals","Referrals","Clients sent and received","swap",oc.referrals||0],
+      ["o-followups","Follow-up emails","Anniversaries and birthdays","mail",oc.followups||0],
+      ["o-hub","Company hub","Policies, forms, announcements","building",oc.unread||0],
+      ["o-partners","Preferred partners","Lenders, title, inspectors","handshake",0],
+      ["o-brand","Brand library","Logos, templates, colors","palette",0],
+      ["o-recruiting","Recruiting","Agents you’re talking with","users",oc.recruits||0,true]]],
+    ["Prospecting", [
+      ["o-rp","Matching clients","Who fits a listing","target",0],
+      ["o-likely","Likely to sell","Owners worth a call","magnet",0],
+      ["o-import","Import contacts","Bring in a CSV","upload",0]]],
+    ["Business", [
+      ["biz","GCI tracker","Pipeline and yearly goal","trend",0],
+      ["tasks","Tasks","Follow-ups and to-dos","check",ts.length],
+      ["marketing","Marketing","Social graphics and captions","megaphone",0],
+      ["showcase","Miller Picks","Curated lists for every visitor","star",0],
+      ["assistant","AI assistant","Ask about your business","spark",0],
+      ["agents","Team","Agents and their links","team",0]]],
+    ["Help", [
+      ["o-setup","Get started","Your setup checklist","list",0],
+      ["help","Help and support","How the tools work","help",0],
+      ["settings","Settings","Profile, link, and goals","gear",0]]]
+  ];
+  return S.map(([h,items])=>[h, items.filter(x=>(!x[0].startsWith("o-") || window.Office) && (!x[5] || Store.isBroker))]).filter(([,i])=>i.length);
+}
+function toolTile([p,title,desc,icon,count,broker]){
+  return `<button class="tool${broker?" broker":""}" data-panel="${p}" data-find="${esc((title+" "+desc).toLowerCase())}"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24">${ICONS[icon]||ICONS.list}</svg></span><strong>${esc(title)}</strong><span class="d">${esc(desc)}${broker?" · Broker":""}</span>${count?`<span class="ct" aria-label="${count} new">${count>99?"99+":count}</span>`:""}</button>`;
+}
+function filterTools(){
+  const q = toolQuery.trim().toLowerCase();
+  document.querySelectorAll("#v-agent .toolsec").forEach(sec=>{
+    let any = false;
+    sec.querySelectorAll(".tool").forEach(b=>{ const hit = !q || b.dataset.find.includes(q); b.hidden = !hit; if (hit) any = true; });
+    sec.hidden = !any;
+  });
+}
 function agentHomeHTML(){
   const reqs = allRequests(), cs = contacts(), ts = tasks().filter(t=>!t.done), t = localDay();
   const due = ts.filter(x=>x.due && x.due<=t).length;
@@ -1054,21 +1146,8 @@ function agentHomeHTML(){
       ${tile("tours","Showing days",Object.values(Store.crm.tours).filter(x=>x && (x.date||"")>=t).length,"upcoming")}
       ${tile("biz","GCI tracker",(()=>{const g=bizStats().closedG;return g?short(g):"$0";})(),"closed this year")}
     </div>
-    <h3 class="agent-h">Clients</h3>
-    <div class="menu">
-      ${row("contacts","Contacts",cs.length)}${row("activity","Client shortlists",`${Object.keys(Store.clients).length} clients`)}${row("searches","Saved searches")}${row("tours","Showing days")}${row("notifications","Activity feed")}
-    </div>
-    <h3 class="agent-h">Listings and market</h3>
-    <div class="menu">
-      ${row("listings","Listings",myListingKeys().length)}${row("exclusives","Off-market & coming soon")}${row("openhouses","Open houses",ohUp?`${ohUp} upcoming`:"")}${row("cmas","CMAs",Object.keys(Store.crm.cmas).length)}${row("market","Market pulse")}${row("insights","Insights")}
-    </div>
-    <h3 class="agent-h">Business</h3>
-    <div class="menu">
-      ${row("marketing","Marketing")}${row("showcase","Miller Picks",Object.keys(showcaseAll()).length)}${row("biz","GCI tracker")}${row("tasks","Tasks",ts.length)}${row("assistant","AI assistant")}${row("agents","Team")}
-    </div>
-    ${window.Office ? Office.menuHTML(row) : ""}
-    <h3 class="agent-h">Help</h3>
-    <div class="menu">${row("help","Help and support")}${row("settings","Settings")}</div>`;
+    <input class="toolfind" id="toolFind" type="search" placeholder="Find a tool" aria-label="Find a tool" value="${esc(toolQuery)}">
+    ${toolSections().map(([h,items])=>`<section class="toolsec"><h3 class="agent-h">${esc(h)}</h3><div class="tools">${items.map(toolTile).join("")}</div></section>`).join("")}`;
 }
 
 function requestsHTML(){
@@ -1922,6 +2001,7 @@ async function renderAgent(){
     default: html = agentHomeHTML();
   }
   el.innerHTML = (Store.demo ? `<p class="note-c"><strong>Demo mode.</strong> Sample clients, deals, and office content, with broker access turned on. Nothing you change is saved, and reloading resets it.</p>` : "") + html;
+  if (agentPanel==="home" && toolQuery) filterTools();
   const pf = $("#profileForm");
   if (pf) pf.addEventListener("submit", async e=>{ e.preventDefault(); const m = $("#profileMsg");
     const slug = slugify($("#pSlug").value);
@@ -2143,6 +2223,7 @@ document.addEventListener("input", e=>{
   if (e.target.matches("[data-pay]")){ const box = e.target.closest("details.pay"); const out = box && box.querySelector("#payOut"); const dn = parseFloat($("#payDown").value), rt = parseFloat($("#payRate").value);
     if (out && isFinite(dn) && isFinite(rt) && dn>=0 && dn<100 && rt>=0) out.textContent = money(payment(+box.dataset.price, dn, rt)); }
 });
+document.addEventListener("input", e=>{ if (e.target.id==="toolFind"){ toolQuery = e.target.value; filterTools(); } });
 document.addEventListener("input", e=>{ if (e.target.id==="rosterQ"){ rosterQuery = e.target.value; const l = $("#rosterList"); if (l) l.innerHTML = rosterCards(); } });
 document.addEventListener("keydown", e=>{ if (e.target.id==="aiText" && e.key==="Enter" && !e.shiftKey){ e.preventDefault(); askAI(e.target.value); } });
 let qTimer; $("#q").addEventListener("input", ()=>{ activeSearch = null; clearTimeout(qTimer); qTimer = setTimeout(runSearch, 250); });
@@ -2168,6 +2249,6 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="office.js?v=202611141040"></script>
+<script src="office.js?v=202611141045"></script>
 </body>
 </html>
