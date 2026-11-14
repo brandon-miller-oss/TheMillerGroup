@@ -16,7 +16,8 @@ window.MG_CONFIG = {
   // Home search and agent tools (search/). Leave the two addresses blank to run on sample listings with no AI.
   IDX_ENDPOINT: '',                 // live listings, e.g. 'https://miller-tools.vercel.app/api/idx'
   AI_ENDPOINT: '',                  // agent AI tools, e.g. 'https://miller-tools.vercel.app/api/ai'
-  DEFAULT_AGENT_SLUG: 'brandon',    // clients who arrive without an agent's link are assigned to this agent
+  DEFAULT_AGENT_SLUG: 'brandon',
+  EMAIL_ENDPOINT: '',               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)    // clients who arrive without an agent's link are assigned to this agent
 
   // Ad tracking (optional)
   GA4_ID: '',                       // e.g. 'G-XXXXXXXXXX'

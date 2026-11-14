@@ -197,6 +197,7 @@
   // Extras the multi-agent app uses
   let brokerFlag = null;
   window.MillerCloud = {
+    async token() { await ready; return session ? session.access_token : ""; },
     async rpc(fn, args) { await ready; if (!sb) throw new Error("Not connected"); const { data, error } = await sb.rpc(fn, args || {}); if (error) throw error; return data; },
     async isBroker() { await ready; if (!sb || !session) return false; if (brokerFlag === null) { const { data } = await sb.rpc("is_admin"); brokerFlag = !!data; } return brokerFlag; },
     // Copies a showing request into the website's Leads inbox (public.leads), so it shows in /admin too.

@@ -9,6 +9,9 @@
 --   Client (any signed-in user)       their own shortlists, searches, requests, messages
 --   Everyone, signed in or not        published off-market listings, open houses,
 --                                     Miller Picks, and the Team page
+--   Transactions (deals/*)            the agent on the deal, and the broker
+--   Company hub, partners, brand,     every agent reads; only the broker edits
+--   commission plan (company/*)
 -- =====================================================================
 
 create table if not exists public.docs (
@@ -47,10 +50,14 @@ $$;
 create or replace function public.doc_top(p text) returns text language sql immutable as $$ select split_part(p, '/', 1) $$;
 create or replace function public.doc_owner(p text) returns text language sql immutable as $$ select split_part(p, '/', 2) $$;
 
-create or replace function public.can_read_doc(p text) returns boolean
+drop policy if exists docs_read on public.docs;
+drop function if exists public.can_read_doc(text);
+create or replace function public.can_read_doc(p text, d jsonb) returns boolean
 language sql stable as $$
   select
     public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'team')
+    or (public.doc_top(p) = 'company' and public.is_agent())
+    or (public.doc_top(p) = 'deals' and public.is_agent() and d->>'agentId' = auth.uid()::text)
     or public.is_admin()
     or (auth.uid() is not null and public.doc_top(p) in ('boards', 'leads', 'threads') and (
           public.doc_owner(p) = auth.uid()::text
@@ -67,14 +74,15 @@ language sql stable as $$
           public.doc_owner(p) = auth.uid()::text
           or (public.is_agent() and public.client_agent(public.doc_owner(p)) = auth.uid()::text)))
     or (public.doc_top(p) in ('agent', 'team') and public.is_agent() and public.doc_owner(p) = auth.uid()::text)
-    or (public.doc_top(p) in ('exclusives', 'openhouses', 'showcase') and public.is_agent() and d->>'agentId' = auth.uid()::text));
+    or (public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'deals') and public.is_agent() and d->>'agentId' = auth.uid()::text));
+-- company/* falls through to is_admin() only.
 $$;
 
 drop policy if exists docs_read on public.docs;
 drop policy if exists docs_insert on public.docs;
 drop policy if exists docs_update on public.docs;
 drop policy if exists docs_delete on public.docs;
-create policy docs_read on public.docs for select using (public.can_read_doc(path));
+create policy docs_read on public.docs for select using (public.can_read_doc(path, data));
 create policy docs_insert on public.docs for insert with check (public.can_write_doc(path, data));
 create policy docs_update on public.docs for update using (public.can_write_doc(path, data)) with check (public.can_write_doc(path, data));
 create policy docs_delete on public.docs for delete using (public.can_write_doc(path, data));

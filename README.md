@@ -79,8 +79,29 @@ Without these, search runs on sample listings and the AI buttons say they aren�
 
 The REcolorado feed comes through Bridge Interactive, requested from your REcolorado CONNECT dashboard. Start with an IDX feed for the public search. Before going live, replace the disclaimer in `search/index.html` (search for `DISCLAIMER`) with REcolorado’s required wording and check the display rules in the current REcolorado Data Policy.
 
+### Office tools (`search/office.js`)
+Under Agent home, Office and Prospecting:
+
+- **Transactions:** contract dates entered from the signed contract, a document checklist with links to signed copies, deadline alerts on Agent home, and Submit for review. You approve or request changes from **Broker review**.
+- **Company hub:** policies, forms, training, and announcements (as links to your files), with "must read" tracking. You also set the **commission plan** (per-transaction fee, E&O, monthly fee, yearly cap) and **Connections** (eSign, MLS, and training links) here.
+- **My income:** each agent’s commission, brokerage fees, referral fees, net, and expenses for the year, with CSV export. You also see fee totals by agent.
+- **Referrals:** clients sent out or received, fee percent, expected fee, and status.
+- **Follow-up emails:** home anniversaries (from closed transactions linked to a contact), birthdays, and check-ins, with editable templates. Contacts marked "Do not contact" are always skipped.
+- **Preferred partners** and **Brand library:** you add them; every agent sees them. Partners show a RESPA reminder and flag affiliated businesses.
+- **Recruiting:** your prospect pipeline (broker only).
+- **Prospecting:** Matching clients (finds clients whose saved searches, loved homes, or budgets fit a listing, and messages them), Likely to sell, Import contacts (CSV), folders on contacts and transactions, and a Get started checklist for new agents.
+
+### Connecting email
+Without this, Send opens the agent’s email app with the message filled in.
+
+1. Sign up at resend.com, verify your domain, and create an API key.
+2. In Vercel, add `RESEND_API_KEY`, `EMAIL_FROM` (an address on the verified domain), `EMAIL_FOOTER` (brokerage name and mailing address), and `CRON_SECRET` (any long random string).
+3. Put `https://<your-vercel-app>/api/email` in `EMAIL_ENDPOINT` in `assets/config.js`.
+
+Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
+
 ### Tests
-`npm i jsdom && node search/test/multi-agent.test.js` checks the agent and client permissions end to end against a simulated database. `node server/test/proxy.test.js` checks the listing proxy.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions) and `node search/test/office.test.js` (office tools) run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

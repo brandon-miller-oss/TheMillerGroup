@@ -4,5 +4,5 @@
   "version": "1.0.0",
   "description": "Live REcolorado listings (via Bridge) and the agent AI assistant for The Miller Group website",
   "engines": { "node": ">=18" },
-  "scripts": { "test": "node test/proxy.test.js" }
+  "scripts": { "test": "node test/proxy.test.js && node test/followups.test.js" }
 }

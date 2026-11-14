@@ -499,7 +499,7 @@ const SAMPLE = [
    ========================================================================= */
 const Store = {
   cols:{}, mode:"local", db:null, user:null, uid:null, isAgent:false, subs:[], queues:{},
-  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{}}, publicEx:{}, roster:{}, exVer:0,
+  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{}}, publicEx:{}, roster:{}, exVer:0,
   searches:{}, searchVer:0, publicOH:{}, showcase:{}, demoShowcase:{}, site:{},
   team:{}, isBroker:false, crmOwner:null, myAgent:null, marker:null,
   threads:{}, msgs:{}, msgSubs:{}, myThread:null, myTours:{}, settings:{}, agentThread:null,
@@ -613,6 +613,7 @@ const Store = {
   },
   markerBody(){ return { ...(this.marker||{}), updatedAt:new Date().toISOString() }; },
   watchAgent(){
+    window.Office?.watch?.();
     this.db.collection("boards").onSnapshot(snap=>{
       const fresh = [];
       snap.docs.forEach(d=>{
@@ -936,7 +937,7 @@ async function openListing(key){
       <label for="lEmail">Email</label><input id="lEmail" type="email" required autocomplete="email">
       <label for="lPhone">Phone</label><input id="lPhone" type="tel" autocomplete="tel">
       <label for="lMsg">Message</label><textarea id="lMsg" rows="3">I’d like to see ${esc(l.address)}.</textarea>
-      <div class="actions"><button class="btn gold" type="submit">Request a showing</button><button class="btn ghost" type="button" data-save="${esc(l.key)}">Save</button>${Store.db && (!Store.isAgent || Store.demo) ? `<button class="btn ghost" type="button" data-chat="${esc(l.key)}">Message</button>` : ""}</div>
+      <div class="actions"><button class="btn gold" type="submit">Request a showing</button><button class="btn ghost" type="button" data-save="${esc(l.key)}">Save</button>${Store.db && (!Store.isAgent || Store.demo) ? `<button class="btn ghost" type="button" data-chat="${esc(l.key)}">Message</button>` : ""}${Store.isAgent ? `<button class="btn ghost" type="button" data-o-rpfor="${esc(l.key)}">Matching clients</button>` : ""}</div>
       <p class="msg" id="leadMsg" role="status"></p>
     </form>`;
   $("#leadForm").addEventListener("submit", async e=>{
@@ -1036,6 +1037,7 @@ function agentHomeHTML(){
   const ohUp = Object.values(Store.crm.openhouses).filter(o=>o && o.date>=t).length;
   return `<div class="colhead"><h2>Agent home</h2></div>
     <div class="quick"><button class="btn gold" data-newcontact>New contact</button><button class="btn ghost" data-newtask>New task</button><button class="btn ghost" data-share>Share this app</button></div>
+    ${window.Office ? Office.homeTop() : ""}
     <div class="tiles">
       ${tile("requests","Showing requests",reqs.filter(r=>r.status==="new").length,"new")}
       ${tile("buyers","Buyers",buyers,"in progress")}
@@ -1058,6 +1060,7 @@ function agentHomeHTML(){
     <div class="menu">
       ${row("marketing","Marketing")}${row("showcase","Miller Picks",Object.keys(showcaseAll()).length)}${row("biz","GCI tracker")}${row("tasks","Tasks",ts.length)}${row("assistant","AI assistant")}${row("agents","Team")}
     </div>
+    ${window.Office ? Office.menuHTML(row) : ""}
     <h3 class="agent-h">Help</h3>
     <div class="menu">${row("help","Help and support")}${row("settings","Settings")}</div>`;
 }
@@ -1109,8 +1112,8 @@ function pipelineHTML(kind){
 }
 
 function contactsHTML(){
-  const cs = contacts();
-  const head = `<div class="quick"><button class="btn gold" data-newcontact>New contact</button></div>`;
+  const cs = window.Office ? Office.filterContacts(contacts()) : contacts();
+  const head = `<div class="quick"><button class="btn gold" data-newcontact>New contact</button></div>${window.Office ? Office.contactsTop() : ""}`;
   if (!cs.length) return head + `<div class="empty"><strong>No contacts yet</strong>Add clients, prospects, and partners here.</div>`;
   return head + cs.map(c=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong><p>${esc((ROLES.find(r=>r[0]===c.role)||ROLES[3])[1])}${c.clientId?" · Uses the app":""}${c.phone?" · "+esc(c.phone):""}</p></div></div>
     <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}<button data-editcontact="${c.id}">Edit</button></div></div>`).join("");
@@ -1787,7 +1790,7 @@ function listingsHTML(){
   return keys.map(k=>{ const l = listingSync(k); if (!l) return ""; const e = eng[k]||{}; const seller = contacts().find(c=>c.listingKey===k); const oh = Object.values(Store.crm.openhouses).filter(o=>o&&o.listingKey===k&&o.date>=localDay()).length;
     return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(l.address)}</strong><p>${money(l.price)} · ${esc(l.exclusive?(l.status==="Private Exclusive"?"Off-market":"Coming soon"):l.status)}${seller?` · ${esc(seller.name)}`:""}</p>
       <p>${e.saves||0} saves · ${e.love||0} loves · ${e.pass||0} passes · ${e.requests||0} showing requests${oh?` · ${oh} open ${oh===1?"house":"houses"} scheduled`:""}</p></div></div>
-      <div class="links"><button data-open="${esc(k)}">View</button><button data-ohfor="${esc(k)}">Open house</button><button data-mklisting="${esc(k)}">Marketing</button><button data-cmafor="${esc(k)}">CMA</button></div></div>`; }).join("");
+      <div class="links"><button data-open="${esc(k)}">View</button><button data-ohfor="${esc(k)}">Open house</button><button data-mklisting="${esc(k)}">Marketing</button><button data-cmafor="${esc(k)}">CMA</button><button data-o-rpfor="${esc(k)}">Matching clients</button></div></div>`; }).join("");
 }
 function insightsHTML(){
   const since = Date.now()-30*864e5, recent = x=>x && new Date(x).getTime()>=since;
@@ -1846,6 +1849,7 @@ function settingsHTML(){
       <label for="pAreas">Areas</label><input id="pAreas" placeholder="Highland, Berkeley, Golden" value="${esc(p.areas||"")}">
       <label for="pLang">Languages</label><input id="pLang" value="${esc(p.languages||"")}">
       <label for="pBio">Short bio</label><textarea id="pBio" rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)">${esc(p.bio||"")}</textarea>
+      <label for="pNrds">NRDS ID</label><input id="pNrds" inputmode="numeric" placeholder="From your REALTOR® association" value="${esc(p.nrds||"")}">
       <label for="pSlug">Your link name</label><input id="pSlug" required pattern="[a-z0-9-]{2,40}" placeholder="sara-clark" value="${esc(p.slug||"")}">
       <p class="addr">Clients who sign up through your link are assigned to you: ${esc(IDX.APP_URL)}?agent=${esc(p.slug||"your-name")}</p>
       <div class="actions"><button class="btn gold" type="submit">Save profile</button>${p.slug?`<button class="btn ghost" type="button" data-copymine>Copy my link</button>`:""}</div><p class="msg" id="profileMsg" role="status"></p></form>
@@ -1882,8 +1886,8 @@ async function renderAgent(){
     $("#agentChatForm").addEventListener("submit", e=>{ e.preventDefault(); const t = $("#agentChatText").value.trim(); if (!t) return; Store.sendMessage(cid, "agent", t); $("#agentChatText").value = ""; });
     updateAgentChat(cid); return;
   }
-  let html;
-  switch (agentPanel.includes(":") ? agentPanel.split(":")[0] : agentPanel){
+  let html = window.Office ? Office.render(agentPanel, head) : null;
+  if (html == null) switch (agentPanel.includes(":") ? agentPanel.split(":")[0] : agentPanel){
     case "searches": html = head("Saved searches") + await savedSearchesHTML(); break;
     case "openhouses": html = head("Open houses") + openHousesHTML(); break;
     case "cmas": html = head("CMAs") + cmasHTML(); break;
@@ -1917,7 +1921,7 @@ async function renderAgent(){
     const slug = slugify($("#pSlug").value);
     const taken = Object.entries(Store.team).some(([id,a])=>a && id!==Store.crmOwner && String(a.slug||"")===slug);
     if (!slug || taken){ if (m) m.textContent = taken ? "Another agent already uses that link name." : "Add a link name."; return; }
-    try{ await Store.saveProfile({ name:$("#pName").value.trim(), title:$("#pTitle").value.trim(), phone:$("#pPhone").value.trim(), email:$("#pEmail").value.trim(), areas:$("#pAreas").value.trim(), languages:$("#pLang").value.trim(), bio:$("#pBio").value.trim(), slug }); if (m) m.textContent = "Profile saved."; }
+    try{ await Store.saveProfile({ name:$("#pName").value.trim(), title:$("#pTitle").value.trim(), phone:$("#pPhone").value.trim(), email:$("#pEmail").value.trim(), areas:$("#pAreas").value.trim(), languages:$("#pLang").value.trim(), bio:$("#pBio").value.trim(), nrds:$("#pNrds").value.trim(), slug }); if (m) m.textContent = "Profile saved."; }
     catch(err){ if (m) m.textContent = "That didn’t save. Try again."; } });
   const va = $("#viewAs");
   if (va) va.addEventListener("change", ()=>{ try{ if (va.value===Store.uid) sessionStorage.removeItem("tmg-view-as"); else sessionStorage.setItem("tmg-view-as", va.value); }catch(e){} location.reload(); });
@@ -1946,6 +1950,7 @@ function openContactForm(id, preset={}){
         <label for="cListing">Linked listing</label><select id="cListing"><option value="">None</option>${marketingPool().map(l=>`<option value="${esc(l.key)}" ${c.listingKey===l.key?"selected":""}>${esc(l.address)} · ${short(l.price)}</option>`).join("")}</select></div>
       <div id="dealFields"><div class="row2"><div><label for="cSale">Contract price</label><input id="cSale" placeholder="$1.1M" value="${esc(c.salePrice||"")}"></div><div><label for="cClose">Closing date</label><input id="cClose" type="date" value="${esc(c.closeDate||"")}"></div></div></div>
       <label for="cClient">App account</label><select id="cClient"><option value="">Not linked</option>${knownClients().map(([v,t])=>`<option value="${esc(v)}" ${c.clientId===v?"selected":""}>${esc(t)}</option>`).join("")}</select>
+      ${window.Office ? Office.contactFields(c) : ""}
       <label for="cNotes">Notes</label><textarea id="cNotes" rows="3">${esc(c.notes||"")}</textarea>
       <div class="actions"><button class="btn gold" type="submit">Save contact</button>${id?`<button class="btn ghost" type="button" data-delcontact="${id}">Delete</button>`:""}</div>
     </form>`;
@@ -1958,7 +1963,7 @@ function openContactForm(id, preset={}){
       buyerStage:$("#cBStage").value, budget:$("#cBudget").value.trim(), area:$("#cArea").value.trim(),
       sellerStage:$("#cSStage").value, listPrice:$("#cPrice").value.trim(), listingAddress:$("#cAddr").value.trim(), listingKey:$("#cListing").value,
       salePrice:$("#cSale").value.trim(), closeDate:$("#cClose").value,
-      clientId:$("#cClient").value, notes:$("#cNotes").value.trim(), createdAt:c.createdAt||now, updatedAt:now });
+      clientId:$("#cClient").value, notes:$("#cNotes").value.trim(), ...(window.Office ? Office.contactValues() : {}), createdAt:c.createdAt||now, updatedAt:now });
     $("#dlgForm").close();
   });
   if (!$("#dlgForm").open) $("#dlgForm").showModal();
@@ -2157,5 +2162,6 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
+<script src="office.js"></script>
 </body>
 </html>
