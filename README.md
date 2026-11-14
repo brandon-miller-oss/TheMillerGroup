@@ -87,12 +87,13 @@ The REcolorado feed comes through Bridge Interactive, requested from your REcolo
 ### Office tools (`search/office.js`)
 Under Agent home, Office and Prospecting:
 
-- **Transactions:** contract dates entered from the signed contract, a document checklist with links to signed copies, deadline alerts on Agent home, and Submit for review. You approve or request changes from **Broker review**.
+- **Transactions:** contract dates entered from the signed contract (each date shows the Road to Closed recommended timing, like "18–21 days after MEC"), a required-document checklist that follows the side (buyer, listing, or both, from the training guide) with links to signed copies, deadline alerts on Agent home, and Submit for review. You approve or request changes from **Broker review**.
 - **Company hub:** policies, forms, training, and announcements (as links to your files), with "must read" tracking. You also set the **commission plan** (per-transaction fee, E&O, monthly fee, yearly cap) and **Connections** (eSign, MLS, and training links) here.
 - **My income:** each agent’s commission, brokerage fees, referral fees, net, and expenses for the year, with CSV export. You also see fee totals by agent.
 - **Referrals:** clients sent out or received, fee percent, expected fee, and status.
 - **Follow-up emails:** home anniversaries (from closed transactions linked to a contact), birthdays, and check-ins, with editable templates. Contacts marked "Do not contact" are always skipped.
 - **Preferred partners** and **Brand library:** you add them; every agent sees them. Partners show a RESPA reminder and flag affiliated businesses.
+- **Contract clauses:** agent-only library of the training guide’s recommended verbiage (appraisal shortfall, escalation with a cap, inspection waiver, commission adjustment, personal belongings, buyer letters, recording devices, ILC, due diligence documents) with Copy buttons and a reminder to review with the Employing Broker.
 - **Recruiting:** your prospect pipeline (broker only).
 - **Prospecting:** Matching clients (finds clients whose saved searches, loved homes, or budgets fit a listing, and messages them), Likely to sell, Import contacts (CSV), folders on contacts and transactions, and a Get started checklist for new agents.
 
@@ -107,10 +108,19 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 - Start one from the tile, from **Presentation** on a seller, or from **Listing presentation** on a CMA.
 - Each agent fills in **My presentation profile** (title, headshot link, bio, pledge, stats, client reviews, and their usual listing fee for net sheets).
 - The broker updates **Market stats** each month (median prices, days on market, months of supply, concessions, expired listings, mortgage rate, and source). They start with October 2026 REcolorado figures.
+- Pages from the Road to Closed training: **Before we begin** (disclosures before any confidential discussion, the listing agreement, and the personal belongings, buyer letters, and recording-device choices), **Walk-through and showing rules**, **Recommended vendors** (at least three inspectors, cleaners, handypeople, and carpet cleaners from Preferred partners, alphabetical), and **After you accept an offer** (inspection and appraisal options, wire fraud warning).
+- Each presentation has an agent-only **appointment checklist** (disclosures first, Exclusive Right-to-Sell, packet contents, pre-listing documents). It never prints in the PDF.
 - The net sheet uses Colorado items: owner’s title policy, closing fee, HOA letter and transfer fees, and property taxes prorated because Colorado taxes are paid a year behind. Fees and buyer’s agent compensation are shown as negotiable.
 
+### Buyer presentations
+**Buyer presentations** builds the buyer-consultation kit from the Road to Closed training as a branded PDF: cover, agent profile, how we work together (Definitions of Working Relationships and Affiliated Business disclosures first, then the Exclusive Right-to-Buy with negotiable compensation), the market for buyers, buying power (payments at three prices, payment breakdown, and cash to close), loan options (FHA, conventional, VA, USDA, jumbo, ARM; the agent picks which), Colorado down payment assistance (metroDPA, CHFA, CHAC, Chenoa Fund), the road to closed, touring homes (including builder registration), offer strategies, a contract-deadline timeline, inspections, low appraisals, title insurance, the buyer’s team (at least three lenders, inspectors, and home warranty companies from Preferred partners, alphabetical), a wire fraud warning, and next steps.
+
+- Start one from the tile or from **Buyer presentation** on any buyer in the Buyers pipeline.
+- Each has an agent-only **appointment checklist** (disclosures before confidential discussion, Exclusive Right-to-Buy, mold, wire fraud, radon, lead-based paint, packet contents, pre-approval, proof of funds, MLS portal). It never prints.
+- Assistance program and loan details are general and change every year; the PDF tells buyers to confirm with a participating lender.
+
 ### Scripts and writing
-The **Scripts and writing** tile drafts listing descriptions, listing presentation and pricing talk tracks, listing video scripts, open house follow-ups, objection handling, expired, FSBO, neighborhood, and sphere call scripts, buyer consultations, and offer cover notes. It pulls facts from a chosen listing, client, or CMA, and every draft follows Fair Housing rules, treats fees as negotiable, and leaves placeholders instead of inventing details. Starter scripts work before the AI is connected. Agents can save scripts to reuse. Before using call scripts for prospecting, scrub numbers against the Do Not Call registry.
+The **Scripts and writing** tile drafts listing descriptions, listing presentation and pricing talk tracks, listing video scripts, open house follow-ups, objection handling, expired, FSBO, neighborhood, and sphere call scripts, buyer consultations, the buyer **under contract email** (from the training template, with inspectors filled in from Preferred partners), and offer cover notes. Listing description drafts carry a reminder from the training to rewrite them in the agent’s own words. It pulls facts from a chosen listing, client, or CMA, and every draft follows Fair Housing rules, treats fees as negotiable, and leaves placeholders instead of inventing details. Starter scripts work before the AI is connected. Agents can save scripts to reuse. Before using call scripts for prospecting, scrub numbers against the Do Not Call registry.
 
 ### Connecting email
 Without this, Send opens the agent’s email app with the message filled in.
@@ -122,7 +132,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js` and `presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

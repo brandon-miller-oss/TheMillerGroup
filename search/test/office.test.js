@@ -109,8 +109,12 @@ const E = (dom, js) => dom.window.eval(js);
   check("bulk message reaches the client with the home attached", E(C1, `(Store.msgs[Store.uid]||[]).some(x=>x.listingKey==="S-1003")`));
 
   // Every Office panel renders
-  const panels = ["o-deals", "o-review", "o-hub", "o-income", "o-referrals", "o-followups", "o-partners", "o-brand", "o-recruiting", "o-setup", "o-import", "o-rp", "o-likely"];
+  const panels = ["o-deals", "o-review", "o-hub", "o-income", "o-referrals", "o-followups", "o-partners", "o-brand", "o-recruiting", "o-setup", "o-import", "o-rp", "o-likely", "o-clauses"];
   check("every Office panel renders for the broker", panels.every(p => go(B, p).length > 40));
+  const cl = go(B, "o-clauses");
+  check("contract clause library: escalation clause with a cap and broker-review note", cl.includes("CAP PRICE") && cl.includes("Employing Broker") && E(B, "Office._t.CLAUSES.length") === 9);
+  check("required documents follow the side (training guide)", E(B, `Office._t.docsFor("seller")[0]`) === "Exclusive Right-to-Sell Listing Contract" && E(B, `Office._t.docsFor("buyer")[0]`) === "Exclusive Right-to-Buy Contract" && E(B, `Office._t.docsFor("both").length`) > E(B, `Office._t.docsFor("seller").length`));
+  check("deadline timing hints from the training guide", E(B, `Office._t.DEADLINE_HINT["Appraisal deadline"]`).startsWith("18–21"));
   const errs = [B, S, Tm, B2, C1, S2].flatMap(d => d.errs);
   check("no page errors", errs.length === 0); if (errs.length) console.log(errs);
   const fails = require("./harness").done();

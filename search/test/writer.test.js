@@ -20,7 +20,8 @@ let fails = 0; const check = (n, ok) => { console.log((ok ? "PASS " : "FAIL ") +
   await wait(400);
   E(`agentPanel = "home"; renderAgent()`);
   check("Scripts and writing tile on Agent home", !!$('[data-panel="writer"]'));
-  check("13 script types available", E("Writer._t.TYPES.length") === 13);
+  check("14 script types available", E("Writer._t.TYPES.length") === 14);
+  E(`Writer.type = "undercontract"`); check("under contract starter lists partner inspectors", E(`Writer._t.fillStarter("undercontract")`).includes("Peak Home Inspections"));
 
   // From a listing card: description with no AI connected falls back to a starter
   $('[data-panel="writer"]') && E(`agentPanel = "listings"; renderAgent()`);

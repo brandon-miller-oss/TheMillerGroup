@@ -45,9 +45,9 @@
   }
   O.watch = function () {
     if (O.watching) return; O.watching = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
@@ -55,7 +55,7 @@
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -82,6 +82,12 @@
   const REVIEW = { none: "Not submitted", submitted: "Waiting on broker", changes: "Changes requested", approved: "Approved" };
   // Typical Colorado contract dates. Every date comes from the signed contract; nothing is calculated.
   const DEADLINES = ["Earnest money due", "Record title deadline", "Off-record title deadline", "Seller’s property disclosure deadline", "Inspection objection deadline", "Inspection resolution deadline", "Loan application deadline", "Loan terms deadline", "Appraisal deadline", "Loan conditions deadline", "Closing date", "Possession date"];
+  // Required file documents by side, from the Road to Closed training guide. "Both" uses the union; leases keep the generic list.
+  const DOCS_BUYER = ["Exclusive Right-to-Buy Contract", "Contract to Buy and Sell Real Estate (fully executed)", "Definitions of Working Relationships / Broker Disclosure to Buyer", "Affiliated Business Arrangement Disclosure", "Colorado Mold Disclosure Addendum", "Wire Fraud Disclosure", "Seller’s Property Disclosure", "Source of Water Disclosure", "Square Footage Disclosure", "Earnest Money Receipt", "Closing Instructions", "Closing / Settlement Statement", "Check copies / wire receipt", "If applicable: Counterproposal", "If applicable: Lead-Based Paint Disclosure", "If applicable: Inspection objection, report, and resolution", "If applicable: Amend/Extend, Post-Closing Occupancy, POA, referral, TRID addendum"];
+  const DOCS_SELLER = ["Exclusive Right-to-Sell Listing Contract", "MLS input form / printout", "Definitions of Working Relationships / Broker Disclosure to Seller", "Affiliated Business Arrangement Disclosure", "Colorado Mold Disclosure Addendum", "Wire Fraud Disclosure", "Seller’s Property Disclosure", "Source of Water Disclosure", "Square Footage Disclosure", "Closing Instructions", "Contract to Buy and Sell Real Estate (fully executed)", "Listing Sales Information Sheet", "Earnest Money Receipt", "Closing / Settlement Statement", "Check copies / wire receipt", "If applicable: Counterproposal", "If applicable: Lead-Based Paint Disclosure and Obligations", "If applicable: Amend/Extend, Post-Closing Occupancy, POA, referral, short sale, well/septic"];
+  // Recommended timing from the training guide's Dates & Deadlines table (MEC = mutual execution of contract).
+  const DEADLINE_HINT = { "Record title deadline": "5–8 days after MEC", "Off-record title deadline": "5–8 days after MEC", "Seller’s property disclosure deadline": "1–3 days after MEC", "Inspection objection deadline": "5–10 days after MEC", "Inspection resolution deadline": "2–3 days after objection", "Loan application deadline": "1–5 days after MEC", "Loan terms deadline": "5–8 days after application", "Appraisal deadline": "18–21 days after MEC (not FHA/VA)", "Loan conditions deadline": "5 days before closing", "Closing date": "About 30 days after MEC; ask the lender", "Possession date": "At closing unless post-occupancy" };
+  const docsFor = side => side === "seller" ? DOCS_SELLER : side === "buyer" ? DOCS_BUYER : side === "both" ? [...new Set([...DOCS_SELLER, ...DOCS_BUYER])] : DOCS;
   const DOCS = ["Executed contract to buy and sell", "Earnest money receipt", "Brokerage relationship disclosure", "Seller’s property disclosure", "Lead-based paint disclosure (homes built before 1978)", "Square footage disclosure", "Inspection objection and resolution", "Appraisal", "Signed closing statement", "Commission disbursement authorization"];
   const myDeals = () => Object.entries(O.deals).filter(([, d]) => d && d.agentId === me()).map(([id, d]) => ({ id, ...d }));
   const dealGCI = d => { const p = parseMoney(d.price); const amt = parseMoney(d.commissionAmount); return amt || p * (Number(d.commissionPct ?? S().commissionRate ?? 2.5) / 100); };
@@ -134,7 +140,7 @@
         referralPct: parseFloat(val("dRef")) || 0, folders: splitList(val("dFolders")), notes: val("dNotes"), createdAt: d.createdAt || nowIso() };
       if (!out.deadlines) out.deadlines = DEADLINES.map(label => ({ label, date: label === "Closing date" ? out.closeDate : "", done: false }));
       else out.deadlines = out.deadlines.map(x => x.label === "Closing date" && !x.date ? { ...x, date: out.closeDate } : x);
-      if (!out.docs) out.docs = DOCS.map(label => ({ label, done: false, url: "" }));
+      if (!out.docs) out.docs = docsFor(out.side).map(label => ({ label, done: false, url: "" }));
       if (!out.review) out.review = { state: "none" };
       const nid = saveDeal(id, out); closeSheet();
       if (!id) { agentPanel = "o-deal:" + nid; renderAgent(); }
@@ -155,7 +161,7 @@
         ${O.conn.esignUrl ? `<a class="btn ghost" style="text-align:center;text-decoration:none" href="${esc(O.conn.esignUrl)}" target="_blank" rel="noopener">Open ${esc(O.conn.esignName || "eSign")}</a>` : ""}</div></div>
       <h3 class="agent-h">Contract dates</h3><p class="addr">Enter each date exactly as written in the signed contract.</p>
       ${(d.deadlines || []).map((x, i) => { const n = daysUntil(x.date); return `<div class="task ${x.done ? "done" : ""} ${!x.done && n !== null && n < 0 ? "overdue" : ""}"><input type="checkbox" data-o-dl="${id}|${i}" ${x.done ? "checked" : ""} aria-label="Mark ${esc(x.label)} done">
-        <div class="tt"><span>${esc(x.label)}</span><p>${x.date ? `${dayLabel(x.date)}${!x.done && n < 0 ? " · Overdue" : ""}` : "No date"}</p></div><input type="date" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" aria-label="Date for ${esc(x.label)}" data-o-dldate="${id}|${i}" value="${esc(x.date || "")}"></div>`; }).join("")}
+        <div class="tt"><span>${esc(x.label)}</span><p>${x.date ? `${dayLabel(x.date)}${!x.done && n < 0 ? " · Overdue" : ""}` : "No date"}${DEADLINE_HINT[x.label] ? ` · <span title="Training guide recommendation">Typical: ${esc(DEADLINE_HINT[x.label])}</span>` : ""}</p></div><input type="date" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" aria-label="Date for ${esc(x.label)}" data-o-dldate="${id}|${i}" value="${esc(x.date || "")}"></div>`; }).join("")}
       <div class="quick" style="margin-top:6px"><button class="btn ghost small" data-o-adddl="${id}">Add a date</button></div>
       <h3 class="agent-h">Documents</h3><p class="addr">Check each item off once it’s in the file. Paste a link to where the signed copy is stored.</p>
       ${(d.docs || []).map((x, i) => `<div class="task ${x.done ? "done" : ""}"><input type="checkbox" data-o-doc="${id}|${i}" ${x.done ? "checked" : ""} aria-label="${esc(x.label)} received">
@@ -388,7 +394,7 @@
   /* ===================================================================
      6. PREFERRED PARTNERS   7. BRAND LIBRARY
      =================================================================== */
-  const PARTNER_CATS = ["Lender", "Title and closing", "Home warranty", "Insurance", "Inspector", "Appraiser", "1031 exchange", "Property management", "Contractor", "Stager and photographer", "Attorney", "Other"];
+  const PARTNER_CATS = ["Lender", "Title and closing", "Home warranty", "Insurance", "Inspector", "Appraiser", "1031 exchange", "Property management", "Contractor", "Handyperson", "Cleaning", "Carpet cleaning", "Stager and photographer", "Attorney", "Other"];
   function partnersHTML() {
     const ps = Object.entries(O.partners).filter(([, x]) => x).map(([id, x]) => ({ id, ...x })).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     let html = `<p class="note-c">Offer clients at least three choices where you can, and never accept anything of value for a referral (RESPA Section 8). If you or the brokerage has a business tie to a partner, give the client a written Affiliated Business Arrangement disclosure.</p>`;
@@ -657,6 +663,23 @@
       ${row("o-hub", "Company hub")}${row("o-partners", "Preferred partners")}${row("o-brand", "Brand library")}${isBroker() ? row("o-recruiting", "Recruiting", crm("recruits").filter(r => !["joined", "passed"].includes(r.stage)).length || "") : ""}
     </div><h3 class="agent-h">Prospecting</h3><div class="menu">${row("o-rp", "Matching clients")}${row("o-likely", "Likely to sell")}${row("o-import", "Import contacts")}${row("o-setup", "Get started checklist")}</div>`;
   };
+  // Agent-only clause library from the Road to Closed training guide (Part 4).
+  const CLAUSES = [
+    ["Offers", "Appraisal shortfall", "Section 4.1 additional provisions", "In the event the property's appraised valuation is less than the contract price, Buyer agrees to contribute up to $[AMOUNT] at closing to help make up for the appraisal shortfall.", ""],
+    ["Offers", "Escalation (with a cap)", "Re: Section 4.1, item 1", "In the event of competing offer(s) on the Property, net purchase price will be $[INCREMENT] more than the highest Net Purchase Price of any bona fide offer on the Property, except Net Purchase Price for this contract will not exceed $[CAP PRICE]. Net purchase price is defined as Purchase Price minus any amount of Seller Concession written in Section 4.2 or elsewhere in the contract offer. Buyer will adjust Cash at Closing and/or New Loan amount as needed to reflect the increased Purchase Price. Should seller use this condition to increase the Purchase Price, seller will provide Buyer a copy of said highest bona fide competing offer not later than one day following MEC.", "Always set a cap the buyer can support."],
+    ["Offers", "Inspection waiver (limited)", "Additional provisions", "Buyer will have the right to inspect the Property but will not have the right to request any concessions or repairs, or otherwise object to, any items or issues other than material safety, health, or structural items or issues. For the avoidance of doubt, structural items and issues shall only include foundation, roof, and main sewer line items and issues.", "Counsel the buyer carefully before waiving repair requests."],
+    ["Offers", "Commission adjustment", "Additional provisions", "Buyer and Seller acknowledge that Buyer's agent shall accept a commission of [X.X]% in order to boost the Seller's net proceeds.", ""],
+    ["Listing agreement", "Personal belongings", "Exclusive Right-to-Sell", "Seller agrees and acknowledges that the listing agent advises the Seller of the need to secure or remove any prescription medications, firearms, jewelry, or items of either high actual or sentimental value while the home is on the market and available for showings.", ""],
+    ["Listing agreement", "Buyer letters", "Exclusive Right-to-Sell", "The Seller has requested that no Love Letters from potential Buyers be submitted for their consideration. Any love letter received will be deleted without review. Broker is authorized to market such directives in the MLS.", "Letters can reveal protected-class information. Fair housing matters here."],
+    ["Listing agreement", "Electronic recording devices", "Exclusive Right-to-Sell", "Seller is informed that the use of recording equipment, including but not limited to Ring Doorbells or other Ring devices, Amazon Echo or similar smart home devices, security cameras, and other technology that may record video, images, or audio, should not be utilized when considering any offers from prospective Buyers. These may represent the risk of an unfair advantage over the Buyer and possible fair housing concerns. Seller must post that such equipment may be in use in a conspicuous location where Buyers and their Real Estate Brokers can be made aware of such activity prior to entering the home.", ""],
+    ["Contract", "ILC or survey payment", "Section 9.1.2", "If the lender requires an ILC, the Buyer will pay. If the Title Company requires an ILC, the Seller will pay.", ""],
+    ["Contract", "Due diligence documents", "Section 10.6.1.2", "Only if in Seller's possession: previous ILC, survey, building plans, plat map, warranties that exist on roof, windows, solar panels (if appropriate), appliances, and other systems as well as the structure itself; previous home inspection reports, radon test results.", ""]
+  ];
+  function clausesHTML() {
+    let last = "";
+    return `<p class="note-c">For agents only. Review with your Employing Broker before using any clause in an offer or agreement, and fill in every bracketed field.</p>` +
+      CLAUSES.map(([grp, name, where, text, tip], i) => `${grp !== last ? (last = grp, `<div class="stage-h">${esc(grp)}</div>`) : ""}<div class="pcard"><div class="pcard-top"><div><strong>${esc(name)}</strong><p>${esc(where)}</p></div></div><p style="margin:8px 0;font-size:14px;line-height:1.5">${esc(text)}</p>${tip ? `<p class="addr">${esc(tip)}</p>` : ""}<div class="links"><button data-o-clause="${i}">Copy</button></div></div>`).join("");
+  }
   O.render = function (panel, head) {
     const [p, arg] = panel.includes(":") ? [panel.slice(0, panel.indexOf(":")), panel.slice(panel.indexOf(":") + 1)] : [panel, ""];
     if (!p.startsWith("o-")) return null;
@@ -676,6 +699,7 @@
       case "o-import": return head("Import contacts") + importHTML();
       case "o-rp": return head("Matching clients") + rpHTML(arg);
       case "o-likely": return head("Likely to sell") + likelyHTML();
+      case "o-clauses": return head("Contract clauses") + clausesHTML();
     }
     return null;
   };
@@ -684,9 +708,10 @@
     // Track setup steps done elsewhere in the app
     if (e.target.closest("[data-mkpng],[data-mkcaps]")) markSetting("didMarketing");
     if (e.target.closest("[data-share],[data-copymine],[data-copylink]")) markSetting("sharedLink");
-    const t = e.target.closest("[data-o-newdeal],[data-o-editdeal],[data-o-deldeal],[data-o-submit],[data-o-approve],[data-o-changes],[data-o-adddl],[data-o-adddoc],[data-o-newhub],[data-o-edithub],[data-o-delhub],[data-o-read],[data-o-plan],[data-o-conn],[data-o-newexp],[data-o-delexp],[data-o-incomecsv],[data-o-newref],[data-o-editref],[data-o-delref],[data-o-tmpl],[data-o-tmplreset],[data-o-fusend],[data-o-fuskip],[data-o-newpartner],[data-o-editpartner],[data-o-delpartner],[data-o-newbrand],[data-o-editbrand],[data-o-delbrand],[data-o-newrec],[data-o-editrec],[data-o-delrec],[data-o-hidesetup],[data-o-doimport],[data-o-cancelimport],[data-o-rpsend],[data-o-folder],[data-o-rpfor]");
+    const t = e.target.closest("[data-o-newdeal],[data-o-editdeal],[data-o-deldeal],[data-o-submit],[data-o-approve],[data-o-changes],[data-o-adddl],[data-o-adddoc],[data-o-newhub],[data-o-edithub],[data-o-delhub],[data-o-read],[data-o-plan],[data-o-conn],[data-o-newexp],[data-o-delexp],[data-o-incomecsv],[data-o-newref],[data-o-editref],[data-o-delref],[data-o-tmpl],[data-o-tmplreset],[data-o-fusend],[data-o-fuskip],[data-o-newpartner],[data-o-editpartner],[data-o-delpartner],[data-o-newbrand],[data-o-editbrand],[data-o-delbrand],[data-o-newrec],[data-o-editrec],[data-o-delrec],[data-o-hidesetup],[data-o-doimport],[data-o-cancelimport],[data-o-rpsend],[data-o-folder],[data-o-rpfor],[data-o-clause]");
     if (!t) return;
     const d = t.dataset;
+    if (d.oClause !== undefined) { const c = CLAUSES[+d.oClause]; const done = () => { t.textContent = "Copied"; setTimeout(() => { t.textContent = "Copy"; }, 1500); }; try { navigator.clipboard.writeText(c[3]).then(done, () => prompt("Copy this clause", c[3])); } catch (err) { prompt("Copy this clause", c[3]); } return; }
     if (d.oNewdeal !== undefined) openDealForm(null);
     else if (d.oEditdeal !== undefined) openDealForm(d.oEditdeal);
     else if (d.oDeldeal !== undefined) { if (confirm("Delete this transaction?")) { saveDeal(d.oDeldeal, null); closeSheet(); agentPanel = "o-deals"; renderAgent(); } }
@@ -753,21 +778,21 @@
   // Sample office content for demo mode (nothing is saved).
   O.seedDemo = function () {
     if (O.seeded) return; O.seeded = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const y = new Date().getFullYear(), ts = nowIso();
     const dl = (pairs) => DEADLINES.map(label => ({ label, date: pairs[label] || "", done: false }));
-    const docs = (n) => DOCS.map((label, i) => ({ label, done: i < n, url: "" }));
+    const docs = (n, side = "buyer") => docsFor(side).map((label, i) => ({ label, done: i < n, url: "" }));
     O.plan = { name: "Flat fee plan", flatFee: 495, eoFee: 50, monthlyFee: 0, cap: 0, notes: "Keep 100% of your commission. One flat fee per closed transaction." };
     O.conn = { esignName: "Association eSign", esignUrl: "https://example.com/esign", mlsUrl: "https://www.recolorado.com" };
     O.deals = {
       dd1: { agentId: "demo-broker", address: "2210 S Fillmore St", side: "seller", status: "pending", clientName: "Tom and Alicia Grant", contactId: "dct3", price: 1180000, commissionPct: 2.5, contractDate: d(-10), closeDate: d(18),
-        deadlines: dl({ "Earnest money due": d(-8), "Inspection objection deadline": d(2), "Inspection resolution deadline": d(5), "Appraisal deadline": d(9), "Closing date": d(18) }), docs: docs(4), review: { state: "none" }, folders: ["Spring sellers"], createdAt: ts },
+        deadlines: dl({ "Earnest money due": d(-8), "Inspection objection deadline": d(2), "Inspection resolution deadline": d(5), "Appraisal deadline": d(9), "Closing date": d(18) }), docs: docs(4, "seller"), review: { state: "none" }, folders: ["Spring sellers"], createdAt: ts },
       dd2: { agentId: "demo-agent", address: "4021 Raleigh St", side: "buyer", status: "pending", clientName: "Dana Whitfield", price: 875000, commissionPct: 2.5, contractDate: d(-6), closeDate: d(25),
         deadlines: dl({ "Earnest money due": d(-4), "Inspection objection deadline": d(1), "Closing date": d(25) }), docs: docs(6), review: { state: "submitted", at: ts }, createdAt: ts },
-      dd3: { agentId: "demo-broker", address: "1440 N Gaylord St", side: "buyer", status: "closed", clientName: "Marcus Lee", contactId: "dct4", price: 910000, commissionPct: 2.5, closeDate: `${y}-03-14`, referralPct: 0, docs: docs(10), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts },
-      dd4: { agentId: "demo-broker", address: "88 Vine St", side: "seller", status: "closed", clientName: "Past client", price: 640000, commissionPct: 2.5, closeDate: `${y}-07-02`, referralPct: 25, docs: docs(10), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts }
+      dd3: { agentId: "demo-broker", address: "1440 N Gaylord St", side: "buyer", status: "closed", clientName: "Marcus Lee", contactId: "dct4", price: 910000, commissionPct: 2.5, closeDate: `${y}-03-14`, referralPct: 0, docs: docs(17), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts },
+      dd4: { agentId: "demo-broker", address: "88 Vine St", side: "seller", status: "closed", clientName: "Past client", price: 640000, commissionPct: 2.5, closeDate: `${y}-07-02`, referralPct: 25, docs: docs(18, "seller"), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts }
     };
     O.hub = {
       h1: { type: "announcement", title: "Welcome to The Miller Group", body: "Office meeting the first Tuesday of each month. Bring one listing or buyer update.", pinned: true, createdAt: ts },
@@ -778,7 +803,23 @@
     O.partners = {
       p1: { category: "Lender", name: "Sample Lender", company: "Front Range Home Loans", phone: "303-555-0110", notes: "Fast pre-approvals." },
       p2: { category: "Title and closing", name: "Sample Closer", company: "Mile High Title", phone: "303-555-0120" },
-      p3: { category: "Inspector", name: "Sample Inspector", company: "Peak Home Inspections", phone: "720-555-0130" }
+      p3: { category: "Inspector", name: "Sample Inspector", company: "Peak Home Inspections", phone: "720-555-0130" },
+      p4: { category: "Lender", name: "Sample Loan Officer", company: "Aspen Mortgage Group", phone: "303-555-0111" },
+      p5: { category: "Lender", name: "Sample Lender", company: "Cherry Creek Lending", phone: "720-555-0112" },
+      p6: { category: "Inspector", name: "Sample Inspector", company: "Foothills Inspection Co.", phone: "303-555-0131" },
+      p7: { category: "Inspector", name: "Sample Inspector", company: "Mountain View Home Inspections", phone: "720-555-0132" },
+      p8: { category: "Home warranty", name: "Sample Rep", company: "Colorado Home Shield", phone: "303-555-0140" },
+      p9: { category: "Home warranty", name: "Sample Rep", company: "Front Range Home Warranty", phone: "720-555-0141" },
+      p10: { category: "Home warranty", name: "Sample Rep", company: "Summit Home Protection", phone: "303-555-0142" },
+      p11: { category: "Cleaning", name: "Sample Cleaner", company: "Bright Spaces Cleaning", phone: "720-555-0150" },
+      p12: { category: "Cleaning", name: "Sample Cleaner", company: "Mile High Maids", phone: "303-555-0151" },
+      p13: { category: "Cleaning", name: "Sample Cleaner", company: "Sparkle Home Services", phone: "720-555-0152" },
+      p14: { category: "Handyperson", name: "Sample Handyperson", company: "Fix-It Denver", phone: "303-555-0160" },
+      p15: { category: "Handyperson", name: "Sample Handyperson", company: "Handy Home Repair", phone: "720-555-0161" },
+      p16: { category: "Handyperson", name: "Sample Handyperson", company: "Rocky Mountain Repairs", phone: "303-555-0162" },
+      p17: { category: "Carpet cleaning", name: "Sample Tech", company: "Alpine Carpet Care", phone: "720-555-0170" },
+      p18: { category: "Carpet cleaning", name: "Sample Tech", company: "Fresh Step Carpet Cleaning", phone: "303-555-0171" },
+      p19: { category: "Carpet cleaning", name: "Sample Tech", company: "Pure Steam Denver", phone: "720-555-0172" }
     };
     O.brand = { b1: { kind: "logo", title: "Primary logo", url: "https://example.com/logo", notes: "Use on light backgrounds." }, b2: { kind: "template", title: "Just listed social template", url: "https://example.com/template" } };
     Store.crm.referrals = { r1: { direction: "out", client: "The Parks", agent: "Sample Agent", brokerage: "Desert Realty", market: "Phoenix, AZ", feePct: 25, expectedFee: 3200, status: "contract", createdAt: ts } };
@@ -793,6 +834,7 @@
     Store.crm.presentations = { dpr1: { contactId: "dct3", cmaId: "dcm1", preparedFor: "Tom and Alicia Grant", address: "2210 S Fillmore St",
       sections: {}, marketing: ["photos", "video", "floorplan", "mls", "matching", "social", "openhouse", "neighbors", "brokers", "feedback"],
       net: { price: "", listFeePct: 2.5, buyerCompPct: "", title: 2100, closingFee: 300, hoa: 0, annualTaxes: 6200, closeDate: close.toLocaleDateString("en-CA"), payoff: 410000, concessions: 10000, repairs: 3500, other: "" }, createdAt: ts, updatedAt: ts } };
+    Store.crm.buyerpres = { dbp1: { contactId: "dct2", preparedFor: "Priya Shah", price: 525000, areas: "Aurora, Centennial", downPct: 5, rate: 7.4, hoa: 85, earnestPct: 1, closingPct: 3, loans: ["fha", "conv", "va", "usda"], dpa: true, kit: { dwr: true, aba: true }, createdAt: ts, updatedAt: ts } };
     Store.emit();
   };
   // office.js can load before or after Store finishes starting up; cover both.
@@ -802,5 +844,5 @@
     Store.emit();
   }
   // test hooks
-  O._t = { parseCSV, mapRows, matchingClients, likelyToSell, followupsDue, incomeStats, setupSteps, saveDeal, saveCompany, saveCompanyDoc, fill, tmpl };
+  O._t = { CLAUSES, docsFor, DEADLINE_HINT,  parseCSV, mapRows, matchingClients, likelyToSell, followupsDue, incomeStats, setupSteps, saveDeal, saveCompany, saveCompanyDoc, fill, tmpl };
 })();

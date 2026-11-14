@@ -33,11 +33,18 @@
     ["feedback", "Weekly updates", "Showing feedback, online views, and market changes every week."]
   ];
   const SECTIONS = [
-    ["about", "Agent profile"], ["why", "Why The Miller Group"], ["market", "The market right now"], ["summary", "Property summary", true],
+    ["about", "Agent profile"], ["why", "Why The Miller Group"], ["begin", "Before we begin: disclosures and agreement"], ["market", "The market right now"], ["summary", "Property summary", true],
     ["comps", "Comparable homes and map", true], ["compdetail", "A page for each comp", true], ["sidebyside", "Side-by-side comparison", true],
     ["averages", "Status comparison and averages", true], ["charts", "Price charts", true], ["pricing", "Pricing analysis", true],
-    ["strategy", "Pricing strategy"], ["net", "Estimated net proceeds"], ["prep", "Getting your home ready"], ["marketing", "Marketing plan"],
-    ["process", "The selling process"], ["offers", "Incentives, offers, and negotiation"], ["questions", "Questions to ask any agent"]
+    ["strategy", "Pricing strategy"], ["net", "Estimated net proceeds"], ["prep", "Getting your home ready"], ["walkthrough", "Walk-through and showing rules"], ["vendors", "Recommended vendors"], ["marketing", "Marketing plan"],
+    ["process", "The selling process"], ["offers", "Incentives, offers, and negotiation"], ["afteroffer", "After you accept an offer"], ["questions", "Questions to ask any agent"]
+  ];
+  // Agent-only listing appointment checklist, from the Road to Closed training guide (Part 3).
+  const KIT = [
+    ["Before any confidential discussion", [["dwr", "Definitions of Working Relationships / Broker Disclosure to Seller signed"], ["aba", "Affiliated Business Arrangement Disclosure signed"]]],
+    ["Secure the listing", [["erts", "Exclusive Right-to-Sell Listing Contract signed"], ["mold", "Mold Disclosure"], ["wire", "Wire Fraud Disclosure"], ["clauses", "Agreement choices: personal belongings, buyer letters, recording devices"]]],
+    ["Listing packet", [["pk_pres", "This presentation and CMA"], ["pk_time", "Timeline, pre-listing through accepted offer"], ["pk_rules", "Showing, inspection, and appraisal rules"], ["pk_mkt", "Sample marketing from prior listings"], ["pk_sample", "Blank sample Exclusive Right-to-Sell Listing Contract"], ["pk_vend", "3+ inspectors, cleaners, handypeople, and carpet cleaners, alphabetical"]]],
+    ["Before going live", [["walk", "Pre-listing walk-through done"], ["upgrades", "Upgrades list with costs, dates, and permits"], ["spd", "Seller’s Property Disclosure"], ["sqft", "Square Footage Disclosure"], ["water", "Source of Water Disclosure"], ["lbp", "Lead-Based Paint Disclosure (built before 1978)"], ["ci", "Closing Instructions"], ["hoa", "HOA transfer costs, warranties, and leases (solar, appliances)"], ["docs", "Seller’s ILC, survey, warranties, prior inspections, radon results"]]]
   ];
   const DEFAULT_PROFILE = {
     presBio: "I help sellers along the Front Range price well, market boldly, and negotiate with care. My clients’ needs come first, and I’ve built my business one client at a time.",
@@ -124,7 +131,8 @@
         <div class="row2">${f("payoff", "Mortgage payoff", "$")}${f("concessions", "Seller concessions", `Median in ${m.asOf}: ${usd(m.concessionMedian)}`)}</div>
         <div class="row2">${f("repairs", "Repairs and preparation", "$")}${f("other", "Other", "$")}</div></div>
       <h3 class="agent-h">Marketing plan</h3><div class="complist">${MARKETING.map(([k, t, d]) => `<label><input type="checkbox" data-pr-mk="${id}|${k}" ${(pr.marketing || []).includes(k) ? "checked" : ""}><span><strong>${esc(t)}</strong><br><span class="addr">${esc(d)}</span></span></label>`).join("")}</div>
-      <h3 class="agent-h">Sections</h3><div class="complist">${SECTIONS.map(([k, t, needsCma]) => `<label><input type="checkbox" data-pr-sec="${id}|${k}" ${pr.sections && pr.sections[k] !== false ? "checked" : ""}><span>${esc(t)}${needsCma && !pr.cmaId ? " (needs a CMA)" : ""}${k === "about" && !(Store.site || {}).presBio ? ` <span class="addr">· using default text, <button class="remove" data-panel="pres-profile">edit profile</button></span>` : ""}</span></label>`).join("")}</div>`;
+      <h3 class="agent-h">Sections</h3><div class="complist">${SECTIONS.map(([k, t, needsCma]) => `<label><input type="checkbox" data-pr-sec="${id}|${k}" ${pr.sections && pr.sections[k] !== false ? "checked" : ""}><span>${esc(t)}${needsCma && !pr.cmaId ? " (needs a CMA)" : ""}${k === "about" && !(Store.site || {}).presBio ? ` <span class="addr">· using default text, <button class="remove" data-panel="pres-profile">edit profile</button></span>` : ""}</span></label>`).join("")}</div>
+      ${(() => { const all = KIT.flatMap(g => g[1]), kit = pr.kit || {}; return `<h3 class="agent-h">Appointment checklist <span class="addr">${all.filter(([k]) => kit[k]).length} of ${all.length}</span></h3><p class="addr">For you, not the seller. From the Road to Closed training guide.</p>` + KIT.map(([g, items], gi) => `<div class="stage-h">${esc(g)}</div>${items.map(([k, t]) => `<label class="task ${kit[k] ? "done" : ""}"><input type="checkbox" data-pr-kit="${id}|${k}" ${kit[k] ? "checked" : ""}><span class="tt"><span>${esc(t)}</span></span></label>`).join("")}${gi === 0 ? `<p class="note-c">Colorado requires these before you discuss any confidential information.</p>` : ""}`).join(""); })()}`;
   };
 
   /* ---------- Presentation profile (per agent, shown in their presentations) ---------- */
@@ -214,18 +222,22 @@
     };
     const ensure = (h, title) => { if (y + h > H - 70) page(title); };
     const h2 = s => { font("helvetica", "bold", 12, mid); doc.text(t(s), M, y); y += 6; doc.setDrawColor(...gold); doc.setLineWidth(1.2); doc.line(M, y, M + 30, y); y += 16; };
+    const bullets = (items, sz = 10.2, title = "") => items.forEach(s => { font("helvetica", "normal", sz, ink); const ls = wrap(s, CW - 16); ensure(ls.length * 14 + 4, title); doc.setFillColor(...gold); doc.circle(M + 4, y - 3.5, 2.6, "F"); font("helvetica", "normal", sz, ink); ls.forEach(l => { doc.text(l, M + 14, y); y += 14; }); y += 3; });
+    const partnersBy = cats => Object.values((window.Office && Office.partners) || {}).filter(p => p && cats.includes(p.category)).sort((a, b) => (a.company || a.name || "").localeCompare(b.company || b.name || ""));
     const badge = (x, yy, n, rad = 10, fill = gold, col = white) => { doc.setFillColor(...fill); doc.circle(x, yy, rad, "F"); font("helvetica", "bold", rad * 0.95, col); doc.text(String(n), x, yy + rad * 0.34, { align: "center" }); };
     const box = (x, yy, w, h, fill = lin) => { doc.setFillColor(...fill); doc.setDrawColor(...line); doc.setLineWidth(0.5); doc.roundedRect(x, yy, w, h, 4, 4, "FD"); };
     const house = (x, yy, w, h) => { box(x, yy, w, h); const cx = x + w / 2, cy = yy + h / 2, s = Math.min(w, h) / 3; doc.setDrawColor(...gold); doc.setLineWidth(1.4); doc.line(cx - s, cy, cx, cy - s * 0.8); doc.line(cx, cy - s * 0.8, cx + s, cy); doc.rect(cx - s * 0.7, cy, s * 1.4, s * 0.8); doc.rect(cx - s * 0.15, cy + s * 0.35, s * 0.3, s * 0.45); };
     const photo = async (url, x, yy, w, h) => { const d = await toDataURL(url); if (d) { try { doc.addImage(d, d.includes("image/png") ? "PNG" : "JPEG", x, yy, w, h, undefined, "FAST"); return true; } catch (e) {} } house(x, yy, w, h); return false; };
     const kv = (x, yy, k, v, w = 150) => { font("helvetica", "bold", 8.5, gray); doc.text(t(k), x, yy); font("helvetica", "normal", 10, ink); doc.text(wrap(v == null || v === "" ? "-" : v, w - 4)[0] || "-", x, yy + 13); };
     const table = (cols, rows, opts = {}) => {
-      const rh = opts.rh || 20; font("helvetica", "bold", 8.5, white); doc.setFillColor(...mid); doc.rect(M, y, CW, rh, "F");
-      let x = M + 6; cols.forEach(([h, w, a]) => { doc.text(t(h), a === "r" ? x + w - 10 : x, y + 13, a === "r" ? { align: "right" } : undefined); x += w; }); y += rh;
+      const hh = opts.rh || 20; font("helvetica", "bold", 8.5, white); doc.setFillColor(...mid); doc.rect(M, y, CW, hh, "F");
+      let x = M + 6; cols.forEach(([h, w, a]) => { doc.text(t(h), a === "r" ? x + w - 10 : x, y + 13, a === "r" ? { align: "right" } : undefined); x += w; }); y += hh;
       rows.forEach((row, i) => {
+        font("helvetica", "normal", 8.8, ink); const lines = row.map((v, k) => opts.wrap ? wrap(v, cols[k][1] - 8) : [wrap(v, cols[k][1] - 8)[0] || ""]);
+        const rh = opts.wrap ? Math.max(20, Math.max(...lines.map(l => l.length)) * 11 + 9) : hh;
         ensure(rh + 4, opts.title || ""); if (i % 2 === 0) { doc.setFillColor(...lin); doc.rect(M, y, CW, rh, "F"); }
         if (row._mark) { doc.setFillColor(...gold); doc.rect(M, y, 3, rh, "F"); }
-        x = M + 6; row.forEach((v, k) => { const [, w, a] = cols[k]; font("helvetica", row._bold && k <= 1 ? "bold" : "normal", 8.8, ink); const s = wrap(v, w - 8)[0] || ""; doc.text(s, a === "r" ? x + w - 10 : x, y + 13.5, a === "r" ? { align: "right" } : undefined); x += w; });
+        x = M + 6; row.forEach((v, k) => { const [, w, a] = cols[k]; font("helvetica", row._bold && k <= 1 ? "bold" : "normal", 8.8, ink); lines[k].forEach((s, j) => doc.text(s, a === "r" ? x + w - 10 : x, y + 13.5 + j * 11, a === "r" ? { align: "right" } : undefined)); x += w; });
         y += rh;
       });
       y += 10;
@@ -292,6 +304,18 @@
     }
 
     /* ---------- Market ---------- */
+    /* ---------- Before we begin ---------- */
+    if (on("begin")) {
+      page("Before we begin");
+      para("Before we talk about your plans, your timing, or your bottom line, Colorado requires me to explain how brokers can work with you and to have you sign that disclosure. It protects you.", 10.5); y += 4;
+      h2("What you’ll sign first");
+      table([["Document", 200], ["What it means for you", CW - 200]], [["Definitions of Working Relationships", "Explains the ways a broker can work with you. As your listing agent, I represent you."], ["Affiliated Business Arrangement Disclosure", "Tells you about any business ties to services you may use. You’re free to choose your own."]], { title: "Before we begin", wrap: true });
+      y += 14; h2("When you’re ready to list");
+      table([["Document", 200], ["What it means for you", CW - 200]], [["Exclusive Right-to-Sell Listing Contract", "Our agreement: price, term, marketing, and fees. Fees are negotiable and set in writing."], ["Mold Disclosure", "Information about mold for you and future buyers."], ["Wire Fraud Disclosure", "How to protect your sale proceeds from wiring scams."], ["Seller’s Property Disclosure", "What you know about the home’s condition. I’ll walk you through it."], ["Square Footage Disclosure", "How the home’s size was measured."], ["Lead-Based Paint Disclosure", "For homes built before 1978."]], { title: "Before we begin", wrap: true });
+      y += 14; h2("Choices we’ll make in the listing agreement");
+      bullets(["Personal belongings: secure or remove prescription medications, firearms, jewelry, and anything of high or sentimental value while the home is being shown.", "Buyer letters: many sellers choose not to receive letters from buyers. Letters can reveal personal details that shouldn’t affect your decision, so I recommend declining them and saying so in the MLS.", "Cameras and smart speakers: don’t use doorbell cameras, security cameras, or smart speakers to listen in on buyers or their agents, and post a visible notice if any device may be recording."], 10.2, "Before we begin");
+    }
+
     if (on("market")) {
       page("The market right now");
       font("helvetica", "normal", 10, gray); doc.text(t(`${m.area}  |  ${m.asOf}`), M, y); y += 16;
@@ -470,6 +494,26 @@
       y = Math.max(a, b) + 8; box(M, y, CW, 44); font("helvetica", "normal", 10, ink); doc.text(wrap("Colorado sellers also complete a Seller’s Property Disclosure and other required disclosures. I’ll walk you through each one.", CW - 28), M + 14, y + 19);
     }
 
+    /* ---------- Walk-through and showing rules ---------- */
+    if (on("walkthrough")) {
+      page("Walk-through and showing rules");
+      para("Before we go live, we’ll walk through your home together and make a short plan. Here’s what we’ll look at.", 10.5); y += 4;
+      const lw = (CW - 12) / 2, items = [["Updates and improvements", "A list of upgrades with costs, dates, and permits. Buyers and appraisers value the details."], ["Cleaning", "A deep clean, clean carpets, and decluttered rooms photograph and show better."], ["Depersonalizing", "Put away photos, valuables, medications, and firearms."], ["Staging", "Whether professional staging would help, room by room."], ["Showing restrictions", "Pets, times that don’t work, and anything buyers’ agents need to know."], ["Documents to gather", "Any ILC or survey, warranties (roof, windows, solar, appliances), prior inspections, radon results, HOA transfer costs, and leases."]];
+      items.forEach(([a, b], i) => { const x = M + (i % 2) * (lw + 12), top = y + Math.floor(i / 2) * 78; box(x, top, lw, 70, white); doc.setFillColor(...gold); doc.rect(x, top, lw, 3, "F"); font("helvetica", "bold", 11, mid); doc.text(t(a), x + 12, top + 22); font("helvetica", "normal", 9.3, ink); wrap(b, lw - 24).slice(0, 3).forEach((l, k) => doc.text(l, x + 12, top + 38 + k * 12)); });
+      y += 3 * 78 + 8; h2("Showing rules");
+      bullets(["Every showing is booked through the showing service, and buyers always come with a licensed agent.", "Keep the home show-ready: lights on, blinds open, counters clear.", "Plan to be away during showings. Take pets with you or crate them, and note them in the showing instructions.", "Inspections and the appraisal follow the same rules: easy access, utilities on, and attics, crawl spaces, and the furnace reachable.", "I collect feedback after every showing and share it with you weekly."], 10.2, "Walk-through and showing rules");
+    }
+
+    /* ---------- Recommended vendors ---------- */
+    if (on("vendors")) {
+      page("Recommended vendors");
+      para("These are local pros I trust, at least three in each category, listed alphabetically. You’re free to use anyone you like. A pre-listing inspection can surface issues before a buyer does.", 10.5); y += 4;
+      [["Home inspectors", ["Inspector"]], ["House cleaners", ["Cleaning"]], ["Handypeople", ["Handyperson"]], ["Carpet cleaners", ["Carpet cleaning"]], ["Stagers and photographers", ["Stager and photographer"]]].forEach(([lab, cats]) => {
+        const ps = partnersBy(cats); if (!ps.length) return; ensure(30 + 20 * Math.min(ps.length, 5) + 30, "Recommended vendors"); y += 6; h2(lab);
+        table([["Company", 210], ["Contact", 150], ["Phone", CW - 360]], ps.slice(0, 5).map(p => [p.company || p.name, p.company ? p.name || "" : "", p.phone || ""]), { title: "Recommended vendors" }); y += 8;
+      });
+    }
+
     /* ---------- Marketing ---------- */
     if (on("marketing")) {
       page("Marketing plan");
@@ -497,6 +541,20 @@
       y += 8; h2("How we compare offers");
       table([["Factor", 130], ["What we look at", CW - 130]], [["Price", "And any concessions requested"], ["Financing", "Cash, conventional, FHA, or VA, and the lender’s strength"], ["Earnest money", "How much the buyer puts at risk"], ["Deadlines", "Inspection, appraisal, loan, and closing dates"], ["Contingencies", "Appraisal gap, sale of the buyer’s home, and more"], ["Possession", "When you move out, and whether you need time after closing"]], { title: "Incentives, offers, and negotiation" });
       para("When an offer arrives you can accept it, decline it, or counter. In Colorado a counterproposal replaces the original offer, so we only change what matters to you. Once you’re under contract, I track every deadline through closing.", 10.5);
+    }
+
+    /* ---------- After you accept ---------- */
+    if (on("afteroffer")) {
+      page("After you accept an offer");
+      para("Most of the work happens in the first few weeks under contract. I send the contract to the title company right away and track every deadline.", 10.5); y += 4;
+      h2("When the inspection objection arrives");
+      para("An inspection report lists every imperfection; that’s its job. It isn’t a judgment on your home. Your options:", 10.2); y += 2;
+      table([["Option", 170], ["What it means", CW - 170]], [["Make repairs", "Agree to some or all, especially safety, health, or structural items."], ["Lower the price", "A price reduction instead of repairs."], ["Credit at closing", "A credit to the buyer for the estimated cost of repairs."], ["Decline", "The buyer can withdraw the objection or end the contract."]], { title: "After you accept an offer", wrap: true });
+      para("We review every word of the Inspection Resolution before you sign. Small wording changes can mean very different outcomes.", 9, gray);
+      y += 10; h2("If the appraisal comes in low");
+      table([["Option", 170], ["What it means", CW - 170]], [["Reduce to appraised value", "Often the most direct way to keep the sale together."], ["Buyer covers the gap", "Some buyers will bring cash above the appraised value."], ["Meet in the middle", "You and the buyer share the difference."], ["Dispute the appraisal", "Worth it if the appraiser missed a sale or made an error."], ["Let the contract end", "If the buyer has an appraisal contingency, they can terminate."]], { title: "After you accept an offer", wrap: true });
+      y += 10; ensure(110, "After you accept an offer"); doc.setFillColor(...mid); doc.roundedRect(M, y, CW, 92, 6, 6, "F"); font("helvetica", "bold", 13, gold); doc.text("Protect your proceeds from wire fraud", M + 16, y + 26);
+      font("helvetica", "normal", 10, white); wrap("Criminals send fake emails that look like they come from your agent or title company, asking for bank details or with changed instructions. Confirm any request by calling the title company at a number you know is real. I will never email you wiring instructions.", CW - 32).forEach((l, i) => doc.text(l, M + 16, y + 46 + i * 14)); y += 108;
     }
 
     /* ---------- Questions ---------- */
@@ -544,7 +602,8 @@
     if (d.prF) { const [id, k] = d.prF.split("|"); edit(id, x => { x[k] = e.target.value.trim(); if (k === "contactId") { const c = Store.crm.contacts[x.contactId]; if (c && !x.preparedFor) x.preparedFor = c.name; } if (k === "cmaId") { const cm = Store.crm.cmas[x.cmaId]; if (cm) { if (!x.address) x.address = cm.subject.address; const r = cmaCalc(cm); if (r.value) x.net = { ...(x.net || {}), price: r.value }; } } }); }
     else if (d.prNet) { const [id, k] = d.prNet.split("|"); edit(id, x => { x.net = { ...(x.net || {}), [k]: e.target.value.trim() }; }); }
     else if (d.prMk) { const [id, k] = d.prMk.split("|"); edit(id, x => { const s = new Set(x.marketing || []); e.target.checked ? s.add(k) : s.delete(k); x.marketing = MARKETING.map(m => m[0]).filter(m => s.has(m)); }); }
+    else if (d.prKit) { const [id, k] = d.prKit.split("|"); edit(id, x => { x.kit = { ...(x.kit || {}), [k]: e.target.checked }; }); }
     else if (d.prSec) { const [id, k] = d.prSec.split("|"); edit(id, x => { x.sections = { ...(x.sections || {}), [k]: e.target.checked }; }); }
   });
-  P._t = { netCalc, market, MARKET_DEFAULT, profile, SECTIONS, MARKETING };
+  P._t = { netCalc, market, MARKET_DEFAULT, profile, SECTIONS, MARKETING, KIT };
 })();

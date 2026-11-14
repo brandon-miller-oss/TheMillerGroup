@@ -360,10 +360,10 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611141129"></script>
+<script src="../assets/config.js?v=202611141143"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611141129"></script>
+<script src="miller-cloud.js?v=202611141143"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -513,7 +513,7 @@ const SAMPLE = [
    ========================================================================= */
 const Store = {
   cols:{}, mode:"local", db:null, user:null, uid:null, isAgent:false, subs:[], queues:{},
-  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{},presentations:{}}, publicEx:{}, roster:{}, exVer:0,
+  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{},presentations:{},buyerpres:{}}, publicEx:{}, roster:{}, exVer:0,
   searches:{}, searchVer:0, publicOH:{}, showcase:{}, demoShowcase:{}, site:{},
   team:{}, isBroker:false, crmOwner:null, myAgent:null, marker:null,
   threads:{}, msgs:{}, msgSubs:{}, myThread:null, myTours:{}, settings:{}, agentThread:null,
@@ -1090,6 +1090,7 @@ function toolSections(){
       ["exclusives","Off-market & coming soon","Homes not on the MLS","star",0],
       ["openhouses","Open houses","Schedule and sign-in sheet","door",ohUp],
       ["presentations","Listing presentations","Branded PDF for seller meetings","home",0],
+      ["buyerpres","Buyer presentations","Road to Closed kit for buyer meetings","key",0],
       ["cmas","CMAs","Comps and a suggested price","chart",0],
       ["market","Market pulse","Prices and pace by neighborhood","pulse",0],
       ["insights","Insights","Client engagement over time","trend",0]]],
@@ -1101,6 +1102,7 @@ function toolSections(){
       ["o-followups","Follow-up emails","Anniversaries and birthdays","mail",oc.followups||0],
       ["o-hub","Company hub","Policies, forms, announcements","building",oc.unread||0],
       ["o-partners","Preferred partners","Lenders, title, inspectors","handshake",0],
+      ["o-clauses","Contract clauses","Training-guide verbiage to copy","doc",0],
       ["o-brand","Brand library","Logos, templates, colors","palette",0],
       ["o-recruiting","Recruiting","Agents you’re talking with","users",oc.recruits||0,true]]],
     ["Prospecting", [
@@ -1199,7 +1201,7 @@ function pipelineHTML(kind){
         : [c.listingAddress?esc(c.listingAddress):"", c.listPrice?esc(c.listPrice):""].filter(Boolean).join(" · ");
       return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong>${sub?`<p>${sub}</p>`:""}</div>
         <select data-stage="${c.id}|${field}" aria-label="Stage for ${esc(c.name)}">${stages.map(([sv,st])=>`<option value="${sv}" ${(c[field]||stages[0][0])===sv?"selected":""}>${st}</option>`).join("")}</select></div>
-        <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}${buyer?`<button data-newtour="${c.id}">Plan showings</button>`:`<button data-cmacontact="${c.id}">Create CMA</button><button data-pr-for="contact|${c.id}">Presentation</button>`}<button data-newtask="${c.id}">Add task</button><button data-editcontact="${c.id}">Edit</button></div></div>`;
+        <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}${buyer?`<button data-newtour="${c.id}">Plan showings</button><button data-bp-for="${c.id}">Buyer presentation</button>`:`<button data-cmacontact="${c.id}">Create CMA</button><button data-pr-for="contact|${c.id}">Presentation</button>`}<button data-newtask="${c.id}">Add task</button><button data-editcontact="${c.id}">Edit</button></div></div>`;
     }).join("");
   }).join("");
 }
@@ -2034,6 +2036,7 @@ async function renderAgent(){
   }
   let html = window.Office ? Office.render(agentPanel, head) : null;
   if (html == null) switch (agentPanel.includes(":") ? agentPanel.split(":")[0] : agentPanel){
+    case "buyerpres": html = agentPanel.includes(":") ? (window.BuyerPresentation ? BuyerPresentation.html(agentPanel.slice(10)) : "") : head("Buyer presentations") + (window.BuyerPresentation ? BuyerPresentation.listHTML() : ""); break;
     case "presentations": html = head("Listing presentations") + (window.Presentation ? Presentation.listHTML() : ""); break;
     case "presentation": html = window.Presentation ? Presentation.html(agentPanel.slice(13)) : ""; break;
     case "pres-profile": html = `<button class="back" data-panel="presentations">‹ Listing presentations</button><div class="colhead"><h2>My presentation profile</h2></div>` + (window.Presentation ? Presentation.profileHTML() : ""); break;
@@ -2319,9 +2322,10 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="office.js?v=202611141129"></script>
-<script src="cma-report.js?v=202611141129"></script>
-<script src="ai-writer.js?v=202611141129"></script>
-<script src="presentation.js?v=202611141129"></script>
+<script src="office.js?v=202611141143"></script>
+<script src="cma-report.js?v=202611141143"></script>
+<script src="ai-writer.js?v=202611141143"></script>
+<script src="presentation.js?v=202611141143"></script>
+<script src="buyer-presentation.js?v=202611141143"></script>
 </body>
 </html>
