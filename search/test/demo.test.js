@@ -3,10 +3,10 @@ let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = requ
 const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..");
 const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
 let html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
-  .replace('<script src="../assets/config.js"></script>', () => `<script>${cfg}</script>`)
+  .replace('<script src="../assets/config.js?v=202611141038"></script>', () => `<script>${cfg}</script>`)
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
-  .replace('<script src="miller-cloud.js"></script>', () => `<script>${fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8")}</script>`)
-  .replace('<script src="office.js"></script>', () => `<script>${fs.readFileSync(path.join(dir, "office.js"), "utf8")}</script>`);
+  .replace('<script src="miller-cloud.js?v=202611141038"></script>', () => `<script>${fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8")}</script>`)
+  .replace('<script src="office.js?v=202611141038"></script>', () => `<script>${fs.readFileSync(path.join(dir, "office.js"), "utf8")}</script>`);
 const errs = [];
 const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/#agent", beforeParse(w) {
   w.structuredClone = o => JSON.parse(JSON.stringify(o)); w.scrollTo = () => {}; w.confirm = () => true; w.prompt = () => "x";
