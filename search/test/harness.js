@@ -3,11 +3,14 @@
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path");
 const dir = path.join(__dirname, "..");
-let html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
-const cloud = fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8");
-const office = fs.readFileSync(path.join(dir, "office.js"), "utf8");
-html = html.replace('<script src="../assets/config.js?v=202611141045"></script>', '<script>window.MG_CONFIG={SITE_URL:"https://site.test",SUPABASE_URL:"x",SUPABASE_ANON_KEY:"y",DEFAULT_AGENT_SLUG:"brandon"};</script>')
-  .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "").replace('<script src="miller-cloud.js?v=202611141045"></script>', `<script>${cloud}</script>`).replace('<script src="office.js?v=202611141045"></script>', () => `<script>${office}</script>`);
+// Inline every local <script src="x.js?v=..."> so the page runs without a web server.
+function inlineScripts(html, config) {
+  return html
+    .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
+    .replace(/<script src="\.\.\/assets\/config\.js(\?v=\d+)?"><\/script>/, () => `<script>${config}</script>`)
+    .replace(/<script src="([\w.-]+\.js)(\?v=\d+)?"><\/script>/g, (m, f) => `<script>${fs.readFileSync(path.join(dir, f), "utf8")}</script>`);
+}
+let html = inlineScripts(fs.readFileSync(path.join(dir, "index.html"), "utf8"), 'window.MG_CONFIG={SITE_URL:"https://site.test",SUPABASE_URL:"x",SUPABASE_ANON_KEY:"y",DEFAULT_AGENT_SLUG:"brandon"};');
 
 const rows = new Map(), chans = [], siteLeads = [];
 const admins = new Set(["broker"]), agents = new Set(["sara"]), emails = { "newagent@x.com": "newbie" };

@@ -50,14 +50,14 @@ async function profile(uid) {
 }
 
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
-async function sendEmail({ to, subject, text, fromName, replyTo }) {
+async function sendEmail({ to, subject, text, fromName, replyTo, attachments }) {
   if (!RESEND_KEY || !EMAIL_FROM) throw new Error("Email isn’t set up on the server yet.");
   if (!EMAIL_RE.test(to || "")) throw new Error("That email address doesn’t look right.");
   const clean = s => String(s || "").replace(/[\r\n<>"]/g, " ").trim().slice(0, 80);
   const footer = `\n\n—\n${EMAIL_FOOTER ? EMAIL_FOOTER + "\n" : ""}If you’d rather not get these emails, just reply and let me know.`;
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST", headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: `${clean(fromName) || "The Miller Group"} <${EMAIL_FROM}>`, to: [to], subject: String(subject).slice(0, 200), text: String(text).slice(0, 20000) + footer, ...(EMAIL_RE.test(replyTo || "") ? { reply_to: replyTo } : {}) })
+    body: JSON.stringify({ from: `${clean(fromName) || "The Miller Group"} <${EMAIL_FROM}>`, to: [to], subject: String(subject).slice(0, 200), text: String(text).slice(0, 20000) + footer, ...(EMAIL_RE.test(replyTo || "") ? { reply_to: replyTo } : {}), ...(attachments && attachments.length ? { attachments } : {}) })
   });
   if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.message || `Email service returned ${r.status}`); }
   return true;

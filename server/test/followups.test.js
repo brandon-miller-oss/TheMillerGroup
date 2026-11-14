@@ -46,5 +46,12 @@ const call = (h, req) => new Promise(resolve => { const res = { headers: {}, sta
   assert.equal(r.status, 200); assert.equal(sent.length, 3);
   r = await call(email, { method: "POST", headers: { authorization: "Bearer good" }, body: { to: "not-an-email", subject: "Hi", text: "Hello" } });
   assert.equal(r.status, 502);
+  const pdf = Buffer.from("%PDF-1.3 test").toString("base64");
+  r = await call(email, { method: "POST", headers: { authorization: "Bearer good" }, body: { to: "a@b.co", subject: "CMA", text: "Attached", attachments: [{ filename: "CMA_1.pdf", content: pdf }] } });
+  assert.equal(r.status, 200); assert.equal(sent[sent.length - 1].attachments[0].filename, "CMA_1.pdf", "PDF attached");
+  r = await call(email, { method: "POST", headers: { authorization: "Bearer good" }, body: { to: "a@b.co", subject: "x", text: "x", attachments: [{ filename: "bad.exe", content: pdf }] } });
+  assert.equal(r.status, 400, "non-PDF attachments rejected");
+  r = await call(email, { method: "POST", headers: { authorization: "Bearer good" }, body: { to: "a@b.co", subject: "x", text: "x", attachments: [{ filename: "fake.pdf", content: Buffer.from("MZ not a pdf").toString("base64") }] } });
+  assert.equal(r.status, 400, "files that aren't really PDFs rejected");
   console.log("All follow-up and email tests passed");
 })().catch(e => { console.error(e); process.exit(1); });

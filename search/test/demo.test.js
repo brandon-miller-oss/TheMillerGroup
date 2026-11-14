@@ -2,11 +2,14 @@
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..");
 const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
-let html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
-  .replace('<script src="../assets/config.js?v=202611141045"></script>', () => `<script>${cfg}</script>`)
-  .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
-  .replace('<script src="miller-cloud.js?v=202611141045"></script>', () => `<script>${fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8")}</script>`)
-  .replace('<script src="office.js?v=202611141045"></script>', () => `<script>${fs.readFileSync(path.join(dir, "office.js"), "utf8")}</script>`);
+// Inline every local <script src="x.js?v=..."> so the page runs without a web server.
+function inlineScripts(html, config) {
+  return html
+    .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
+    .replace(/<script src="\.\.\/assets\/config\.js(\?v=\d+)?"><\/script>/, () => `<script>${config}</script>`)
+    .replace(/<script src="([\w.-]+\.js)(\?v=\d+)?"><\/script>/g, (m, f) => `<script>${fs.readFileSync(path.join(dir, f), "utf8")}</script>`);
+}
+let html = inlineScripts(fs.readFileSync(path.join(dir, "index.html"), "utf8"), cfg);
 const errs = [];
 const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/#agent", beforeParse(w) {
   w.structuredClone = o => JSON.parse(JSON.stringify(o)); w.scrollTo = () => {}; w.confirm = () => true; w.prompt = () => "x";
