@@ -119,6 +119,9 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 - Each has an agent-only **appointment checklist** (disclosures before confidential discussion, Exclusive Right-to-Buy, mold, wire fraud, radon, lead-based paint, packet contents, pre-approval, proof of funds, MLS portal). It never prints.
 - Assistance program and loan details are general and change every year; the PDF tells buyers to confirm with a participating lender.
 
+### Road to Closed training
+The **Training** section has **Road to Closed training**: 19 short lessons along one road, built from the 2026 Road to Closed Training Guide (financing, the buyer side, the listing side, contract clauses and FIRPTA, and CTM). Each lesson opens with a "Know this" card, then multiple-choice questions with an explanation after every answer. Missed questions come back at the end of the lesson. Lessons unlock in order, XP and a daily streak carry over, and finishing the road unlocks the 20-question **Road test** (80% to pass), which certifies the agent. The broker sees every agent's lessons, XP, streak, and certification under **Team progress**. Update the lessons in `search/training.js` when the guide changes; loan limits and assistance programs change every year.
+
 ### Scripts and writing
 The **Scripts and writing** tile drafts listing descriptions, listing presentation and pricing talk tracks, listing video scripts, open house follow-ups, objection handling, expired, FSBO, neighborhood, and sphere call scripts, buyer consultations, the buyer **under contract email** (from the training template, with inspectors filled in from Preferred partners), and offer cover notes. Listing description drafts carry a reminder from the training to rewrite them in the agent’s own words. It pulls facts from a chosen listing, client, or CMA, and every draft follows Fair Housing rules, treats fees as negotiable, and leaves placeholders instead of inventing details. Starter scripts work before the AI is connected. Agents can save scripts to reuse. Before using call scripts for prospecting, scrub numbers against the Do Not Call registry.
 
@@ -132,7 +135,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

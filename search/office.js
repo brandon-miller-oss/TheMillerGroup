@@ -45,9 +45,9 @@
   }
   O.watch = function () {
     if (O.watching) return; O.watching = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
@@ -55,7 +55,7 @@
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -778,7 +778,7 @@
   // Sample office content for demo mode (nothing is saved).
   O.seedDemo = function () {
     if (O.seeded) return; O.seeded = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const y = new Date().getFullYear(), ts = nowIso();
