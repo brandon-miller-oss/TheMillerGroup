@@ -740,6 +740,48 @@
   });
   document.addEventListener("input", e => { if (e.target.id === "oRpText") O.rp.text = e.target.value; });
 
+  // Sample office content for demo mode (nothing is saved).
+  O.seedDemo = function () {
+    if (O.seeded) return; O.seeded = true;
+    ["referrals", "expenses", "recruits", "emaillog"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
+    const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
+    const y = new Date().getFullYear(), ts = nowIso();
+    const dl = (pairs) => DEADLINES.map(label => ({ label, date: pairs[label] || "", done: false }));
+    const docs = (n) => DOCS.map((label, i) => ({ label, done: i < n, url: "" }));
+    O.plan = { name: "Flat fee plan", flatFee: 495, eoFee: 50, monthlyFee: 0, cap: 0, notes: "Keep 100% of your commission. One flat fee per closed transaction." };
+    O.conn = { esignName: "Association eSign", esignUrl: "https://example.com/esign", mlsUrl: "https://www.recolorado.com" };
+    O.deals = {
+      dd1: { agentId: "demo-broker", address: "2210 S Fillmore St", side: "seller", status: "pending", clientName: "Tom and Alicia Grant", contactId: "dct3", price: 1180000, commissionPct: 2.5, contractDate: d(-10), closeDate: d(18),
+        deadlines: dl({ "Earnest money due": d(-8), "Inspection objection deadline": d(2), "Inspection resolution deadline": d(5), "Appraisal deadline": d(9), "Closing date": d(18) }), docs: docs(4), review: { state: "none" }, folders: ["Spring sellers"], createdAt: ts },
+      dd2: { agentId: "demo-agent", address: "4021 Raleigh St", side: "buyer", status: "pending", clientName: "Dana Whitfield", price: 875000, commissionPct: 2.5, contractDate: d(-6), closeDate: d(25),
+        deadlines: dl({ "Earnest money due": d(-4), "Inspection objection deadline": d(1), "Closing date": d(25) }), docs: docs(6), review: { state: "submitted", at: ts }, createdAt: ts },
+      dd3: { agentId: "demo-broker", address: "1440 N Gaylord St", side: "buyer", status: "closed", clientName: "Marcus Lee", contactId: "dct4", price: 910000, commissionPct: 2.5, closeDate: `${y}-03-14`, referralPct: 0, docs: docs(10), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts },
+      dd4: { agentId: "demo-broker", address: "88 Vine St", side: "seller", status: "closed", clientName: "Past client", price: 640000, commissionPct: 2.5, closeDate: `${y}-07-02`, referralPct: 25, docs: docs(10), deadlines: dl({}), review: { state: "approved", at: ts }, createdAt: ts }
+    };
+    O.hub = {
+      h1: { type: "announcement", title: "Welcome to The Miller Group", body: "Office meeting the first Tuesday of each month. Bring one listing or buyer update.", pinned: true, createdAt: ts },
+      h2: { type: "policy", title: "Policy and Procedures Manual", url: "https://example.com/ppm", mustRead: true, createdAt: ts },
+      h3: { type: "form", title: "Independent Contractor Agreement", url: "https://example.com/ica", createdAt: ts },
+      h4: { type: "training", title: "Transaction file checklist walkthrough", body: "How to submit a complete file for broker review.", createdAt: ts }
+    };
+    O.partners = {
+      p1: { category: "Lender", name: "Sample Lender", company: "Front Range Home Loans", phone: "303-555-0110", notes: "Fast pre-approvals." },
+      p2: { category: "Title and closing", name: "Sample Closer", company: "Mile High Title", phone: "303-555-0120" },
+      p3: { category: "Inspector", name: "Sample Inspector", company: "Peak Home Inspections", phone: "720-555-0130" }
+    };
+    O.brand = { b1: { kind: "logo", title: "Primary logo", url: "https://example.com/logo", notes: "Use on light backgrounds." }, b2: { kind: "template", title: "Just listed social template", url: "https://example.com/template" } };
+    Store.crm.referrals = { r1: { direction: "out", client: "The Parks", agent: "Sample Agent", brokerage: "Desert Realty", market: "Phoenix, AZ", feePct: 25, expectedFee: 3200, status: "contract", createdAt: ts } };
+    Store.crm.expenses = { e1: { amount: 450, date: d(-12), category: "Marketing", note: "Open house signs" }, e2: { amount: 210, date: d(-30), category: "MLS and association dues" } };
+    Store.crm.recruits = { rc1: { name: "Casey Morgan", brokerage: "Big Box Realty", volume: "$9M", stage: "talking", referredBy: "Alex Rivera", next: d(3), createdAt: ts } };
+    const c = Store.crm.contacts;
+    if (c.dct4) c.dct4 = { ...c.dct4, birthday: "1985-" + d(0).slice(5), folders: ["Past clients"] };
+    if (c.dct3) c.dct3 = { ...c.dct3, folders: ["Spring sellers"] };
+    c.dct6 = { name: "Renee Ortiz", email: "renee@example.com", phone: "720-555-0166", role: "seller", sellerStage: "prospect", buyerStage: "lead", purchaseDate: ago(8), notes: "Kids moving out, may downsize.", folders: ["Sphere"], createdAt: ts, updatedAt: ago(1) };
+    Store.settings = { ...Store.settings, followups: { anniversary: true, birthday: true, checkinDays: 0 } };
+    Store.emit();
+  };
+  if (window.Store && Store.demo) O.seedDemo();
   if (window.Store && Store.isAgent && Store.db) { O.watch(); Store.emit(); }
   // test hooks
   O._t = { parseCSV, mapRows, matchingClients, likelyToSell, followupsDue, incomeStats, setupSteps, saveDeal, saveCompany, saveCompanyDoc, fill, tmpl };

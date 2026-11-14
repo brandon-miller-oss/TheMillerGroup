@@ -54,6 +54,11 @@ Who sees what:
 | A client’s shortlists, searches, showing requests, messages | Their own | Their assigned clients | All |
 | Contacts, tasks, deals, CMAs, GCI goals | No | Their own | Your own, plus any agent’s through Settings, Broker view |
 
+### Demo mode (testing)
+`DEMO_MODE: true` in `assets/config.js` lets anyone open **Search homes → Agent** without signing in. They see sample clients, transactions, and office content with broker access turned on, and nothing they change is saved. Signed-in agents always see their real data. Set `DEMO_MODE: false` before launch.
+
+The website admin at `/admin/` always requires a login, because it holds real leads.
+
 ### Setup
 1. Run `supabase/agent-tools.sql` in the Supabase SQL Editor (after `schema.sql`).
 2. Supabase, Authentication, Sign In / Providers: turn ON "Allow new users to sign up" and keep Email enabled, so clients can sign in with an emailed link. Your admin data stays protected: only users in the `admins` table can read leads or anything in `/admin/`.
