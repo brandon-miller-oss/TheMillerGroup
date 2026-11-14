@@ -6,8 +6,8 @@ const dir = path.join(__dirname, "..");
 let html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
 const cloud = fs.readFileSync(path.join(dir, "miller-cloud.js"), "utf8");
 const office = fs.readFileSync(path.join(dir, "office.js"), "utf8");
-html = html.replace('<script src="../assets/config.js?v=202611141038"></script>', '<script>window.MG_CONFIG={SITE_URL:"https://site.test",SUPABASE_URL:"x",SUPABASE_ANON_KEY:"y",DEFAULT_AGENT_SLUG:"brandon"};</script>')
-  .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "").replace('<script src="miller-cloud.js?v=202611141038"></script>', `<script>${cloud}</script>`).replace('<script src="office.js?v=202611141038"></script>', () => `<script>${office}</script>`);
+html = html.replace('<script src="../assets/config.js?v=202611141040"></script>', '<script>window.MG_CONFIG={SITE_URL:"https://site.test",SUPABASE_URL:"x",SUPABASE_ANON_KEY:"y",DEFAULT_AGENT_SLUG:"brandon"};</script>')
+  .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "").replace('<script src="miller-cloud.js?v=202611141040"></script>', `<script>${cloud}</script>`).replace('<script src="office.js?v=202611141040"></script>', () => `<script>${office}</script>`);
 
 const rows = new Map(), chans = [], siteLeads = [];
 const admins = new Set(["broker"]), agents = new Set(["sara"]), emails = { "newagent@x.com": "newbie" };

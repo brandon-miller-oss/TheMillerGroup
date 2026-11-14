@@ -55,7 +55,7 @@
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog"].forEach(k => { if (window.Store && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -781,8 +781,12 @@
     Store.settings = { ...Store.settings, followups: { anniversary: true, birthday: true, checkinDays: 0 } };
     Store.emit();
   };
-  if (window.Store && Store.demo) O.seedDemo();
-  if (window.Store && Store.isAgent && Store.db) { O.watch(); Store.emit(); }
+  // office.js can load before or after Store finishes starting up; cover both.
+  if (typeof Store !== "undefined") {
+    if (Store.demo) O.seedDemo();
+    if (Store.isAgent && Store.db) O.watch();
+    Store.emit();
+  }
   // test hooks
   O._t = { parseCSV, mapRows, matchingClients, likelyToSell, followupsDue, incomeStats, setupSteps, saveDeal, saveCompany, saveCompanyDoc, fill, tmpl };
 })();
