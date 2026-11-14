@@ -13,4 +13,5 @@
   <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/testimonials.html</loc></url>
   <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/blog.html</loc></url>
   <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/contact.html</loc></url>
+  <url><loc>https://brandon-miller-oss.github.io/TheMillerGroup/search/</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
 </urlset>

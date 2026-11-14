@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home Search | The Miller Group</title>
+<meta name="description" content="Search Denver and Colorado homes with The Miller Group. Save homes, get showing times, and message your agent.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --midnight:#141A26; --gold:#B8935A; --gold-strong:#9A7641; --linen:#F4EFE7;
+  --bg:#F4EFE7; --surface:#FFFDF9; --surface-2:#EAE3D7; --ink:#141A26; --ink-2:#4E5566;
+  --line:#DDD4C5; --accent:#9A7641; --accent-ink:#FFFDF9; --pin:#141A26; --pin-ink:#F4EFE7;
+  --love:#2F6B4F; --maybe:#9A7641; --pass:#8A3B3B;
+  --map-bg:#E6DED0; --map-line:#CFC4B1; --water:#B9C6CC;
+  --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151F; --surface:#182030; --surface-2:#222B3D; --ink:#F4EFE7; --ink-2:#A9AFBC;
+    --line:#2C3549; --accent:#C9A56C; --accent-ink:#141A26; --pin:#C9A56C; --pin-ink:#141A26;
+    --love:#6FB993; --maybe:#C9A56C; --pass:#D98080;
+    --map-bg:#161D2B; --map-line:#26304A; --water:#24364A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151F; --surface:#182030; --surface-2:#222B3D; --ink:#F4EFE7; --ink-2:#A9AFBC;
+  --line:#2C3549; --accent:#C9A56C; --accent-ink:#141A26; --pin:#C9A56C; --pin-ink:#141A26;
+  --love:#6FB993; --maybe:#C9A56C; --pass:#D98080;
+  --map-bg:#161D2B; --map-line:#26304A; --water:#24364A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+img,svg{max-width:100%}
+
+/* Header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
+.brand h1{font:600 26px/1 var(--serif);margin:0;letter-spacing:.01em}
+.brand h1 span{color:var(--accent)}
+.sync{font-size:12px;color:var(--ink-2);white-space:nowrap}
+.searchrow{max-width:1100px;margin:12px auto 0;display:flex;gap:8px}
+.searchrow input{flex:1;min-width:0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.filters{max-width:1100px;margin:10px auto 0;display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filters select{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px;flex:none}
+
+main{max-width:1100px;margin:0 auto;padding:16px 18px 110px}
+.banner{font-size:13px;color:var(--ink-2);border-left:3px solid var(--gold);padding:6px 10px;margin:0 0 16px;background:var(--surface)}
+.count{font-size:13px;color:var(--ink-2);margin:0 0 12px}
+
+/* Listing cards */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;text-align:left;padding:0}
+.card .photo{position:relative;aspect-ratio:16/10;display:block}
+.card .photo svg{display:block;width:100%;height:100%}
+.status{position:absolute;left:10px;top:10px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--surface);color:var(--ink)}
+.heart{position:absolute;right:8px;top:8px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(20,26,38,.55);display:grid;place-items:center}
+.heart svg{width:20px;height:20px;fill:none;stroke:#F4EFE7;stroke-width:2}
+.heart.on svg{fill:var(--gold);stroke:var(--gold)}
+.card .body{padding:12px 14px 14px;cursor:pointer}
+.price{font:600 28px/1 var(--serif)}
+.specs{font-size:14px;margin-top:6px}
+.addr{font-size:13px;color:var(--ink-2);margin-top:2px}
+.courtesy{font-size:11px;color:var(--ink-2);margin-top:8px}
+
+/* Map */
+.mapwrap{position:relative;background:var(--map-bg);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.mapwrap svg{display:block;width:100%;height:auto}
+.pin{cursor:pointer}
+.pin rect{fill:var(--pin)}
+.pin text{fill:var(--pin-ink);font:600 12px var(--sans)}
+.pin.sel rect{fill:var(--gold-strong)}
+.pin.sel text{fill:#FFFDF9}
+.maplabel{fill:var(--ink-2);font:italic 500 14px var(--serif)}
+.mapcard{margin-top:14px}
+
+/* Collections */
+.colhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.colhead h2,.detail h2{font:600 30px/1.1 var(--serif);margin:0}
+.btn{border:0;border-radius:10px;padding:11px 16px;background:var(--ink);color:var(--bg);font-weight:600}
+.btn.gold{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.collist{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.colcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:left}
+.colcard h3{font:600 22px/1.2 var(--serif);margin:0}
+.colcard p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.tally{display:flex;gap:12px;margin-top:10px;font-size:13px}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:28px 20px;text-align:center;color:var(--ink-2)}
+.empty strong{display:block;color:var(--ink);font:600 22px var(--serif);margin-bottom:6px}
+.back{background:none;border:0;padding:0;color:var(--accent);font-weight:600;margin-bottom:10px}
+.saved{display:grid;gap:14px}
+.saveditem{background:var(--surface);border:1px solid var(--line);border-radius:14px;display:grid;grid-template-columns:120px 1fr;overflow:hidden}
+.saveditem .thumb svg{display:block;width:100%;height:100%;min-height:120px}
+.saveditem .info{padding:12px 14px}
+.saveditem .price{font-size:22px}
+.reactions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.reactions button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px}
+.reactions button[aria-pressed="true"][data-r="love"]{background:var(--love);border-color:var(--love);color:#fff}
+.reactions button[aria-pressed="true"][data-r="maybe"]{background:var(--maybe);border-color:var(--maybe);color:#fff}
+.reactions button[aria-pressed="true"][data-r="pass"]{background:var(--pass);border-color:var(--pass);color:#fff}
+.note{width:100%;margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);font-size:13px;resize:vertical;min-height:38px}
+.remove{background:none;border:0;color:var(--ink-2);font-size:12px;text-decoration:underline;padding:0;margin-top:8px}
+
+/* Sheets */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);width:min(560px,100%);max-height:88vh;border-radius:18px 18px 0 0;margin:auto auto 0;overflow:auto}
+@media (min-width:700px){dialog{border-radius:18px;margin:auto}}
+dialog::backdrop{background:rgba(10,13,20,.55)}
+.sheet{padding:18px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.sheet .photo svg{display:block;width:100%;border-radius:12px}
+.sheettop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheettop h2{font:600 26px/1.1 var(--serif);margin:0}
+.close{border:0;background:var(--surface-2);width:36px;height:36px;border-radius:50%;font-size:18px;line-height:1}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.facts div{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.facts b{display:block;font:600 22px var(--serif)}
+.facts span{font-size:12px;color:var(--ink-2)}
+.remarks{font-size:14px;line-height:1.6;max-width:70ch}
+.agent{display:flex;gap:12px;align-items:center;padding:14px;background:var(--bg);border-radius:12px;margin:16px 0}
+.agent .mono{width:44px;height:44px;border-radius:50%;background:var(--midnight);color:var(--gold);display:grid;place-items:center;font:600 20px var(--serif);flex:none}
+.agent p{margin:0;font-size:13px;color:var(--ink-2)}
+.agent strong{font-size:15px;color:var(--ink)}
+form label{display:block;font-size:13px;font-weight:500;margin:10px 0 4px}
+form input,form textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:140px}
+.msg{font-size:13px;margin-top:10px}
+.colpick{display:grid;gap:8px}
+.colpick button{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.colpick button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.newcol{display:flex;gap:8px;margin-top:12px}
+.newcol input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+
+/* Footer + tabs */
+.disclaimer{font-size:11px;color:var(--ink-2);margin-top:32px;line-height:1.5;max-width:80ch}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs a{flex:1;max-width:200px;text-align:center;padding:10px 4px 12px;text-decoration:none;color:var(--ink-2);font-size:12px;font-weight:500}
+nav.tabs a svg{display:block;margin:0 auto 3px;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8}
+nav.tabs a[aria-current="page"]{color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 22px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 10px}
+.stats b{display:block;font:600 30px/1 var(--serif)}
+.stats span{font-size:12px;color:var(--ink-2)}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+.agent-h{font:600 24px/1.2 var(--serif);margin:26px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.agent-h .btn{font:600 13px var(--sans);padding:8px 12px}
+.req{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.req.new{border-left:4px solid var(--accent)}
+.req-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.req-top strong{font-size:16px}
+.req select{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:13px;flex:none}
+.req p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.req .msgtext{color:var(--ink);font-size:14px;margin-top:8px}
+.req .contact{display:flex;gap:14px;margin-top:8px;font-size:13px;flex-wrap:wrap}
+.req a,.client a{color:var(--accent)}
+.client{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.client h3{font:600 22px/1.2 var(--serif);margin:0}
+.client .cline{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:8px 0;border-top:1px solid var(--line);margin-top:8px}
+.client ul{margin:6px 0 0;padding:0;list-style:none}
+.client li{font-size:13px;padding:6px 0;border-top:1px dashed var(--line)}
+.client li b{font-weight:600}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;color:#fff;margin-right:6px}
+.tag.love{background:var(--love)}.tag.maybe{background:var(--maybe)}.tag.pass{background:var(--pass)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:flex;flex-direction:column;min-height:118px}
+.tile-t{font:600 20px/1.15 var(--serif)}
+.tile b{font:600 34px/1 var(--serif);margin-top:auto;padding-top:10px;color:var(--accent)}
+.tile-s{font-size:12px;color:var(--ink-2);margin-top:4px}
+.tile.soon{background:transparent;border-style:dashed}
+.tile.soon .tile-t{color:var(--ink-2)}
+.quick{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
+.quick .btn{flex:1;min-width:130px}
+.stage-h{display:flex;justify-content:space-between;font:600 20px var(--serif);margin:20px 0 8px}
+.stage-h span{font:500 13px var(--sans);color:var(--ink-2)}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.pcard-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pcard-top strong{font-size:16px}
+.pcard select{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:13px;flex:none}
+.pcard p{margin:3px 0 0;font-size:13px;color:var(--ink-2)}
+.links{display:flex;gap:14px;margin-top:8px;font-size:13px;flex-wrap:wrap}
+.links a,.links button{color:var(--accent);background:none;border:0;padding:0;font-size:13px;text-decoration:underline}
+.task{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.task input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.task .tt{flex:1;min-width:0}
+.task .tt p{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
+.task.done .tt span{text-decoration:line-through;color:var(--ink-2)}
+.task.overdue .tt p{color:var(--pass)}
+.task button{background:none;border:0;color:var(--accent);font-size:13px;text-decoration:underline;padding:0}
+form select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chatlog{max-height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 2px 10px}
+.chatlog.tall{max-height:calc(100vh - 330px);min-height:220px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.bub{max-width:82%;align-self:flex-start;background:var(--surface-2);border-radius:14px 14px 14px 4px;padding:8px 12px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.bub.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-radius:14px 14px 4px 14px}
+.bub time{display:block;font-size:11px;opacity:.7;margin-top:2px}
+.bub-home{display:block;background:none;border:0;padding:0 0 4px;color:inherit;font-weight:600;font-size:12px;text-decoration:underline;text-align:left}
+.chatform{margin-top:10px}
+.chatrow{display:flex;gap:8px;align-items:flex-end}
+.chatrow textarea{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);resize:none;max-height:120px}
+.about{font-size:12px;color:var(--ink-2);margin:0 0 6px}
+.about button{border:0;background:none;color:var(--ink-2);font-size:14px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pass);vertical-align:middle;margin-left:4px}
+.badge{display:inline-block;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--pass);color:#fff;font-size:11px;line-height:17px;margin-left:3px;vertical-align:1px}
+.badge:empty{display:none}
+.thread{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.thread p{margin:2px 0 0;font-size:13px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.thread time{font-size:12px;color:var(--ink-2);flex:none}
+.thread.unread strong::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pass);margin-left:6px;vertical-align:middle}
+.notif{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:6px;font-size:14px}
+.notif.fresh{border-left:4px solid var(--accent)}
+.notif time{display:block;font-size:12px;color:var(--ink-2);margin-top:2px}
+.bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden;margin:10px 0 4px}
+.bar span{display:block;height:100%;background:var(--accent)}
+.bigstat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.bigstat b{font:600 40px/1 var(--serif)}
+.bigstat p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.chart svg{display:block;width:100%;height:auto}
+.chart text{fill:var(--ink-2);font:11px var(--sans)}
+.stop{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.stop .num{width:28px;height:28px;border-radius:50%;background:var(--pin);color:var(--pin-ink);display:grid;place-items:center;font-weight:600;font-size:13px;flex:none}
+.stop .tt{flex:1;min-width:0}
+.stop .tt p{margin:2px 0 6px;font-size:12px;color:var(--ink-2)}
+.stop input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:13px}
+.stopbtns{display:flex;flex-direction:column;gap:4px}
+.stopbtns button{width:32px;height:30px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.tourform label{display:block;font-size:13px;font-weight:500;margin:10px 0 4px}
+.tourform input,.tourform select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.check{display:flex!important;gap:8px;align-items:center;font-size:14px!important;margin-top:12px!important}
+.check input{width:20px!important;height:20px;accent-color:var(--accent)}
+.tourmap{margin:14px 0;background:var(--map-bg);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.tourmap svg{display:block;width:100%;height:auto}
+.tourmap .n{fill:var(--pin)}.tourmap .nt{fill:var(--pin-ink);font:600 12px var(--sans)}
+.status.ex{background:var(--midnight);color:var(--gold)}
+.mtable{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mtable th,.mtable td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.mtable th:first-child,.mtable td:first-child{text-align:left}
+.mtable th{font-weight:600;font-size:12px;color:var(--ink-2);background:var(--surface-2)}
+.scroll{overflow-x:auto}
+.note-c{font-size:12px;color:var(--ink-2);border-left:3px solid var(--gold);padding:6px 10px;background:var(--surface);margin:12px 0}
+.flyer{max-width:420px;margin:12px auto;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.flyer svg{display:block;width:100%;height:auto}
+.caps textarea{width:100%;min-height:110px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13px}
+.caps label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;margin:14px 0 4px}
+.caps label button{font-weight:500}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;text-align:left}
+.bub.ai{background:var(--surface);border:1px solid var(--line)}
+.roster-search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:12px}
+.sstrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin:0 0 12px;align-items:center;scrollbar-width:none}
+.sstrip::-webkit-scrollbar{display:none}
+.sstrip > *{flex:none}
+.btn.small{padding:7px 12px;font-size:13px}
+.schip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13px}
+.schip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.ohline{font-size:12px;font-weight:600;color:var(--accent);margin-top:4px}
+details.pay{background:var(--bg);border-radius:12px;padding:12px 14px;margin:12px 0}
+details.pay summary{cursor:pointer;font-size:14px;list-style:none;display:flex;justify-content:space-between;gap:8px}
+details.pay summary::-webkit-details-marker{display:none}
+details.pay summary b{font:600 20px var(--serif)}
+details.pay label{display:block;font-size:12px;margin:10px 0 4px}
+details.pay input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
+.menu{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px}
+.menu button{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:15px}
+.menu button:last-child{border-bottom:0}
+.menu button::after{content:"›";color:var(--accent);font-size:20px;line-height:1}
+.menu button span{font-size:12px;color:var(--ink-2);margin-left:auto;margin-right:10px}
+.cmares{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+.cmares b{font:600 34px/1.1 var(--serif);display:block}
+.cmares p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.mtable input{width:92px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);text-align:right;font-size:13px}
+.complist label{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:6px;font-size:13px}
+.complist input{width:18px;height:18px;accent-color:var(--accent);flex:none}
+.kiosk h2{font:600 30px/1.15 var(--serif);margin:0 0 4px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.faq summary{cursor:pointer;font-weight:600}
+.faq p{font-size:14px;margin:8px 0 0;max-width:70ch}
+.hidden{display:none!important}
+@media (prefers-reduced-motion:no-preference){dialog[open]{animation:rise .22s ease-out}@keyframes rise{from{transform:translateY(24px);opacity:.6}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>The Miller <span>Group</span></h1>
+    <span class="sync" id="sync">Saved on this device</span>
+  </div>
+  <div id="searchUI">
+    <div class="searchrow">
+      <input id="q" type="search" placeholder="Neighborhood, city, or address" aria-label="Search homes">
+    </div>
+    <div class="filters">
+      <select id="fPrice" aria-label="Max price">
+        <option value="">Any price</option><option value="600000">Up to $600K</option><option value="900000">Up to $900K</option><option value="1300000">Up to $1.3M</option><option value="2000000">Up to $2M</option>
+      </select>
+      <select id="fBeds" aria-label="Minimum bedrooms">
+        <option value="">Any beds</option><option value="1">1+ beds</option><option value="2">2+ beds</option><option value="3">3+ beds</option><option value="4">4+ beds</option>
+      </select>
+      <select id="fType" aria-label="Home type">
+        <option value="">All types</option><option value="Single Family Residence">House</option><option value="Townhouse">Townhome</option><option value="Condominium">Condo</option>
+      </select>
+      <select id="fStatus" aria-label="Status">
+        <option value="">For sale + coming soon</option><option value="Active">For sale</option><option value="Coming Soon">Coming soon</option><option value="Pending">Pending</option><option value="Private Exclusive">Off-market</option>
+      </select>
+      <select id="fSort" aria-label="Sort">
+        <option value="new">Newest</option><option value="plo">Price: low to high</option><option value="phi">Price: high to low</option><option value="sqft">Largest</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="banner" id="dataBanner">Sample listings for preview. Live MLS listings appear here once the IDX feed is connected.</p>
+  <section id="v-search"></section>
+  <section id="v-map" class="hidden"></section>
+  <section id="v-collections" class="hidden"></section>
+  <section id="v-agent" class="hidden"></section>
+  <p class="disclaimer" id="disclaimer"></p>
+</main>
+
+<nav class="tabs" aria-label="Sections">
+  <a href="#search" data-view="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</a>
+  <a href="#map" data-view="map"><svg viewBox="0 0 24 24"><path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map</a>
+  <a href="#collections" data-view="collections"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>Shortlists</a>
+  <a href="#agent" data-view="agent" id="agentTab" class="hidden"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M18 14a6 6 0 013.5 6"/></svg>Agent<span class="badge" id="agentBadge"></span></a>
+</nav>
+
+<dialog id="dlgListing" aria-label="Home details"><div class="sheet" id="listingBody"></div></dialog>
+<dialog id="dlgSave" aria-label="Save to a shortlist"><div class="sheet" id="saveBody"></div></dialog>
+<dialog id="dlgForm" aria-label="Edit"><div class="sheet" id="formBody"></div></dialog>
+<dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
+
+<!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
+<script src="../assets/config.js"></script>
+<script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="miller-cloud.js"></script>
+<script>
+/* =========================================================================
+   IDX CONFIGURATION
+   Everything listing-related goes through ListingProvider below. Sample data
+   is stored in RESO Data Dictionary field names, so switching to a live feed
+   means flipping MODE to "reso" and pointing ENDPOINT at your IDX proxy.
+
+   Keep the MLS bearer token on the server. The browser calls your proxy
+   (e.g. a Vercel function on the TheMillerGroup site), the proxy calls the
+   REcolorado RESO Web API (OData) and returns the JSON untouched.
+   ========================================================================= */
+const SITE = window.MG_CONFIG || {};
+const IDX = {
+  MODE: SITE.IDX_ENDPOINT ? "reso" : "sample",   // sample listings until the IDX proxy address is set in assets/config.js
+  ENDPOINT: SITE.IDX_ENDPOINT || "",             // e.g. https://miller-tools.vercel.app/api/idx
+  MLS_NAME: "REcolorado",
+  PAGE_SIZE: 50,
+  APP_URL: (SITE.SITE_URL || location.origin) + "/search/",
+  // Shows the Agent tab with sample data to anyone who isn't you, for testing. Set to false at launch.
+  DEMO_AGENT: false,
+  // Replace with the exact disclaimer text your MLS requires for IDX display.
+  DISCLAIMER: "Listing information is deemed reliable but not guaranteed. IDX information is provided exclusively for consumers’ personal, non-commercial use and may not be used for any purpose other than to identify prospective properties consumers may be interested in purchasing.",
+  BROKER: { name: "Brandon Miller", firm: SITE.BUSINESS_NAME || "The Miller Group", phone: SITE.PHONE || "303-990-0702" },
+  DEFAULT_AGENT_SLUG: SITE.DEFAULT_AGENT_SLUG || "brandon"
+};
+
+// RESO fields the app reads. Used as $select on the live feed.
+const RESO_FIELDS = ["ListingKey","ListingId","StandardStatus","ListPrice","BedroomsTotal","BathroomsTotalInteger","LivingArea","LotSizeAcres","YearBuilt","PropertySubType","UnparsedAddress","City","StateOrProvince","PostalCode","SubdivisionName","Latitude","Longitude","PublicRemarks","ListOfficeName","ListAgentFullName","OnMarketDate","ModificationTimestamp"];
+
+// Builds the OData $filter string for the RESO Web API from the app's filters.
+function buildODataFilter(f){
+  const parts = [];
+  if (f.status) parts.push(`StandardStatus eq '${f.status}'`);
+  else parts.push(`(StandardStatus eq 'Active' or StandardStatus eq 'Coming Soon')`);
+  if (f.maxPrice) parts.push(`ListPrice le ${Number(f.maxPrice)}`);
+  if (f.minBeds) parts.push(`BedroomsTotal ge ${Number(f.minBeds)}`);
+  if (f.type) parts.push(`PropertySubType eq '${f.type.replace(/'/g,"''")}'`);
+  if (f.text){
+    const t = f.text.replace(/'/g,"''");
+    parts.push(`(contains(City,'${t}') or contains(SubdivisionName,'${t}') or contains(UnparsedAddress,'${t}') or PostalCode eq '${t}')`);
+  }
+  return parts.join(" and ");
+}
+const ODATA_ORDER = { new:"OnMarketDate desc", plo:"ListPrice asc", phi:"ListPrice desc", sqft:"LivingArea desc" };
+
+// One shape for the whole UI, whatever the source.
+function normalize(r){
+  return {
+    key: r.ListingKey, mlsId: r.ListingId, status: r.StandardStatus,
+    price: r.ListPrice, beds: r.BedroomsTotal, baths: r.BathroomsTotalInteger,
+    sqft: r.LivingArea, lot: r.LotSizeAcres, year: r.YearBuilt, type: r.PropertySubType,
+    address: r.UnparsedAddress, city: r.City, state: r.StateOrProvince, zip: r.PostalCode,
+    hood: r.SubdivisionName, lat: r.Latitude, lng: r.Longitude, remarks: r.PublicRemarks,
+    office: r.ListOfficeName, agent: r.ListAgentFullName, listed: r.OnMarketDate, exclusive: !!r.exclusive, published: r.published!==false,
+    photos: (r.Media||[]).filter(m=>m.MediaCategory==="Photo").sort((a,b)=>(a.Order||0)-(b.Order||0)).map(m=>m.MediaURL)
+  };
+}
+
+/* Office exclusives and Miller Group coming soons: entered by you, not in the MLS feed. */
+function exclusiveRecords(){
+  if (Store.demo) return [...Object.values(Store.publicEx), ...Object.values(Store.crm.exclusives)].filter(Boolean);
+  if (Store.isAgent){ const m = new Map(); Object.values(Store.publicEx).filter(Boolean).forEach(r=>m.set(r.ListingKey,r)); Object.values(Store.crm.exclusives).filter(Boolean).forEach(r=>m.set(r.ListingKey,r)); return [...m.values()]; }
+  return Object.values(Store.publicEx).filter(Boolean);
+}
+function matchExclusive(l, f){
+  if (f.status && f.status!=="Private Exclusive" && f.status!==l.status) return false;
+  if (f.maxPrice && l.price > +f.maxPrice) return false;
+  if (f.minBeds && l.beds < +f.minBeds) return false;
+  if (f.type && l.type !== f.type) return false;
+  if (f.text){ const t = f.text.toLowerCase(); if (![l.city,l.hood,l.address,l.zip].some(v=>String(v||"").toLowerCase().includes(t))) return false; }
+  return true;
+}
+const exByKey = k=>exclusiveRecords().find(r=>r.ListingKey===k);
+const ListingProvider = {
+  cache: new Map(),
+  async search(f){
+    const ex = exclusiveRecords().map(normalize).filter(l=>matchExclusive(l,f));
+    ex.forEach(l=>this.cache.set(l.key,l));
+    if (f.status==="Private Exclusive") return ex.filter(l=>l.status==="Private Exclusive");
+    const base = await this.searchFeed(f);
+    return [...ex, ...base];
+  },
+  async searchFeed(f){
+    if (IDX.MODE === "reso"){
+      const p = new URLSearchParams({
+        "$filter": buildODataFilter(f), "$orderby": ODATA_ORDER[f.sort]||ODATA_ORDER.new,
+        "$top": String(IDX.PAGE_SIZE)
+      });
+      const res = await fetch(`${IDX.ENDPOINT}?${p}`);
+      if (!res.ok) throw new Error(`IDX request failed (${res.status})`);
+      const json = await res.json();
+      const list = (json.value||[]).map(normalize);
+      list.forEach(l=>this.cache.set(l.key,l));
+      return list;
+    }
+    // Sample mode: same filter logic, run locally.
+    let list = SAMPLE.map(normalize).filter(l=>{
+      if (f.status ? l.status!==f.status : !["Active","Coming Soon"].includes(l.status)) return false;
+      if (f.maxPrice && l.price > +f.maxPrice) return false;
+      if (f.minBeds && l.beds < +f.minBeds) return false;
+      if (f.type && l.type !== f.type) return false;
+      if (f.text){
+        const t = f.text.toLowerCase();
+        if (![l.city,l.hood,l.address,l.zip].some(v=>String(v||"").toLowerCase().includes(t))) return false;
+      }
+      return true;
+    });
+    const s = { new:(a,b)=>b.listed.localeCompare(a.listed), plo:(a,b)=>a.price-b.price, phi:(a,b)=>b.price-a.price, sqft:(a,b)=>b.sqft-a.sqft }[f.sort] || ((a,b)=>b.listed.localeCompare(a.listed));
+    list.sort(s);
+    list.forEach(l=>this.cache.set(l.key,l));
+    return list;
+  },
+  async get(key){
+    const ex = exByKey(key); if (ex) return normalize(ex);
+    if (this.cache.has(key)) return this.cache.get(key);
+    if (IDX.MODE === "reso"){
+      const res = await fetch(`${IDX.ENDPOINT}?key=${encodeURIComponent(key)}`);
+      if (!res.ok) return null;
+      const rec = ((await res.json()).value||[])[0]; if (!rec) return null;
+      const l = normalize(rec); this.cache.set(key,l); return l;
+    }
+    const r = SAMPLE.find(x=>x.ListingKey===key); return r ? normalize(r) : null;
+  }
+};
+
+/* Sample listings — fictional properties in RESO field names. */
+const SAMPLE = [
+  {ListingKey:"S-1001",ListingId:"9000101",StandardStatus:"Active",ListPrice:1085000,BedroomsTotal:3,BathroomsTotalInteger:4,LivingArea:2310,LotSizeAcres:.05,YearBuilt:2019,PropertySubType:"Townhouse",UnparsedAddress:"3318 W Pemberton Ln",City:"Denver",StateOrProvince:"CO",PostalCode:"80211",SubdivisionName:"Highland",Latitude:39.763,Longitude:-105.016,PublicRemarks:"Rooftop deck with downtown and mountain views, two-car garage, and a walkable block near Tennyson shops and restaurants.",ListOfficeName:"Front Range Realty Partners",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-09"},
+  {ListingKey:"S-1002",ListingId:"9000102",StandardStatus:"Active",ListPrice:749000,BedroomsTotal:2,BathroomsTotalInteger:2,LivingArea:1240,LotSizeAcres:0,YearBuilt:2016,PropertySubType:"Condominium",UnparsedAddress:"1704 Calder St #405",City:"Denver",StateOrProvince:"CO",PostalCode:"80211",SubdivisionName:"LoHi",Latitude:39.758,Longitude:-105.005,PublicRemarks:"Corner unit with floor-to-ceiling windows, deeded parking, and a short walk over the pedestrian bridge to Union Station.",ListOfficeName:"Platte Street Brokers",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-02"},
+  {ListingKey:"S-1003",ListingId:"9000103",StandardStatus:"Active",ListPrice:1495000,BedroomsTotal:4,BathroomsTotalInteger:3,LivingArea:2880,LotSizeAcres:.14,YearBuilt:1924,PropertySubType:"Single Family Residence",UnparsedAddress:"1186 S Larkmoor St",City:"Denver",StateOrProvince:"CO",PostalCode:"80209",SubdivisionName:"Washington Park",Latitude:39.699,Longitude:-104.968,PublicRemarks:"Updated 1920s bungalow a block from the park, with a finished basement, chef’s kitchen, and detached two-car garage.",ListOfficeName:"Parkside Homes Co.",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-10-28"},
+  {ListingKey:"S-1004",ListingId:"9000104",StandardStatus:"Coming Soon",ListPrice:925000,BedroomsTotal:3,BathroomsTotalInteger:2,LivingArea:1760,LotSizeAcres:.12,YearBuilt:1941,PropertySubType:"Single Family Residence",UnparsedAddress:"1452 S Orwell St",City:"Denver",StateOrProvince:"CO",PostalCode:"80210",SubdivisionName:"Platt Park",Latitude:39.684,Longitude:-104.982,PublicRemarks:"Brick Tudor near South Pearl Street with original arched doorways, new windows, and a deep backyard.",ListOfficeName:"Front Range Realty Partners",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-11"},
+  {ListingKey:"S-1005",ListingId:"9000105",StandardStatus:"Active",ListPrice:1890000,BedroomsTotal:3,BathroomsTotalInteger:4,LivingArea:3120,LotSizeAcres:.06,YearBuilt:2021,PropertySubType:"Townhouse",UnparsedAddress:"244 Vessing St",City:"Denver",StateOrProvince:"CO",PostalCode:"80206",SubdivisionName:"Cherry Creek North",Latitude:39.719,Longitude:-104.955,PublicRemarks:"Modern townhome with an elevator, private rooftop, and attached garage, steps from Cherry Creek North galleries and dining.",ListOfficeName:"Cherry Creek Estates Group",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-10-30"},
+  {ListingKey:"S-1006",ListingId:"9000106",StandardStatus:"Active",ListPrice:1120000,BedroomsTotal:4,BathroomsTotalInteger:3,LivingArea:2450,LotSizeAcres:.15,YearBuilt:1908,PropertySubType:"Single Family Residence",UnparsedAddress:"1027 Holloway St",City:"Denver",StateOrProvince:"CO",PostalCode:"80206",SubdivisionName:"Congress Park",Latitude:39.733,Longitude:-104.945,PublicRemarks:"Foursquare with a wraparound porch, refinished oak floors, and a carriage house, close to the Botanic Gardens.",ListOfficeName:"Parkside Homes Co.",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-10-21"},
+  {ListingKey:"S-1007",ListingId:"9000107",StandardStatus:"Active",ListPrice:415000,BedroomsTotal:1,BathroomsTotalInteger:1,LivingArea:720,LotSizeAcres:0,YearBuilt:1962,PropertySubType:"Condominium",UnparsedAddress:"930 Tremaine St #7C",City:"Denver",StateOrProvince:"CO",PostalCode:"80218",SubdivisionName:"Capitol Hill",Latitude:39.731,Longitude:-104.977,PublicRemarks:"Mid-century high-rise unit with a west-facing balcony, renovated kitchen, and pool, near Cheesman Park.",ListOfficeName:"Platte Street Brokers",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-06"},
+  {ListingKey:"S-1008",ListingId:"9000108",StandardStatus:"Pending",ListPrice:689000,BedroomsTotal:2,BathroomsTotalInteger:3,LivingArea:1380,LotSizeAcres:.03,YearBuilt:2018,PropertySubType:"Townhouse",UnparsedAddress:"3561 Ansell Ct",City:"Denver",StateOrProvince:"CO",PostalCode:"80205",SubdivisionName:"RiNo",Latitude:39.768,Longitude:-104.979,PublicRemarks:"Industrial-style townhome with polished concrete floors and a rooftop deck, close to the 38th & Blake station.",ListOfficeName:"Front Range Realty Partners",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-10-12"},
+  {ListingKey:"S-1009",ListingId:"9000109",StandardStatus:"Active",ListPrice:1265000,BedroomsTotal:4,BathroomsTotalInteger:4,LivingArea:2740,LotSizeAcres:.08,YearBuilt:2014,PropertySubType:"Single Family Residence",UnparsedAddress:"1689 Dorrance Ct",City:"Denver",StateOrProvince:"CO",PostalCode:"80204",SubdivisionName:"Sloan’s Lake",Latitude:39.749,Longitude:-105.043,PublicRemarks:"Contemporary home a block from the lake path, with a main-floor office, open kitchen, and lake views from the primary suite.",ListOfficeName:"Cherry Creek Estates Group",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-04"},
+  {ListingKey:"S-1010",ListingId:"9000110",StandardStatus:"Active",ListPrice:845000,BedroomsTotal:3,BathroomsTotalInteger:2,LivingArea:1690,LotSizeAcres:.14,YearBuilt:1951,PropertySubType:"Single Family Residence",UnparsedAddress:"4473 Brenning St",City:"Denver",StateOrProvince:"CO",PostalCode:"80212",SubdivisionName:"Berkeley",Latitude:39.777,Longitude:-105.039,PublicRemarks:"Remodeled ranch near Tennyson Street with a sunroom, mature trees, and a large garden lot.",ListOfficeName:"Parkside Homes Co.",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-10-25"},
+  {ListingKey:"S-1011",ListingId:"9000111",StandardStatus:"Coming Soon",ListPrice:1340000,BedroomsTotal:5,BathroomsTotalInteger:4,LivingArea:3410,LotSizeAcres:.21,YearBuilt:1938,PropertySubType:"Single Family Residence",UnparsedAddress:"2286 Quillan St",City:"Denver",StateOrProvince:"CO",PostalCode:"80207",SubdivisionName:"Park Hill",Latitude:39.751,Longitude:-104.921,PublicRemarks:"Spacious brick home on a corner lot with a finished lower level, two fireplaces, and a sunny south yard.",ListOfficeName:"Cherry Creek Estates Group",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-10"},
+  {ListingKey:"S-1012",ListingId:"9000112",StandardStatus:"Active",ListPrice:569000,BedroomsTotal:2,BathroomsTotalInteger:1,LivingArea:1080,LotSizeAcres:.07,YearBuilt:1895,PropertySubType:"Single Family Residence",UnparsedAddress:"318 W Corwin Ave",City:"Denver",StateOrProvince:"CO",PostalCode:"80223",SubdivisionName:"Baker",Latitude:39.714,Longitude:-104.991,PublicRemarks:"Victorian cottage with high ceilings and a front porch, a short walk to the South Broadway shops.",ListOfficeName:"Platte Street Brokers",ListAgentFullName:"Sample Agent",OnMarketDate:"2026-11-01"}
+];
+
+/* =========================================================================
+   DATA STORE — artifact database when available, this browser otherwise.
+   boards/<clientId>/collections/<id>  each client's collections (private to
+                                       that client; you as owner read all)
+   leads/<clientId>                     that client's showing requests
+   ========================================================================= */
+const Store = {
+  cols:{}, mode:"local", db:null, user:null, uid:null, isAgent:false, subs:[], queues:{},
+  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{}}, publicEx:{}, roster:{}, exVer:0,
+  searches:{}, searchVer:0, publicOH:{}, showcase:{}, demoShowcase:{}, site:{},
+  team:{}, isBroker:false, crmOwner:null, myAgent:null, marker:null,
+  threads:{}, msgs:{}, msgSubs:{}, myThread:null, myTours:{}, settings:{}, agentThread:null,
+  load(){
+    try{ this.cols = JSON.parse(localStorage.getItem("tmg-collections")||"{}"); }catch(e){ this.cols={}; }
+    try{ this.searches = JSON.parse(localStorage.getItem("tmg-searches")||"{}"); }catch(e){ this.searches={}; }
+    this.searchVer++;
+  },
+  persistLocal(){ try{ localStorage.setItem("tmg-collections", JSON.stringify(this.cols)); }catch(e){} },
+  emit(){ this.subs.forEach(fn=>fn()); },
+  onChange(fn){ this.subs.push(fn); },
+  async init(){
+    await this.connect();
+    if (!this.isAgent && IDX.DEMO_AGENT) this.enableDemo();
+    this.emit();
+  },
+  enableDemo(){
+    this.demo = true; this.isAgent = true;
+    const d = n=>{ const x = new Date(); x.setDate(x.getDate()+n); return x.toLocaleDateString("en-CA"); };
+    const ts = (n,h=10)=>{ const x = new Date(); x.setDate(x.getDate()+n); x.setHours(h,0,0,0); return x.toISOString(); };
+    this.clients = {
+      "demo-jordan":{ cols:{ dc1:{ name:"Wash Park shortlist", createdAt:ts(-6), items:{ "S-1003":{ addedAt:ts(-5), updatedAt:ts(-1,15), reaction:"love", note:"Love the porch and the garage." }, "S-1004":{ addedAt:ts(-4), updatedAt:ts(-2), reaction:"love", note:"" }, "S-1012":{ addedAt:ts(-3), updatedAt:ts(-3), reaction:"pass", note:"Too small for us." } } } } },
+      "demo-priya":{ cols:{ dc2:{ name:"Highland condos", createdAt:ts(-3), items:{ "S-1002":{ addedAt:ts(-2), updatedAt:ts(0,9), reaction:"maybe", note:"Can we see the HOA budget?" }, "S-1001":{ addedAt:ts(-1), updatedAt:ts(-1), reaction:"love", note:"" } } } } }
+    };
+    this.leads = {
+      "demo-jordan":{ requests:{ dr1:{ name:"Jordan Reyes", email:"jordan@example.com", phone:"303-555-0142", address:"1186 S Larkmoor St", listingKey:"S-1003", message:"Could we see it Saturday morning?", createdAt:ts(0,8), status:"new" } } },
+      "demo-priya":{ requests:{ dr2:{ name:"Priya Shah", email:"priya@example.com", phone:"720-555-0188", address:"1704 Calder St #405", listingKey:"S-1002", message:"Is parking included?", createdAt:ts(-2,14), status:"contacted" } } }
+    };
+    this.threads = { "demo-priya":{ updatedAt:ts(0,9), lastText:"Can you send the HOA budget for Calder?", lastFrom:"client" } };
+    this.msgs["demo-priya"] = [
+      { id:"dm1", from:"agent", text:"Hi Priya, parking is one deeded space in the garage.", createdAt:ts(-2,16) },
+      { id:"dm2", from:"client", text:"Can you send the HOA budget for Calder?", listingKey:"S-1002", createdAt:ts(0,9) }
+    ];
+    this.crm.contacts = {
+      dct1:{ name:"Jordan Reyes", phone:"303-555-0142", email:"jordan@example.com", role:"buyer", buyerStage:"touring", sellerStage:"prospect", budget:"$1.5M", area:"Wash Park, Platt Park", clientId:"demo-jordan", notes:"Relocating from Austin in March.", createdAt:ts(-10), updatedAt:ts(-1) },
+      dct2:{ name:"Priya Shah", phone:"720-555-0188", email:"priya@example.com", role:"buyer", buyerStage:"searching", sellerStage:"prospect", budget:"$800K", area:"LoHi, Highland", clientId:"demo-priya", createdAt:ts(-4), updatedAt:ts(-2) },
+      dct3:{ name:"Tom and Alicia Grant", phone:"303-555-0119", email:"grants@example.com", role:"seller", buyerStage:"lead", sellerStage:"contract", listingAddress:"1689 Dorrance Ct", listingKey:"S-1009", listPrice:"$1.265M", salePrice:"$1.18M", closeDate:d(18), createdAt:ts(-40), updatedAt:ts(-3) },
+      dct4:{ name:"Marcus Lee", phone:"720-555-0101", email:"marcus@example.com", role:"buyer", buyerStage:"closed", sellerStage:"prospect", budget:"$950K", salePrice:"$910K", closeDate:d(-30), createdAt:ts(-120), updatedAt:ts(-30) },
+      dct5:{ name:"Dana Whitfield", phone:"720-555-0175", email:"dana@example.com", role:"seller", buyerStage:"lead", sellerStage:"prep", listingAddress:"4021 Raleigh St", listPrice:"$875K", createdAt:ts(-8), updatedAt:ts(-2) }
+    };
+    this.crm.tasks = {
+      dt1:{ title:"Send Jordan Saturday tour times", due:d(0), contactId:"dct1", done:false, createdAt:ts(-1) },
+      dt2:{ title:"Follow up on Grant inspection response", due:d(-1), contactId:"dct3", done:false, createdAt:ts(-3) },
+      dt3:{ title:"Pull HOA docs for Calder St", due:d(1), contactId:"dct2", done:false, createdAt:ts(0) },
+      dt4:{ title:"Schedule listing photos for Raleigh St", due:d(3), contactId:"dct5", done:false, createdAt:ts(-2) }
+    };
+    this.crm.tours = { dtr1:{ name:"Jordan Saturday showings", date:d(2), contactId:"dct1", clientId:"demo-jordan", shared:false, createdAt:ts(-1),
+      stops:[{ listingKey:"S-1003", time:"10:00", note:"Lockbox on side door" }, { listingKey:"S-1004", time:"10:45", note:"" }, { listingKey:"S-1005", time:"11:30", note:"" }] } };
+    this.crm.exclusives = { dx1:{ ListingKey:"PX-dx1", ListingId:"Off-market", StandardStatus:"Private Exclusive", ListPrice:1725000, BedroomsTotal:4, BathroomsTotalInteger:4, LivingArea:3050, YearBuilt:1931, PropertySubType:"Single Family Residence", UnparsedAddress:"2675 S Gilpin St", City:"Denver", StateOrProvince:"CO", PostalCode:"80210", SubdivisionName:"Washington Park", Latitude:39.696, Longitude:-104.964, PublicRemarks:"Renovated Tudor on a tree-lined block with a new kitchen, primary suite addition, and heated garage.", ListOfficeName:"The Miller Group", ListAgentFullName:IDX.BROKER.name, OnMarketDate:d(-1), exclusive:true, published:true } };
+    this.settings = { gciGoal:250000, commissionRate:2.5, notifSeenAt:ts(-1,0) };
+    this.clients["demo-jordan"].searches = { ds1:{ name:"Wash Park and Platt Park under $1.6M", filters:{ text:"Park", maxPrice:"2000000", minBeds:"3", type:"", status:"", sort:"new" }, seenKeys:["S-1003","S-1006"], createdAt:ts(-6) } };
+    this.clients["demo-priya"].searches = { ds2:{ name:"Condos under $900K", filters:{ text:"", maxPrice:"900000", minBeds:"", type:"Condominium", status:"", sort:"new" }, seenKeys:["S-1002"], createdAt:ts(-3) } };
+    this.crm.openhouses = { doh1:{ listingKey:"PX-dx1", date:d(3), start:"11:00", end:"13:00", notes:"Park on Gilpin; enter through the front.", published:true, createdAt:ts(-1) } };
+    this.crm.ohvisitors = {
+      dv1:{ ohId:"doh1", name:"Sam Okafor", email:"sam@example.com", phone:"720-555-0133", agent:"No", preapproved:"Yes", createdAt:ts(-1,12) },
+      dv2:{ ohId:"doh1", name:"Lena Fischer", email:"lena@example.com", phone:"", agent:"Yes", preapproved:"Not yet", createdAt:ts(-1,12) } };
+    this.crm.cmas = { dcm1:{ name:"2210 S Fillmore St", subject:{ address:"2210 S Fillmore St", hood:"Washington Park", beds:4, baths:3, sqft:2600, year:1926, type:"Single Family Residence" }, compKeys:["S-1003","S-1004","S-1006"], adj:{ "S-1003":-25000 }, notes:"", createdAt:ts(-2), updatedAt:ts(-2) } };
+    this.demoShowcase = { dsc1:{ name:"Bungalows near the parks", description:"Character homes a short walk from Wash Park and Cheesman.", keys:["S-1003","S-1004","S-1012"], createdAt:ts(-5) } };
+    this.exVer++;
+  },
+  async connect(){
+    this.load(); this.emit();
+    try{
+      if (!window.claude || !window.claude.use) return;
+      const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!db || !user) return;
+      // Public data loads for everyone, signed in or not.
+      db.collection("openhouses").onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.publicOH = m; this.emit(); }, ()=>{});
+      db.collection("showcase").onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.showcase = m; this.emit(); }, ()=>{});
+      db.collection("team").onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.team = m; this.roster = m; this.refreshProfile(); this.emit(); }, ()=>{});
+      db.collection("exclusives").onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.publicEx = m; this.exVer++; this.emit(); }, ()=>{});
+      const uid = await user.id(); if (!uid) return;
+      this.db = db; this.user = user; this.uid = uid;
+      setSync("Connecting…");
+      this.isAgent = await user.canEdit();
+      if (!this.isAgent) await this.assignAgent();
+      const timer = setTimeout(()=>setSync("Saved on this device"), 10000);
+      db.collection(`boards/${uid}/collections`).onSnapshot(snap=>{
+        clearTimeout(timer);
+        const next = {}; snap.docs.forEach(d=>{ next[d.id] = d.data(); });
+        this.cols = next; this.mode = "shared"; setSync("Synced"); this.emit();
+      }, ()=>{ clearTimeout(timer); this.db=null; this.mode="local"; this.load(); setSync("Saved on this device"); this.emit(); });
+      db.doc(`threads/${uid}`).onSnapshot(d=>{ this.myThread = d.exists ? d.data() : null; this.emit(); }, ()=>{});
+      this.watchMessages(uid);
+      db.collection(`boards/${uid}/searches`).onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.searches = m; this.searchVer++; this.emit(); }, ()=>{});
+      db.collection(`boards/${uid}/tours`).onSnapshot(sn=>{ const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.myTours = m; this.emit(); }, ()=>{});
+      this.isBroker = this.isAgent && !!(await window.MillerCloud?.isBroker?.());
+      let viewAs = null; try{ viewAs = sessionStorage.getItem("tmg-view-as"); }catch(e){}
+      this.crmOwner = this.isBroker && viewAs ? viewAs : uid;
+      if (this.isAgent){ this.refreshProfile(); this.watchAgent(); }
+      this.emit();
+    }catch(e){ /* stay local */ }
+  },
+  // Each client belongs to one agent, set from the agent's personal link (?agent=slug).
+  async assignAgent(){
+    const ref = this.db.doc(`boards/${this.uid}`);
+    let cur = null; try{ const d = await ref.get(); cur = d.exists ? d.data() : null; }catch(e){}
+    this.marker = cur || {};
+    if (!cur || !cur.agentId){
+      let slug = ""; try{ slug = localStorage.getItem("tmg-agent-slug") || ""; }catch(e){}
+      const agentId = await resolveAgentSlug(slug || IDX.DEFAULT_AGENT_SLUG);
+      if (agentId && agentId!==this.uid){ this.marker = { ...(cur||{}), agentId, updatedAt:new Date().toISOString() }; this.markerDone = true; try{ await ref.set(this.marker); }catch(e){} }
+    }
+    this.myAgent = this.marker.agentId || null;
+    this.refreshProfile();
+  },
+  refreshProfile(){
+    const id = this.isAgent ? this.crmOwner : this.myAgent;
+    const p = (id && this.team[id]) || {};
+    this.site = p; applyProfile();
+  },
+  markerBody(){ return { ...(this.marker||{}), updatedAt:new Date().toISOString() }; },
+  watchAgent(){
+    this.db.collection("boards").onSnapshot(snap=>{
+      const fresh = [];
+      snap.docs.forEach(d=>{
+        const cid = d.id;
+        if (cid===this.uid || this.clientSubs[cid] || this.team[cid]) return;
+        fresh.push(cid);
+        this.clients[cid] = { cols:{}, searches:{} };
+        this.clientSubs[cid] = this.db.collection(`boards/${cid}/collections`).onSnapshot(s=>{
+          const m = {}; s.docs.forEach(x=>{ m[x.id] = x.data(); });
+          this.clients[cid].cols = m; this.emit();
+        }, ()=>{});
+        this.db.collection(`boards/${cid}/searches`).onSnapshot(s=>{
+          const m = {}; s.docs.forEach(x=>{ m[x.id] = x.data(); });
+          this.clients[cid].searches = m; this.emit();
+        }, ()=>{});
+      });
+      if (fresh.length) this.resolveNames(fresh);
+      this.emit();
+    }, ()=>{});
+    this.db.collection("threads").onSnapshot(sn=>{
+      const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); });
+      const fresh = Object.keys(m).filter(id=>!(id in this.names));
+      this.threads = m; if (fresh.length) this.resolveNames(fresh); this.emit();
+    }, ()=>{});
+    this.db.doc(`agent/${this.crmOwner}/settings`).onSnapshot(d=>{ this.settings = d.exists ? d.data() : {}; this.emit(); }, ()=>{});
+    ["contacts","tasks","tours","exclusives","openhouses","ohvisitors","cmas"].forEach(k=>this.db.collection(`agent/${this.crmOwner}/crm/${k}`).onSnapshot(sn=>{
+      const m = {}; sn.docs.forEach(d=>{ m[d.id] = d.data(); }); this.crm[k] = m; if (k==="exclusives") this.exVer++; this.emit();
+    }, ()=>{}));
+    this.db.collection("leads").onSnapshot(snap=>{
+      const m = {}; snap.docs.forEach(d=>{ m[d.id] = d.data(); });
+      const fresh = Object.keys(m).filter(id=>!(id in this.names));
+      this.leads = m; if (fresh.length) this.resolveNames(fresh);
+      this.emit();
+    }, ()=>{});
+  },
+  async resolveNames(ids){
+    ids.forEach(id=>{ if(!(id in this.names)) this.names[id] = ""; });
+    const ps = await this.user.profiles(ids);
+    ids.forEach(id=>{ if (ps[id] && ps[id].name) this.names[id] = ps[id].name; });
+    this.emit();
+  },
+  clientName(cid){
+    const reqs = Object.values(this.leads[cid]?.requests||{}).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+    return (reqs[0] && reqs[0].name) || this.names[cid] || "Unnamed client";
+  },
+  queue(key, fn){
+    const q = (this.queues[key]||Promise.resolve()).then(fn);
+    this.queues[key] = q.catch(()=>{ toast("That change didn’t save. Check your connection and try again."); });
+    return q;
+  },
+  write(id, data){
+    this.cols[id] = data; this.emit();
+    if (!this.db){ this.persistLocal(); return Promise.resolve(); }
+    if (!this.markerDone){ this.markerDone = true; this.queue("marker", ()=>this.db.doc(`boards/${this.uid}`).set(this.markerBody())); }
+    const ref = this.db.doc(`boards/${this.uid}/collections/${id}`);
+    return this.queue(id, ()=> data ? ref.set(data) : ref.delete());
+  },
+  create(name){
+    const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    this.write(id, { name, createdAt:new Date().toISOString(), items:{} });
+    return id;
+  },
+  toggle(id, key){
+    const c = structuredClone(this.cols[id]); if(!c) return;
+    c.items = c.items||{};
+    if (c.items[key]) delete c.items[key]; else c.items[key] = { addedAt:new Date().toISOString(), updatedAt:new Date().toISOString(), reaction:"", note:"" };
+    this.write(id, c);
+  },
+  setItem(id, key, patch){
+    const c = structuredClone(this.cols[id]); if(!c||!c.items[key]) return;
+    Object.assign(c.items[key], patch, { updatedAt:new Date().toISOString() }); this.write(id, c);
+  },
+  remove(id){ delete this.cols[id]; this.write(id, null); },
+  saveSearch(id, data){
+    id = id || "s" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    if (data) this.searches[id] = data; else delete this.searches[id];
+    this.searchVer++; this.emit();
+    if (!this.db){ try{ localStorage.setItem("tmg-searches", JSON.stringify(this.searches)); }catch(e){} return id; }
+    if (!this.markerDone){ this.markerDone = true; this.queue("marker", ()=>this.db.doc(`boards/${this.uid}`).set(this.markerBody())); }
+    const ref = this.db.doc(`boards/${this.uid}/searches/${id}`);
+    this.queue("search"+id, ()=> data ? ref.set(data) : ref.delete());
+    return id;
+  },
+  saveOpenHouse(id, oh){
+    id = this.saveCrm("openhouses", id, oh);
+    if (!this.db || this.demo) return id;
+    const pub = this.db.doc(`openhouses/${id}`);
+    this.queue("ohpub"+id, ()=> oh && oh.published ? pub.set({ listingKey:oh.listingKey, date:oh.date, start:oh.start, end:oh.end, notes:oh.notes||"", agentId:this.crmOwner }) : pub.delete());
+    return id;
+  },
+  saveShowcase(id, sc){
+    id = id || "p" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const bag = this.demo ? this.demoShowcase : this.showcase;
+    if (sc) bag[id] = sc; else { delete this.demoShowcase[id]; delete this.showcase[id]; }
+    this.emit();
+    if (!this.db || this.demo) return id;
+    const ref = this.db.doc(`showcase/${id}`);
+    if (sc) sc.agentId = sc.agentId || this.crmOwner;
+    this.queue("sc"+id, ()=> sc ? ref.set(sc) : ref.delete());
+    return id;
+  },
+  saveProfile(patch){
+    const id = this.crmOwner;
+    this.site = { ...this.site, ...patch, updatedAt:new Date().toISOString() }; if (id) this.team[id] = this.site; applyProfile(); this.emit();
+    if (!this.db || this.demo || !id) return Promise.resolve();
+    const body = { ...this.site };
+    return this.queue("team"+id, ()=>this.db.doc(`team/${id}`).set(body));
+  },
+  isSaved(key){ return Object.values(this.cols).some(c=>c && c.items && c.items[key]); },
+  async addLead(lead){
+    if (!this.db) return false;
+    const id = "r" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const ref = this.db.doc(`leads/${this.uid}`);
+    await this.queue("lead", async ()=>{
+      const cur = await ref.get();
+      const body = cur.exists ? cur.data() : { requests:{} };
+      body.requests = body.requests || {};
+      body.requests[id] = { ...lead, status:"new" };
+      body.updatedAt = lead.createdAt;
+      await ref.set(body);
+    });
+    return true;
+  },
+  saveCrm(kind, id, data){
+    id = id || kind[0] + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    if (data) this.crm[kind][id] = data; else delete this.crm[kind][id];
+    this.emit();
+    if (!this.db || this.demo) return id;
+    const ref = this.db.doc(`agent/${this.crmOwner}/crm/${kind}/${id}`);
+    this.queue(kind+id, ()=> data ? ref.set(data) : ref.delete());
+    return id;
+  },
+  watchMessages(cid){
+    if (this.msgSubs[cid]) return;
+    this.msgSubs[cid] = this.db.collection(`threads/${cid}/messages`).orderBy("createdAt","desc").limit(150).onSnapshot(sn=>{
+      this.msgs[cid] = sn.docs.map(d=>({ id:d.id, ...d.data() })).reverse(); this.emit();
+    }, ()=>{});
+  },
+  openAgentThread(cid){
+    if (this.demo){ this.agentThread = cid; this.markRead(cid, "agent"); return; }
+    if (!this.db) return;
+    if (this.agentThread && this.agentThread!==cid && this.agentThread!==this.uid && this.msgSubs[this.agentThread]){ this.msgSubs[this.agentThread](); delete this.msgSubs[this.agentThread]; }
+    this.agentThread = cid; this.watchMessages(cid); this.markRead(cid, "agent");
+  },
+  unread(t, who){ if (!t) return false; const f = who==="agent" ? "lastReadAgent" : "lastReadClient"; return t.lastFrom!==who && (t.updatedAt||"") > (t[f]||""); },
+  markRead(cid, who){
+    if (!this.db && !(this.demo && who==="agent")) return;
+    const t = who==="agent" ? this.threads[cid] : this.myThread;
+    if (!this.unread(t, who)) return;
+    const f = who==="agent" ? "lastReadAgent" : "lastReadClient";
+    t[f] = new Date().toISOString(); this.emit();
+    if (!(this.demo && who==="agent")) this.queue("thread"+cid, ()=>this.db.doc(`threads/${cid}`).update({ [f]:t[f] }));
+  },
+  async sendMessage(cid, from, text, listingKey){
+    if (!this.db && !(this.demo && from==="agent")) return false;
+    const now = new Date().toISOString();
+    const mid = "m" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const msg = { from, text, createdAt:now }; if (listingKey) msg.listingKey = listingKey;
+    (this.msgs[cid] = this.msgs[cid]||[]).push({ id:mid, ...msg }); this.emit();
+    if (this.demo && from==="agent"){ this.threads[cid] = { ...(this.threads[cid]||{}), updatedAt:now, lastText:text.slice(0,140), lastFrom:"agent", lastReadAgent:now }; this.emit(); return true; }
+    await this.queue("msg"+cid, ()=>this.db.doc(`threads/${cid}/messages/${mid}`).set(msg));
+    const cur = from==="agent" ? this.threads[cid] : this.myThread;
+    const patch = { updatedAt:now, lastText:text.slice(0,140), lastFrom:from, [from==="agent"?"lastReadAgent":"lastReadClient"]:now };
+    const ref = this.db.doc(`threads/${cid}`);
+    await this.queue("thread"+cid, ()=> cur ? ref.update(patch) : ref.set(patch));
+    return true;
+  },
+  saveSettings(patch){
+    this.settings = { ...this.settings, ...patch }; this.emit();
+    if (!this.db || this.demo) return; const body = { ...this.settings };
+    this.queue("settings", ()=>this.db.doc(`agent/${this.crmOwner}/settings`).set(body));
+  },
+  saveExclusive(id, rec){
+    if (rec) this.crm.exclusives[id] = rec; else delete this.crm.exclusives[id];
+    this.exVer++; this.emit();
+    if (!this.db || this.demo) return;
+    const priv = this.db.doc(`agent/${this.crmOwner}/crm/exclusives/${id}`), pub = this.db.doc(`exclusives/${id}`);
+    if (rec) rec.agentId = this.crmOwner;
+    this.queue("ex"+id, ()=> rec ? priv.set(rec) : priv.delete());
+    this.queue("expub"+id, ()=> rec && rec.published ? pub.set(rec) : pub.delete());
+  },
+  saveRoster(id, rec){
+    id = id || "a" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    if (rec) this.roster[id] = rec; else delete this.roster[id];
+    this.emit();
+    if (!this.db || this.demo) return id;
+    const ref = this.db.doc(`team/${id}`);
+    this.queue("roster"+id, ()=> rec ? ref.set({ ...(this.team[id]||{}), ...rec }) : ref.delete());
+    return id;
+  },
+  saveTour(id, tour){
+    const prev = id ? this.crm.tours[id] : null;
+    const target = tour && tour.shared && tour.clientId ? tour.clientId : "";
+    if (tour) tour.sharedTo = target;
+    id = this.saveCrm("tours", id, tour);
+    if (!this.db || this.demo) return id;
+    const old = prev && prev.sharedTo;
+    if (old && old!==target) this.queue("share"+id, ()=>this.db.doc(`boards/${old}/tours/${id}`).delete());
+    if (target){ const pub = { name:tour.name||"Tour", date:tour.date||"", stops:tour.stops||[], updatedAt:new Date().toISOString() }; this.queue("share"+id, ()=>this.db.doc(`boards/${target}/tours/${id}`).set(pub)); }
+    return id;
+  },
+  setLeadStatus(cid, rid, status){
+    if (!this.isAgent) return;
+    const l = this.leads[cid]; if (l && l.requests && l.requests[rid]) l.requests[rid].status = status;
+    this.emit();
+    if (!this.db || this.demo) return;
+    return this.queue("lead-"+cid, ()=>this.db.doc(`leads/${cid}`).update({ requests:{ [rid]:{ status } } }));
+  }
+};
+
+/* ========================================================================= UI */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n=>"$"+Math.round(n).toLocaleString("en-US");
+const short = n=> !n ? "$0" : n>=1e6 ? "$"+(n/1e6).toFixed(n%1e6?2:0).replace(/0$/,"")+"M" : "$"+Math.round(n/1e3)+"K";
+const typeName = t=>({"Single Family Residence":"House","Townhouse":"Townhome","Condominium":"Condo"}[t]||t);
+function setSync(t){ $("#sync").textContent = t; }
+function toast(t){ setSync(t); setTimeout(()=>setSync(Store.mode==="shared"?"Shortlists synced":"Saved on this device"), 4000); }
+
+// Placeholder façade art until MLS photos arrive (photos[0] replaces it).
+function art(l){
+  if (l.photos && l.photos.length) return `<img src="${esc(l.photos[0])}" alt="Photo of ${esc(l.address)}" style="width:100%;height:100%;object-fit:cover;display:block">`;
+  const h = [...l.key].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const skies = ["#C9D6DF","#D9C9B6","#BFCBC2","#D7C4C0","#C4C9D9"];
+  const walls = ["#8C6B4F","#5E6E66","#A39A8A","#6E5A55","#47556B","#B39A72"];
+  const sky = skies[h%skies.length], wall = walls[h%walls.length];
+  let house;
+  if (l.type==="Condominium"){
+    house = `<rect x="110" y="40" width="180" height="210" fill="${wall}"/>` + Array.from({length:12},(_,i)=>`<rect x="${128+(i%3)*54}" y="${58+Math.floor(i/3)*46}" width="36" height="28" fill="#F4EFE7" opacity=".85"/>`).join("");
+  } else if (l.type==="Townhouse"){
+    house = [0,1,2].map(i=>`<rect x="${70+i*90}" y="${80-(i%2)*14}" width="88" height="${170+(i%2)*14}" fill="${wall}" opacity="${1-i*.12}"/><rect x="${92+i*90}" y="${108-(i%2)*14}" width="44" height="34" fill="#F4EFE7" opacity=".85"/><rect x="${100+i*90}" y="196" width="28" height="54" fill="#141A26" opacity=".7"/>`).join("");
+  } else {
+    house = `<polygon points="95,130 200,62 305,130" fill="#141A26" opacity=".85"/><rect x="110" y="128" width="180" height="122" fill="${wall}"/><rect x="134" y="152" width="40" height="34" fill="#F4EFE7" opacity=".85"/><rect x="226" y="152" width="40" height="34" fill="#F4EFE7" opacity=".85"/><rect x="186" y="196" width="28" height="54" fill="#141A26" opacity=".7"/>`;
+  }
+  return `<svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Illustration of ${esc(typeName(l.type))}"><rect width="400" height="250" fill="${sky}"/><path d="M0 180 L70 120 L130 160 L210 90 L290 150 L350 110 L400 140 V250 H0Z" fill="#141A26" opacity=".08"/>${house}<rect y="248" width="400" height="2" fill="#141A26" opacity=".2"/></svg>`;
+}
+const heartSvg = `<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg>`;
+
+function cardHTML(l){
+  const saved = Store.isSaved(l.key);
+  return `<article class="card">
+    <div class="photo">${art(l)}
+      ${l.exclusive?`<span class="status ex">${l.status==="Private Exclusive"?"Off-market":"Coming soon"}${l.published?"":" · Draft"}</span>`:l.status!=="Active"?`<span class="status">${esc(l.status)}</span>`:""}
+      <button class="heart ${saved?"on":""}" data-save="${esc(l.key)}" aria-label="${saved?"Saved. Change shortlists":"Save to a shortlist"}">${heartSvg}</button>
+    </div>
+    <div class="body" data-open="${esc(l.key)}" role="button" tabindex="0" aria-label="Open ${esc(l.address)}">
+      <div class="price">${money(l.price)}</div>
+      <div class="specs">${l.beds} bd · ${l.baths} ba · ${l.sqft.toLocaleString()} sq ft · ${esc(typeName(l.type))}</div>
+      ${(()=>{ const oh = nextOpenHouse(l.key); return oh ? `<div class="ohline">Open house ${dayLabel(oh.date)} · ${fmtTime(oh.start)}${oh.end?`–${fmtTime(oh.end)}`:""}</div>` : ""; })()}
+      <div class="addr">${esc(l.address)}, ${esc(l.hood)}</div>
+      <div class="courtesy">${l.exclusive?"Miller Group off-market listing":`Listing courtesy of ${esc(l.office)}`}</div>
+    </div>
+  </article>`;
+}
+
+let results = [], selectedPin = null;
+function filters(){ return { text:$("#q").value.trim(), maxPrice:$("#fPrice").value, minBeds:$("#fBeds").value, type:$("#fType").value, status:$("#fStatus").value, sort:$("#fSort").value }; }
+
+async function runSearch(){
+  try{ results = await ListingProvider.search(filters()); }
+  catch(e){ results = []; $("#v-search").innerHTML = `<div class="empty"><strong>Listings didn’t load</strong>${esc(e.message)}. Check the IDX proxy and try again.</div>`; return; }
+  renderSearch(); renderMap();
+}
+
+function renderSearch(){
+  const el = $("#v-search");
+  if (!results.length){ el.innerHTML = `${savedStripHTML()}<div class="empty"><strong>No homes match</strong>Try a wider price range or fewer filters.</div>`; return; }
+  el.innerHTML = `${savedStripHTML()}<p class="count">${results.length} ${results.length===1?"home":"homes"}</p><div class="grid">${results.map(cardHTML).join("")}</div>`;
+}
+
+// Simple projected map of central Denver; pins come from Latitude/Longitude.
+const B = { minLat:39.672, maxLat:39.788, minLng:-105.060, maxLng:-104.905 }, W=400, H=420;
+const px = (lat,lng)=>[ (lng-B.minLng)/(B.maxLng-B.minLng)*W, (B.maxLat-lat)/(B.maxLat-B.minLat)*H ];
+function pathFrom(pts){ return pts.map((p,i)=>(i?"L":"M")+px(p[0],p[1]).map(n=>n.toFixed(1)).join(" ")).join(" "); }
+function renderMap(){
+  const el = $("#v-map");
+  const river = pathFrom([[39.672,-105.016],[39.700,-105.012],[39.725,-105.010],[39.748,-105.006],[39.765,-104.995],[39.788,-104.975]]);
+  const i25 = pathFrom([[39.672,-104.985],[39.700,-104.995],[39.725,-105.016],[39.750,-105.022],[39.770,-105.020],[39.788,-105.010]]);
+  const colfax = pathFrom([[39.7402,-105.060],[39.7402,-104.905]]);
+  const sixth = pathFrom([[39.7254,-105.060],[39.7254,-104.905]]);
+  const col = pathFrom([[39.788,-104.940],[39.672,-104.940]]);
+  const lake = px(39.751,-105.048);
+  const [dx,dy] = px(39.747,-104.993);
+  const pins = results.map(l=>{
+    const [x,y] = px(l.lat,l.lng); const label = short(l.price); const w = label.length*7.4+14;
+    return `<g class="pin ${selectedPin===l.key?"sel":""}" data-pin="${esc(l.key)}" tabindex="0" role="button" aria-label="${esc(l.address)}, ${money(l.price)}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><rect x="${-w/2}" y="-26" width="${w}" height="22" rx="11"/><path d="M-5 -5 L0 2 L5 -5Z" fill="var(--pin)"/><text text-anchor="middle" y="-11">${label}</text></g>`;
+  }).join("");
+  const sel = results.find(l=>l.key===selectedPin);
+  el.innerHTML = `<div class="mapwrap"><svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Map of listings in central Denver">
+    <rect width="${W}" height="${H}" fill="var(--map-bg)"/>
+    <ellipse cx="${lake[0]}" cy="${lake[1]}" rx="18" ry="12" fill="var(--water)"/>
+    <path d="${colfax}" stroke="var(--map-line)" stroke-width="3" fill="none"/>
+    <path d="${sixth}" stroke="var(--map-line)" stroke-width="2" fill="none"/>
+    <path d="${col}" stroke="var(--map-line)" stroke-width="2" fill="none"/>
+    <path d="${i25}" stroke="var(--map-line)" stroke-width="5" fill="none"/>
+    <path d="${river}" stroke="var(--water)" stroke-width="4" fill="none"/>
+    <text class="maplabel" x="${dx}" y="${dy+22}">Downtown</text>
+    <text class="maplabel" x="8" y="${px(39.7402,0)[1]-6}">Colfax</text>
+    ${pins}</svg></div>
+    <div class="mapcard">${sel?cardHTML(sel):`<p class="count">Tap a price to preview the home.</p>`}</div>`;
+}
+
+/* Listing detail + lead capture */
+async function openListing(key){
+  const l = await ListingProvider.get(key); if(!l) return;
+  const b = IDX.BROKER;
+  $("#listingBody").innerHTML = `
+    <div class="sheettop"><h2>${money(l.price)}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <div class="photo">${art(l)}</div>
+    <p style="margin:12px 0 0;font-weight:500">${esc(l.address)}</p>
+    <p class="addr" style="margin:0">${esc(l.hood)}, ${esc(l.city)}, ${esc(l.state)} ${esc(l.zip)} · ${esc(l.status==="Private Exclusive"?"Off-market":l.status)}</p>
+    <div class="facts"><div><b>${l.beds}</b><span>Beds</span></div><div><b>${l.baths}</b><span>Baths</span></div><div><b>${l.sqft.toLocaleString()}</b><span>Sq ft</span></div></div>
+    <p class="remarks">${esc(l.remarks)}</p>
+    ${(()=>{ const oh = nextOpenHouse(l.key); return oh ? `<p class="ohline" style="font-size:14px">Open house ${dayLabel(oh.date)} · ${fmtTime(oh.start)}${oh.end?`–${fmtTime(oh.end)}`:""}${oh.notes?`<br><span class="addr">${esc(oh.notes)}</span>`:""}</p>` : ""; })()}
+    ${paymentHTML(l)}
+    <p class="addr">${esc(typeName(l.type))} · Built ${l.year}${l.lot?` · ${l.lot} acre lot`:""} · MLS# ${esc(l.mlsId)}</p>
+    <p class="courtesy" style="font-size:12px">Listing courtesy of ${esc(l.office)}</p>
+    <div class="agent"><div class="mono">M</div><div><strong>${esc(b.name)}</strong><p>${esc(b.firm)} · <a href="tel:${b.phone.replace(/\D/g,"")}">${esc(b.phone)}</a></p></div></div>
+    <form id="leadForm">
+      <label for="lName">Name</label><input id="lName" required autocomplete="name">
+      <label for="lEmail">Email</label><input id="lEmail" type="email" required autocomplete="email">
+      <label for="lPhone">Phone</label><input id="lPhone" type="tel" autocomplete="tel">
+      <label for="lMsg">Message</label><textarea id="lMsg" rows="3">I’d like to see ${esc(l.address)}.</textarea>
+      <div class="actions"><button class="btn gold" type="submit">Request a showing</button><button class="btn ghost" type="button" data-save="${esc(l.key)}">Save</button>${Store.db && (!Store.isAgent || Store.demo) ? `<button class="btn ghost" type="button" data-chat="${esc(l.key)}">Message</button>` : ""}</div>
+      <p class="msg" id="leadMsg" role="status"></p>
+    </form>`;
+  $("#leadForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const lead = { listingKey:l.key, address:l.address, name:$("#lName").value.trim(), email:$("#lEmail").value.trim(), phone:$("#lPhone").value.trim(), message:$("#lMsg").value.trim(), createdAt:new Date().toISOString(), source:"home-search" };
+    let ok=false; try{ ok = await Store.addLead(lead); }catch(err){ ok=false; }
+    if (ok) window.MillerCloud?.siteLead?.({ ...lead, agentId:Store.myAgent||"" });
+    $("#leadMsg").textContent = ok ? "Request sent. Brandon will reach out shortly." : `Request not sent from this preview. Call or text ${b.phone} to set up a showing.`;
+    if (ok) e.target.querySelector("button[type=submit]").disabled = true;
+  });
+  $("#dlgListing").showModal();
+}
+
+/* Save-to-collection sheet */
+let saveKey = null;
+function renderSave(){
+  const cols = Object.entries(Store.cols).filter(([,c])=>c);
+  $("#saveBody").innerHTML = `
+    <div class="sheettop"><h2>Save to a shortlist</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <div class="colpick">${cols.length ? cols.map(([id,c])=>{const on=!!(c.items&&c.items[saveKey]);return `<button data-pick="${id}" aria-pressed="${on}"><span>${esc(c.name)}</span><span>${on?"Saved":"Add"}</span></button>`;}).join("") : `<p class="count">No collections yet. Name your first one below.</p>`}</div>
+    <form class="newcol" id="newColForm"><input id="newColName" placeholder="New shortlist, e.g. Wash Park favorites" aria-label="New shortlist name" required><button class="btn" type="submit">Create</button></form>`;
+  $("#newColForm").addEventListener("submit", e=>{ e.preventDefault(); const n=$("#newColName").value.trim(); if(!n) return; const id=Store.create(n); Store.toggle(id, saveKey); });
+}
+function openSave(key){ saveKey = key; renderSave(); if(!$("#dlgSave").open) $("#dlgSave").showModal(); }
+
+/* Collections view */
+let openCol = null;
+async function renderCollections(){
+  const el = $("#v-collections");
+  const cols = Object.entries(Store.cols).filter(([,c])=>c);
+  if (openShow && showcaseAll()[openShow]){
+    const sc = showcaseAll()[openShow];
+    const ls = (await Promise.all((sc.keys||[]).map(k=>ListingProvider.get(k)))).filter(Boolean);
+    el.innerHTML = `<div class="detail"><button class="back" data-closeshow>‹ All shortlists</button><div class="colhead"><h2>${esc(sc.name)}</h2></div>
+      ${sc.description?`<p class="remarks" style="margin-top:0">${esc(sc.description)}</p>`:""}<p class="addr">Curated by ${esc(IDX.BROKER.firm)}</p>
+      ${ls.length?`<div class="grid">${ls.map(cardHTML).join("")}</div>`:`<div class="empty"><strong>No homes yet</strong>Check back soon.</div>`}</div>`;
+    return;
+  }
+  if (openCol && Store.cols[openCol]){
+    const c = Store.cols[openCol];
+    const keys = Object.keys(c.items||{}).sort((a,b)=>(c.items[b].addedAt||"").localeCompare(c.items[a].addedAt||""));
+    const ls = (await Promise.all(keys.map(k=>ListingProvider.get(k)))).filter(Boolean);
+    el.innerHTML = `<div class="detail"><button class="back" data-back>‹ All shortlists</button>
+      <div class="colhead"><h2>${esc(c.name)}</h2><button class="btn ghost" data-delcol="${openCol}">Delete</button></div>
+      ${ls.length ? `<div class="saved">${ls.map(l=>{const it=c.items[l.key];return `<div class="saveditem">
+        <div class="thumb" data-open="${esc(l.key)}" role="button" tabindex="0" aria-label="Open ${esc(l.address)}">${art(l)}</div>
+        <div class="info"><div class="price">${money(l.price)}</div><div class="specs">${l.beds} bd · ${l.baths} ba · ${l.sqft.toLocaleString()} sq ft</div><div class="addr">${esc(l.address)}, ${esc(l.hood)}</div>
+          <div class="reactions">${[["love","Love it"],["maybe","Maybe"],["pass","Pass"]].map(([r,t])=>`<button data-react="${r}" data-r="${r}" data-key="${esc(l.key)}" aria-pressed="${it.reaction===r}">${t}</button>`).join("")}</div>
+          <textarea class="note" data-note="${esc(l.key)}" placeholder="Add a note for Brandon" aria-label="Note on ${esc(l.address)}">${esc(it.note||"")}</textarea>
+          <button class="remove" data-unsave="${esc(l.key)}">Remove from collection</button></div></div>`;}).join("")}</div>`
+        : `<div class="empty"><strong>Nothing saved yet</strong>Tap the heart on any home to add it here.</div>`}</div>`;
+    return;
+  }
+  openCol = null;
+  el.innerHTML = `<div class="colhead"><h2>Shortlists</h2><button class="btn gold" data-newcol>New shortlist</button></div>${clientBarHTML()}
+    ${cols.length ? `<div class="collist">${cols.map(([id,c])=>{const its=Object.values(c.items||{});const n=r=>its.filter(i=>i.reaction===r).length;return `<button class="colcard" data-col="${id}"><h3>${esc(c.name)}</h3><p>${its.length} ${its.length===1?"home":"homes"}</p><div class="tally"><span style="color:var(--love)">${n("love")} love</span><span style="color:var(--maybe)">${n("maybe")} maybe</span><span style="color:var(--pass)">${n("pass")} pass</span></div></button>`;}).join("")}</div>`
+    : `<div class="empty"><strong>Start a shortlist</strong>Group homes you like, react to each one, and leave notes. Brandon sees the same board.</div>`}${clientToursHTML()}${showcaseStripHTML()}`;
+}
+
+/* =========================================================================
+   AGENT WORKSPACE — only for you (owner/editors)
+   ========================================================================= */
+const STATUSES = [["new","New"],["contacted","Contacted"],["showing","Showing set"],["closed","Closed"]];
+const BUYER_STAGES = [["lead","New lead"],["searching","Searching"],["touring","Touring"],["contract","Under contract"],["closed","Closed"]];
+const SELLER_STAGES = [["prospect","Prospect"],["prep","Listing prep"],["active","Active"],["contract","Under contract"],["closed","Closed"]];
+const ROLES = [["buyer","Buyer"],["seller","Seller"],["both","Buyer and seller"],["other","Other"]];
+const isBuyer = c=>c.role==="buyer"||c.role==="both";
+const isSeller = c=>c.role==="seller"||c.role==="both";
+const localDay = (d=new Date())=>d.toLocaleDateString("en-CA");
+const when = iso=>{ try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return ""; } };
+const dayLabel = d=>{ if(!d) return "No due date"; const t=localDay(); if(d===t) return "Today"; const dt=new Date(d+"T12:00"); return dt.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}); };
+const telLink = p=>p?`<a href="tel:${esc(p.replace(/[^\d+]/g,""))}">Call</a><a href="sms:${esc(p.replace(/[^\d+]/g,""))}">Text</a>`:"";
+const mailLink = (e,subj)=>e?`<a href="mailto:${esc(e)}${subj?`?subject=${encodeURIComponent(subj)}`:""}">Email</a>`:"";
+let agentPanel = "home";
+
+function allRequests(){
+  const out = [];
+  Object.entries(Store.leads).forEach(([cid,doc])=>Object.entries(doc.requests||{}).forEach(([rid,r])=>out.push({ cid, rid, ...r })));
+  return out.sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+}
+const contacts = ()=>Object.entries(Store.crm.contacts).map(([id,c])=>({ id, ...c })).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+const tasks = ()=>Object.entries(Store.crm.tasks).map(([id,t])=>({ id, ...t }));
+const contactFor = cid=>contacts().find(c=>c.clientId===cid);
+function clientItems(cid){
+  const items = [];
+  Object.values(Store.clients[cid]?.cols||{}).filter(Boolean).forEach(col=>Object.entries(col.items||{}).forEach(([key,it])=>items.push({ key, col:col.name, ...it })));
+  return items;
+}
+
+function agentHomeHTML(){
+  const reqs = allRequests(), cs = contacts(), ts = tasks().filter(t=>!t.done), t = localDay();
+  const due = ts.filter(x=>x.due && x.due<=t).length;
+  const buyers = cs.filter(c=>isBuyer(c) && c.buyerStage!=="closed").length;
+  const sellers = cs.filter(c=>isSeller(c) && c.sellerStage!=="closed").length;
+  const tile = (p,title,n,sub)=>`<button class="tile" data-panel="${p}"><span class="tile-t">${title}</span><b>${n}</b><span class="tile-s">${sub}</span></button>`;
+  const row = (p,label,meta="")=>`<button data-panel="${p}">${label}${meta?`<span>${meta}</span>`:""}</button>`;
+  const ohUp = Object.values(Store.crm.openhouses).filter(o=>o && o.date>=t).length;
+  return `<div class="colhead"><h2>Agent home</h2></div>
+    <div class="quick"><button class="btn gold" data-newcontact>New contact</button><button class="btn ghost" data-newtask>New task</button><button class="btn ghost" data-share>Share this app</button></div>
+    <div class="tiles">
+      ${tile("requests","Showing requests",reqs.filter(r=>r.status==="new").length,"new")}
+      ${tile("buyers","Buyers",buyers,"in progress")}
+      ${tile("sellers","Sellers",sellers,"in progress")}
+      ${tile("tasks","Tasks",due,"due or overdue")}
+      ${tile("inbox","Inbox",Object.values(Store.threads).filter(x=>Store.unread(x,"agent")).length,"unread")}
+      ${tile("notifications","Notifications",unseenCount(),"new")}
+      ${tile("tours","Showing days",Object.values(Store.crm.tours).filter(x=>x && (x.date||"")>=t).length,"upcoming")}
+      ${tile("biz","GCI tracker",(()=>{const g=bizStats().closedG;return g?short(g):"$0";})(),"closed this year")}
+    </div>
+    <h3 class="agent-h">Clients</h3>
+    <div class="menu">
+      ${row("contacts","Contacts",cs.length)}${row("activity","Client shortlists",`${Object.keys(Store.clients).length} clients`)}${row("searches","Saved searches")}${row("tours","Showing days")}${row("notifications","Activity feed")}
+    </div>
+    <h3 class="agent-h">Listings and market</h3>
+    <div class="menu">
+      ${row("listings","Listings",myListingKeys().length)}${row("exclusives","Off-market & coming soon")}${row("openhouses","Open houses",ohUp?`${ohUp} upcoming`:"")}${row("cmas","CMAs",Object.keys(Store.crm.cmas).length)}${row("market","Market pulse")}${row("insights","Insights")}
+    </div>
+    <h3 class="agent-h">Business</h3>
+    <div class="menu">
+      ${row("marketing","Marketing")}${row("showcase","Miller Picks",Object.keys(showcaseAll()).length)}${row("biz","GCI tracker")}${row("tasks","Tasks",ts.length)}${row("assistant","AI assistant")}${row("agents","Team")}
+    </div>
+    <h3 class="agent-h">Help</h3>
+    <div class="menu">${row("help","Help and support")}${row("settings","Settings")}</div>`;
+}
+
+function requestsHTML(){
+  const reqs = allRequests();
+  if (!reqs.length) return `<div class="empty"><strong>No showing requests yet</strong>Requests from the home details page land here.</div>`;
+  return reqs.map(r=>{ const inC = contactFor(r.cid); return `<div class="req ${r.status==="new"?"new":""}">
+    <div class="req-top"><div><strong>${esc(r.name||"No name")}</strong><p>${esc(r.address)} · ${when(r.createdAt)}</p></div>
+      <select data-status="${esc(r.cid)}|${esc(r.rid)}" aria-label="Status for ${esc(r.name)}">${STATUSES.map(([v,t])=>`<option value="${v}" ${r.status===v?"selected":""}>${t}</option>`).join("")}</select></div>
+    ${r.message?`<p class="msgtext">${esc(r.message)}</p>`:""}
+    <div class="links">${telLink(r.phone)}${mailLink(r.email,"Showing: "+(r.address||""))}<a href="#" data-open="${esc(r.listingKey)}">View home</a><button data-panel="thread:${esc(r.cid)}">Message</button>${inC?`<button data-editcontact="${inC.id}">In contacts</button>`:`<button data-addcontact="${esc(r.cid)}|${esc(r.rid)}">Add to contacts</button>`}</div>
+  </div>`; }).join("");
+}
+
+async function activityHTML(){
+  const ids = [...new Set([...Object.keys(Store.clients), ...Object.keys(Store.leads)])];
+  if (!ids.length) return `<div class="empty"><strong>No client activity yet</strong>Share this page with clients as Contributors so they can save homes and request showings.</div>`;
+  let html = "";
+  for (const cid of ids){
+    const cols = Object.values(Store.clients[cid]?.cols||{}).filter(Boolean);
+    const items = clientItems(cid).sort((a,b)=>(b.updatedAt||b.addedAt||"").localeCompare(a.updatedAt||a.addedAt||""));
+    const recent = (await Promise.all(items.slice(0,5).map(async it=>({ it, l: await ListingProvider.get(it.key) })))).filter(x=>x.l);
+    const c = contactFor(cid);
+    html += `<div class="client"><h3>${esc(c?.name || Store.clientName(cid))}</h3>
+      ${cols.map(col=>{const its=Object.values(col.items||{});const n=r=>its.filter(i=>i.reaction===r).length;return `<div class="cline"><span>${esc(col.name)}</span><span>${its.length} saved · ${n("love")} love · ${n("pass")} pass</span></div>`;}).join("") || `<p class="addr">No collections yet.</p>`}
+      ${recent.length ? `<ul>${recent.map(({it,l})=>`<li>${it.reaction?`<span class="tag ${it.reaction}">${{love:"Love",maybe:"Maybe",pass:"Pass"}[it.reaction]}</span>`:""}<b>${esc(l.address)}</b> · ${short(l.price)}${it.note?`<br>“${esc(it.note)}”`:""}</li>`).join("")}</ul>` : ""}
+    </div>`;
+  }
+  return html;
+}
+
+function pipelineHTML(kind){
+  const buyer = kind==="buyer", stages = buyer ? BUYER_STAGES : SELLER_STAGES, field = buyer ? "buyerStage" : "sellerStage";
+  const list = contacts().filter(buyer ? isBuyer : isSeller);
+  if (!list.length) return `<div class="empty"><strong>No ${buyer?"buyers":"sellers"} yet</strong>Add a contact and set them as a ${buyer?"buyer":"seller"}.<div style="margin-top:12px"><button class="btn gold" data-newcontact="${kind}">New ${buyer?"buyer":"seller"}</button></div></div>`;
+  return stages.map(([v,t])=>{
+    const inStage = list.filter(c=>(c[field]||stages[0][0])===v);
+    return `<div class="stage-h">${t}<span>${inStage.length}</span></div>` + inStage.map(c=>{
+      const its = c.clientId ? clientItems(c.clientId) : [];
+      const sub = buyer
+        ? [c.budget?`Up to ${esc(c.budget)}`:"", c.area?esc(c.area):"", its.length?`${its.length} saved · ${its.filter(i=>i.reaction==="love").length} loved`:""].filter(Boolean).join(" · ")
+        : [c.listingAddress?esc(c.listingAddress):"", c.listPrice?esc(c.listPrice):""].filter(Boolean).join(" · ");
+      return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong>${sub?`<p>${sub}</p>`:""}</div>
+        <select data-stage="${c.id}|${field}" aria-label="Stage for ${esc(c.name)}">${stages.map(([sv,st])=>`<option value="${sv}" ${(c[field]||stages[0][0])===sv?"selected":""}>${st}</option>`).join("")}</select></div>
+        <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}${buyer?`<button data-newtour="${c.id}">Plan showings</button>`:""}<button data-newtask="${c.id}">Add task</button><button data-editcontact="${c.id}">Edit</button></div></div>`;
+    }).join("");
+  }).join("");
+}
+
+function contactsHTML(){
+  const cs = contacts();
+  const head = `<div class="quick"><button class="btn gold" data-newcontact>New contact</button></div>`;
+  if (!cs.length) return head + `<div class="empty"><strong>No contacts yet</strong>Add clients, prospects, and partners here.</div>`;
+  return head + cs.map(c=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong><p>${esc((ROLES.find(r=>r[0]===c.role)||ROLES[3])[1])}${c.clientId?" · Uses the app":""}${c.phone?" · "+esc(c.phone):""}</p></div></div>
+    <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}<button data-editcontact="${c.id}">Edit</button></div></div>`).join("");
+}
+
+function tasksHTML(){
+  const ts = tasks(), t = localDay();
+  const names = Object.fromEntries(contacts().map(c=>[c.id,c.name]));
+  const row = x=>`<div class="task ${x.done?"done":""} ${!x.done&&x.due&&x.due<t?"overdue":""}"><input type="checkbox" data-taskdone="${x.id}" ${x.done?"checked":""} aria-label="Mark ${esc(x.title)} done">
+    <div class="tt"><span>${esc(x.title)}</span><p>${dayLabel(x.due)}${!x.done&&x.due&&x.due<t?" · Overdue":""}${x.contactId&&names[x.contactId]?" · "+esc(names[x.contactId]):""}</p></div><button data-edittask="${x.id}">Edit</button></div>`;
+  const open = ts.filter(x=>!x.done).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+  const done = ts.filter(x=>x.done).sort((a,b)=>(b.doneAt||"").localeCompare(a.doneAt||"")).slice(0,10);
+  const groups = [["Overdue",open.filter(x=>x.due&&x.due<t)],["Today",open.filter(x=>x.due===t)],["Upcoming",open.filter(x=>!x.due||x.due>t)]];
+  return `<div class="quick"><button class="btn gold" data-newtask>New task</button></div>` +
+    (open.length ? groups.filter(g=>g[1].length).map(([h,l])=>`<div class="stage-h">${h}<span>${l.length}</span></div>${l.map(row).join("")}`).join("") : `<div class="empty"><strong>All caught up</strong>Add a task to follow up with a client.</div>`) +
+    (done.length ? `<div class="stage-h">Done<span>${done.length}</span></div>${done.map(row).join("")}` : "");
+}
+
+/* Shared helpers for phase 2 */
+const pending = new Set();
+function listingSync(k){
+  const x = exByKey(k); if (x) return normalize(x);
+  const c = ListingProvider.cache.get(k); if (c) return c;
+  const r = SAMPLE.find(x=>x.ListingKey===k); if (r) return normalize(r);
+  if (IDX.MODE==="reso" && !pending.has(k)){ pending.add(k); ListingProvider.get(k).then(l=>{ if (l) Store.emit(); }); }
+  return null;
+}
+const addrOf = k=>listingSync(k)?.address || "a home";
+const nameOf = cid=>contactFor(cid)?.name || Store.clientName(cid);
+const fmtTime = t=>{ if(!t) return ""; const [h,m] = t.split(":").map(Number); return `${(h%12)||12}:${String(m).padStart(2,"0")} ${h<12?"AM":"PM"}`; };
+function bubblesHTML(list, me){
+  if (!list || !list.length) return `<p class="count" style="text-align:center;margin:24px 0">No messages yet.</p>`;
+  return list.map(m=>`<div class="bub ${m.from===me?"me":""}">${m.listingKey?`<button class="bub-home" data-open="${esc(m.listingKey)}">${esc(addrOf(m.listingKey))}</button>`:""}${esc(m.text)}<time>${when(m.createdAt)}</time></div>`).join("");
+}
+
+/* Inbox */
+function inboxHTML(){
+  const ts = Object.entries(Store.threads).sort((a,b)=>(b[1].updatedAt||"").localeCompare(a[1].updatedAt||""));
+  if (!ts.length) return `<div class="empty"><strong>No conversations yet</strong>Clients can message you from their shortlists or any home. You can start one from a contact linked to an app account.</div>`;
+  return ts.map(([cid,t])=>`<button class="thread ${Store.unread(t,"agent")?"unread":""}" data-panel="thread:${esc(cid)}"><span style="min-width:0"><strong>${esc(nameOf(cid))}</strong><p>${t.lastFrom==="agent"?"You: ":""}${esc(t.lastText)}</p></span><time>${when(t.updatedAt)}</time></button>`).join("");
+}
+function updateAgentChat(cid){
+  const log = $("#agentChatLog"); if (!log) return;
+  const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+  log.innerHTML = bubblesHTML(Store.msgs[cid], "agent");
+  if (nearBottom || !log.dataset.ready){ log.scrollTop = log.scrollHeight; log.dataset.ready = "1"; }
+}
+
+/* Notifications */
+let notifPrevSeen = "";
+function notifications(){
+  const ev = [];
+  allRequests().forEach(r=>ev.push({ t:r.createdAt, text:`${r.name||"A client"} requested a showing at ${r.address}`, panel:"requests" }));
+  Object.entries(Store.threads).forEach(([cid,t])=>{ if (t.lastFrom==="client") ev.push({ t:t.updatedAt, text:`${nameOf(cid)} sent a message: ${t.lastText}`, panel:"thread:"+cid }); });
+  Object.keys(Store.clients).forEach(cid=>clientItems(cid).forEach(it=>{
+    if (it.reaction || it.note){
+      const verb = { love:"loved", maybe:"marked maybe on", pass:"passed on" }[it.reaction] || "left a note on";
+      ev.push({ t:it.updatedAt||it.addedAt, text:`${nameOf(cid)} ${verb} ${addrOf(it.key)}${it.note?`: “${it.note}”`:""}`, panel:"activity" });
+    } else ev.push({ t:it.addedAt, text:`${nameOf(cid)} saved ${addrOf(it.key)}`, panel:"activity" });
+  }));
+  return ev.filter(e=>e.t).sort((a,b)=>b.t.localeCompare(a.t)).slice(0,60);
+}
+const unseenCount = ()=>{ const s = Store.settings.notifSeenAt||""; return notifications().filter(e=>e.t>s).length; };
+function notificationsHTML(){
+  const t = localDay();
+  const due = tasks().filter(x=>!x.done && x.due && x.due<=t).sort((a,b)=>a.due.localeCompare(b.due));
+  const ev = notifications();
+  return (due.length ? `<div class="stage-h">Tasks due<span>${due.length}</span></div>${due.map(x=>`<button class="notif" data-panel="tasks">${esc(x.title)}<time>${x.due<t?"Overdue · ":""}${dayLabel(x.due)}</time></button>`).join("")}` : "") +
+    `<div class="stage-h">Activity<span>${ev.length}</span></div>` +
+    (ev.length ? ev.map(e=>`<button class="notif ${e.t>notifPrevSeen?"fresh":""}" data-panel="${esc(e.panel)}">${esc(e.text)}<time>${when(e.t)}</time></button>`).join("") : `<div class="empty"><strong>Nothing new</strong>Showing requests, messages, and client reactions show up here.</div>`);
+}
+
+/* GCI tracker */
+function parseMoney(v){ const m = String(v??"").replace(/[$,\s]/g,"").match(/^([\d.]+)([kKmM]?)/); if (!m) return 0; let n = parseFloat(m[1]); if (/k/i.test(m[2])) n*=1e3; if (/m/i.test(m[2])) n*=1e6; return isFinite(n) ? n : 0; }
+function bizStats(){
+  const rate = Number(Store.settings.commissionRate ?? 2.5), goal = Number(Store.settings.gciGoal||0), yr = String(new Date().getFullYear());
+  const ds = [];
+  contacts().forEach(c=>{
+    if (isBuyer(c)) ds.push({ c, stage:c.buyerStage||"lead", value:parseMoney(c.salePrice)||parseMoney(c.budget) });
+    if (isSeller(c)) ds.push({ c, stage:c.sellerStage||"prospect", value:parseMoney(c.salePrice)||parseMoney(c.listPrice) });
+  });
+  const gci = d=>d.value*rate/100, sum = a=>a.reduce((t,d)=>t+gci(d),0);
+  const closed = ds.filter(d=>d.stage==="closed" && (d.c.closeDate||d.c.updatedAt||"").startsWith(yr));
+  const pend = ds.filter(d=>d.stage==="contract");
+  const active = ds.filter(d=>["searching","touring","prep","active"].includes(d.stage));
+  const early = ds.filter(d=>["lead","prospect"].includes(d.stage));
+  const months = Array(12).fill(0); closed.forEach(d=>{ const mo = Number((d.c.closeDate||d.c.updatedAt||"").slice(5,7)); if (mo) months[mo-1] += gci(d); });
+  return { rate, goal, yr, closed, pend, active, early, closedG:sum(closed), pendG:sum(pend), activeG:sum(active), earlyG:sum(early), months };
+}
+function bizHTML(){
+  const b = bizStats(), pct = b.goal ? Math.min(100, b.closedG/b.goal*100) : 0;
+  const mx = Math.max(...b.months, 1), labels = "JFMAMJJASOND";
+  const bars = b.months.map((v,i)=>{ const h = v/mx*100; return `<rect x="${i*30+6}" y="${110-h}" width="18" height="${Math.max(h,1)}" rx="3" fill="${v?"var(--accent)":"var(--line)"}"><title>${money(v)}</title></rect><text x="${i*30+15}" y="126" text-anchor="middle">${labels[i]}</text>`; }).join("");
+  const card = (n,t,sub)=>`<div><b>${n}</b><span>${t}${sub?`<br>${sub}`:""}</span></div>`;
+  return `<div class="bigstat"><p>Closed GCI in ${b.yr}</p><b>${money(b.closedG)}</b>
+      ${b.goal ? `<div class="bar"><span style="width:${pct.toFixed(1)}%"></span></div><p>${pct.toFixed(0)}% of your ${money(b.goal)} goal</p>` : `<p>Set a yearly goal to track progress.</p>`}</div>
+    <div class="stats">${card(short(b.pendG||0),"Under contract",`${b.pend.length} deals`)}${card(short(b.activeG||0),"Active pipeline",`${b.active.length} deals`)}${card(short(b.earlyG||0),"Leads and prospects",`${b.early.length}`)}${card(b.closed.length,"Closed",`this year`)}</div>
+    <p class="addr">GCI estimates use ${b.rate}% of the contract price, or of the budget or list price until there’s a contract.</p>
+    <div class="chart"><svg viewBox="0 0 360 132" role="img" aria-label="Closed GCI by month">${bars}</svg></div>`;
+}
+function openGoalsForm(){
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>Goals</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="goalsForm"><div class="row2"><div><label for="gGoal">Yearly GCI goal</label><input id="gGoal" inputmode="decimal" placeholder="$250K" value="${esc(Store.settings.gciGoal?short(Store.settings.gciGoal):"")}"></div>
+    <div><label for="gRate">Commission rate (%)</label><input id="gRate" inputmode="decimal" value="${esc(Store.settings.commissionRate ?? 2.5)}"></div></div>
+    <div class="actions"><button class="btn gold" type="submit">Save goals</button></div></form>`;
+  $("#goalsForm").addEventListener("submit", e=>{ e.preventDefault(); const r = parseFloat($("#gRate").value); Store.saveSettings({ gciGoal:parseMoney($("#gGoal").value), commissionRate:isFinite(r)?r:2.5 }); $("#dlgForm").close(); });
+  $("#dlgForm").showModal();
+}
+
+/* Showing days */
+function toursHTML(){
+  const ts = Object.entries(Store.crm.tours).filter(([,x])=>x).sort((a,b)=>(b[1].date||"").localeCompare(a[1].date||""));
+  const head = `<div class="quick"><button class="btn gold" data-newtour>New showing day</button></div>`;
+  if (!ts.length) return head + `<div class="empty"><strong>No showing days yet</strong>Plan a day of showings, put it in route order, and share it to your client’s app.</div>`;
+  return head + ts.map(([id,t])=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(t.name||"Tour")}</strong><p>${t.date?dayLabel(t.date):"No date"}${t.contactId&&Store.crm.contacts[t.contactId]?` · ${esc(Store.crm.contacts[t.contactId].name)}`:""} · ${(t.stops||[]).length} homes${t.sharedTo?" · Shared":""}</p></div></div>
+    <div class="links"><button data-panel="tour:${id}">Open</button></div></div>`).join("");
+}
+function tourMapSVG(ls){
+  const pts = ls.map(l=>px(l.lat,l.lng));
+  const river = pathFrom([[39.672,-105.016],[39.700,-105.012],[39.725,-105.010],[39.748,-105.006],[39.765,-104.995],[39.788,-104.975]]);
+  const i25 = pathFrom([[39.672,-104.985],[39.700,-104.995],[39.725,-105.016],[39.750,-105.022],[39.770,-105.020],[39.788,-105.010]]);
+  const colfax = pathFrom([[39.7402,-105.060],[39.7402,-104.905]]);
+  const route = pts.length>1 ? `<path d="${pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ")}" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 5" fill="none"/>` : "";
+  return `<div class="tourmap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Route map with ${ls.length} stops"><rect width="${W}" height="${H}" fill="var(--map-bg)"/>
+    <path d="${colfax}" stroke="var(--map-line)" stroke-width="3" fill="none"/><path d="${i25}" stroke="var(--map-line)" stroke-width="5" fill="none"/><path d="${river}" stroke="var(--water)" stroke-width="4" fill="none"/>
+    ${route}${pts.map((p,i)=>`<circle class="n" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="13"/><text class="nt" x="${p[0].toFixed(1)}" y="${(p[1]+4).toFixed(1)}" text-anchor="middle">${i+1}</text>`).join("")}</svg></div>`;
+}
+function tourHTML(id){
+  const t = Store.crm.tours[id];
+  const back = `<button class="back" data-panel="tours">‹ All showing days</button>`;
+  if (!t) return back + `<div class="empty"><strong>Showing day not found</strong>It may have been deleted.</div>`;
+  const stops = t.stops||[], ls = stops.map(s=>listingSync(s.listingKey));
+  const c = t.contactId ? Store.crm.contacts[t.contactId] : null;
+  const pool = (IDX.MODE==="sample" ? SAMPLE.map(normalize) : [...ListingProvider.cache.values()]).filter(l=>!stops.some(s=>s.listingKey===l.key));
+  const loved = c && c.clientId ? clientItems(c.clientId).filter(i=>i.reaction==="love" && !stops.some(s=>s.listingKey===i.key)) : [];
+  const valid = ls.filter(Boolean);
+  const gmaps = valid.length ? "https://www.google.com/maps/dir/" + valid.map(l=>encodeURIComponent(`${l.address}, ${l.city}, ${l.state} ${l.zip}`)).join("/") : "";
+  return `${back}<div class="colhead"><h2>${esc(t.name||"Tour")}</h2><button class="btn ghost" data-deltour="${id}">Delete</button></div>
+    <div class="tourform"><div class="row2"><div><label for="tfName">Name</label><input id="tfName" data-tourfield="${id}|name" value="${esc(t.name||"")}"></div><div><label for="tfDate">Date</label><input id="tfDate" type="date" data-tourfield="${id}|date" value="${esc(t.date||"")}"></div></div>
+      <label for="tfContact">Client</label><select id="tfContact" data-tourfield="${id}|contactId"><option value="">None</option>${contacts().map(x=>`<option value="${x.id}" ${t.contactId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+      ${c && c.clientId ? `<label class="check"><input type="checkbox" data-tourfield="${id}|shared" ${t.shared?"checked":""}> Show this in ${esc(c.name)}’s app</label>` : c ? `<p class="addr">Link ${esc(c.name)} to an app account to share this with them.</p>` : ""}
+    </div>
+    ${valid.length ? tourMapSVG(valid) : ""}
+    ${stops.map((s,i)=>{ const l = ls[i]; return `<div class="stop"><span class="num">${i+1}</span><div class="tt"><strong>${esc(l?l.address:"Loading…")}</strong><p>${l?`${short(l.price)} · ${l.beds} bd · ${esc(l.hood)}`:""}</p>
+      <div class="row2"><input type="time" aria-label="Time for stop ${i+1}" data-stopfield="${id}|${i}|time" value="${esc(s.time||"")}"><input aria-label="Note for stop ${i+1}" placeholder="Note, e.g. lockbox code" data-stopfield="${id}|${i}|note" value="${esc(s.note||"")}"></div></div>
+      <div class="stopbtns"><button data-stopmove="${id}|${i}|-1" aria-label="Move stop ${i+1} up" ${i?"":"disabled"}>↑</button><button data-stopmove="${id}|${i}|1" aria-label="Move stop ${i+1} down" ${i<stops.length-1?"":"disabled"}>↓</button><button data-stopdel="${id}|${i}" aria-label="Remove stop ${i+1}">×</button></div></div>`; }).join("") || `<div class="empty"><strong>No homes on this tour</strong>Add homes below.</div>`}
+    <div class="tourform"><label for="tfAdd">Add a home</label><select id="tfAdd" data-addstop="${id}"><option value="">Choose a home</option>${pool.map(l=>`<option value="${esc(l.key)}">${esc(l.address)} · ${short(l.price)}</option>`).join("")}</select></div>
+    <div class="quick" style="margin-top:14px">${loved.length?`<button class="btn ghost" data-addloved="${id}">Add ${loved.length} loved ${loved.length===1?"home":"homes"}</button>`:""}${stops.length>2?`<button class="btn ghost" data-optimize="${id}">Order by shortest route</button>`:""}${gmaps?`<a class="btn gold" style="text-align:center;text-decoration:none" href="${gmaps}" target="_blank" rel="noopener">Open in Google Maps</a>`:""}</div>`;
+}
+function editTour(id, fn){ const t = structuredClone(Store.crm.tours[id]); if (!t) return; t.stops = t.stops||[]; fn(t); t.updatedAt = new Date().toISOString(); Store.saveTour(id, t); }
+function optimizeStops(stops){
+  const pts = stops.map(s=>({ s, l:listingSync(s.listingKey) }));
+  if (pts.some(p=>!p.l)) return stops;
+  const times = stops.map(s=>s.time).filter(Boolean).sort();
+  const out = [pts.shift()];
+  while (pts.length){
+    const last = out[out.length-1].l; let bi = 0, bd = Infinity;
+    pts.forEach((p,i)=>{ const d = (p.l.lat-last.lat)**2 + ((p.l.lng-last.lng)*0.77)**2; if (d<bd){ bd=d; bi=i; } });
+    out.push(pts.splice(bi,1)[0]);
+  }
+  const res = out.map(p=>({ ...p.s }));
+  if (times.length===res.length) res.forEach((s,i)=>s.time = times[i]);
+  return res;
+}
+function newTour(contactId){
+  const c = contactId ? Store.crm.contacts[contactId] : null;
+  const loved = c && c.clientId ? clientItems(c.clientId).filter(i=>i.reaction==="love").map(i=>({ listingKey:i.key, time:"", note:"" })) : [];
+  const id = Store.saveTour(null, { name: c ? `${c.name} showings` : "Showing day", date:localDay(), contactId:contactId||"", clientId:c?.clientId||"", stops:loved, shared:false, createdAt:new Date().toISOString() });
+  agentPanel = "tour:"+id; renderAgent(); window.scrollTo(0,0);
+}
+
+/* Client side: messages and tours */
+let chatListing = "";
+function clientBarHTML(){
+  if (!Store.db || (Store.isAgent && !Store.demo)) return "";
+  const first = IDX.BROKER.name.split(" ")[0];
+  return `<div class="quick"><button class="btn ghost" data-chat="">Message ${esc(first)}${Store.unread(Store.myThread,"client")?`<span class="dot" aria-label="Unread messages"></span>`:""}</button></div>`;
+}
+function clientToursHTML(){
+  if (Store.isAgent && !Store.demo) return "";
+  const ts = Object.entries(Store.myTours).filter(([,t])=>t).sort((a,b)=>(a[1].date||"").localeCompare(b[1].date||""));
+  if (!ts.length) return "";
+  return `<h3 class="agent-h">Your showing days</h3>` + ts.map(([,t])=>`<div class="client"><h3>${esc(t.name||"Showing day")}</h3><p class="addr" style="margin:2px 0 0">${t.date?dayLabel(t.date):"Date to be set"} · ${(t.stops||[]).length} homes</p>
+    <ul>${(t.stops||[]).map((s,i)=>`<li><b>${i+1}.</b> ${s.time?esc(fmtTime(s.time))+" · ":""}<a href="#" data-open="${esc(s.listingKey)}">${esc(addrOf(s.listingKey))}</a></li>`).join("")}</ul></div>`).join("");
+}
+function updateClientChat(){
+  const log = $("#clientChatLog"); if (!log) return;
+  log.innerHTML = bubblesHTML(Store.msgs[Store.uid], "client"); log.scrollTop = log.scrollHeight;
+}
+function openClientChat(listingKey){
+  chatListing = listingKey||"";
+  const b = IDX.BROKER;
+  $("#chatBody").innerHTML = `<div class="sheettop"><h2>${esc(b.name)}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    ${Store.db ? `<div class="chatlog" id="clientChatLog"></div>
+    <form class="chatform" id="clientChatForm">${chatListing?`<p class="about" id="chatAbout">About ${esc(addrOf(chatListing))} <button type="button" data-clearabout aria-label="Remove home from message">×</button></p>`:""}
+      <div class="chatrow"><textarea id="clientChatText" rows="2" placeholder="Write a message" aria-label="Message" required></textarea><button class="btn gold" type="submit">Send</button></div></form>`
+    : `<div class="empty">Messaging works once you’re signed in to this page. You can also call or text <a href="tel:${b.phone.replace(/\D/g,"")}">${esc(b.phone)}</a>.</div>`}`;
+  const f = $("#clientChatForm");
+  if (f) f.addEventListener("submit", e=>{
+    e.preventDefault(); const t = $("#clientChatText").value.trim(); if (!t) return;
+    Store.sendMessage(Store.uid, "client", t, chatListing); $("#clientChatText").value = ""; chatListing = ""; $("#chatAbout")?.remove();
+  });
+  updateClientChat(); Store.markRead(Store.uid, "client");
+  if ($("#dlgListing").open) $("#dlgListing").close();
+  if (!$("#dlgChat").open) $("#dlgChat").showModal();
+}
+
+/* ===================== PHASE 3 ===================== */
+const median = a=>{ if(!a.length) return 0; const s=[...a].sort((x,y)=>x-y), m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; };
+const daysSince = d=>d ? Math.max(0, Math.round((Date.now()-new Date(d+"T12:00"))/864e5)) : 0;
+
+/* Market pulse */
+function marketHTML(){
+  const all = (IDX.MODE==="sample" ? SAMPLE.map(normalize) : results.filter(l=>!l.exclusive));
+  const by = {};
+  all.forEach(l=>{ (by[l.hood] = by[l.hood]||[]).push(l); });
+  const rows = Object.entries(by).map(([h,ls])=>{
+    const act = ls.filter(l=>l.status==="Active");
+    return { h, active:act.length, soon:ls.filter(l=>l.status==="Coming Soon").length, pend:ls.filter(l=>l.status==="Pending").length,
+      med:median(ls.filter(l=>l.status!=="Pending").map(l=>l.price)), ppsf:median(ls.filter(l=>l.sqft).map(l=>l.price/l.sqft)), dom:Math.round(median(act.map(l=>daysSince(l.listed)))) };
+  }).sort((a,b)=>b.ppsf-a.ppsf);
+  const fresh = all.filter(l=>daysSince(l.listed)<=7 && l.status!=="Pending").sort((a,b)=>b.listed.localeCompare(a.listed));
+  const mx = Math.max(...rows.map(r=>r.ppsf),1), bh = 26;
+  const chart = `<svg viewBox="0 0 360 ${rows.length*bh+8}" role="img" aria-label="Median price per square foot by neighborhood">${rows.map((r,i)=>`<text x="0" y="${i*bh+17}">${esc(r.h.length>16?r.h.slice(0,15)+"…":r.h)}</text><rect x="118" y="${i*bh+5}" width="${(r.ppsf/mx*190).toFixed(1)}" height="16" rx="3" fill="var(--accent)"/><text x="${(118+r.ppsf/mx*190+6).toFixed(1)}" y="${i*bh+17}">$${Math.round(r.ppsf)}</text>`).join("")}</svg>`;
+  return `${IDX.MODE==="sample"?`<p class="note-c">Built from sample listings. With the IDX feed connected, add closed sales from the MLS to show sold prices and true days on market.</p>`:`<p class="note-c">Built from your current search results.</p>`}
+    <div class="stats">${[["Active",all.filter(l=>l.status==="Active").length],["Coming soon",all.filter(l=>l.status==="Coming Soon").length],["Pending",all.filter(l=>l.status==="Pending").length],["Median list",short(median(all.filter(l=>l.status!=="Pending").map(l=>l.price)))]].map(([t,n])=>`<div><b>${n}</b><span>${t}</span></div>`).join("")}</div>
+    <h3 class="agent-h">New this week</h3>
+    ${fresh.length ? `<div class="saved">${fresh.map(l=>`<button class="notif" data-open="${esc(l.key)}"><strong>${money(l.price)}</strong> · ${esc(l.address)}, ${esc(l.hood)}<time>${l.status} · listed ${daysSince(l.listed)===0?"today":daysSince(l.listed)+(daysSince(l.listed)===1?" day ago":" days ago")}</time></button>`).join("")}</div>` : `<p class="addr">No new listings in the last 7 days.</p>`}
+    <h3 class="agent-h">By neighborhood</h3>
+    <div class="scroll"><table class="mtable"><thead><tr><th>Neighborhood</th><th>Active</th><th>Soon</th><th>Pending</th><th>Median</th><th>$/sq ft</th><th>Days</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${esc(r.h)}</td><td>${r.active}</td><td>${r.soon}</td><td>${r.pend}</td><td>${short(r.med)}</td><td>$${Math.round(r.ppsf)}</td><td>${r.active?r.dom:"–"}</td></tr>`).join("")}</tbody></table></div>
+    <div class="chart">${chart}</div>`;
+}
+
+/* Off-market & coming soon */
+const HOODS = [...new Map(SAMPLE.map(r=>[r.SubdivisionName,{ lat:r.Latitude, lng:r.Longitude, zip:r.PostalCode }])).entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+function exclusivesHTML(){
+  const xs = Object.entries(Store.crm.exclusives).filter(([,x])=>x).sort((a,b)=>(b[1].OnMarketDate||"").localeCompare(a[1].OnMarketDate||""));
+  const head = `<p class="note-c">Before marketing an office exclusive, confirm it fits REcolorado’s current rules for office-exclusive and coming-soon listings and your seller’s signed disclosure.</p><div class="quick"><button class="btn gold" data-newex>New off-market listing</button></div>`;
+  if (!xs.length) return head + `<div class="empty"><strong>No off-market listings yet</strong>Add a home that isn’t on the MLS. Published ones appear in your clients’ search with a Miller Group badge.</div>`;
+  return head + `<div class="grid">${xs.map(([,x])=>cardHTML(normalize(x)).replace('class="card"','class="card"').replace(/<button class="heart[^]*?<\/button>/,"")+"").join("")}</div>`
+    .replace(/<div class="courtesy">Miller Group off-market listing<\/div>/g,"") +
+    `<div class="quick" style="margin-top:12px">${xs.map(([id,x])=>`<button class="btn ghost" data-editex="${id}">Edit ${esc(x.UnparsedAddress)}</button>`).join("")}</div>`;
+}
+function openExclusiveForm(id){
+  const x = id ? { ...Store.crm.exclusives[id] } : { StandardStatus:"Private Exclusive", PropertySubType:"Single Family Residence", SubdivisionName:HOODS[0][0], published:false };
+  const opt = (list,val)=>list.map(([v,t])=>`<option value="${esc(v)}" ${val===v?"selected":""}>${esc(t)}</option>`).join("");
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>${id?"Edit off-market listing":"New off-market listing"}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="exForm">
+      <label for="xStatus">Type</label><select id="xStatus">${opt([["Private Exclusive","Off-market"],["Coming Soon","Coming soon"]],x.StandardStatus)}</select>
+      <label for="xAddr">Address</label><input id="xAddr" required value="${esc(x.UnparsedAddress||"")}">
+      <div class="row2"><div><label for="xHood">Neighborhood</label><select id="xHood">${opt(HOODS.map(([h])=>[h,h]),x.SubdivisionName)}</select></div><div><label for="xPrice">Price</label><input id="xPrice" required inputmode="decimal" placeholder="$1.2M" value="${x.ListPrice?esc(short(x.ListPrice)):""}"></div></div>
+      <div class="row2"><div><label for="xBeds">Beds</label><input id="xBeds" type="number" min="0" value="${esc(x.BedroomsTotal??"")}"></div><div><label for="xBaths">Baths</label><input id="xBaths" type="number" min="0" value="${esc(x.BathroomsTotalInteger??"")}"></div></div>
+      <div class="row2"><div><label for="xSqft">Square feet</label><input id="xSqft" type="number" min="0" value="${esc(x.LivingArea??"")}"></div><div><label for="xYear">Year built</label><input id="xYear" type="number" value="${esc(x.YearBuilt??"")}"></div></div>
+      <label for="xType">Home type</label><select id="xType">${opt([["Single Family Residence","House"],["Townhouse","Townhome"],["Condominium","Condo"]],x.PropertySubType)}</select>
+      <label for="xRemarks">Description</label><textarea id="xRemarks" rows="4">${esc(x.PublicRemarks||"")}</textarea>
+      <label class="check"><input type="checkbox" id="xPub" ${x.published?"checked":""}> Show to clients in search</label>
+      <div class="actions"><button class="btn gold" type="submit">Save listing</button>${id?`<button class="btn ghost" type="button" data-delex="${id}">Delete</button>`:""}</div>
+    </form>`;
+  $("#exForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    const eid = id || "x" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const hood = $("#xHood").value, hc = (HOODS.find(h=>h[0]===hood)||HOODS[0])[1];
+    const jit = ()=> (Math.random()-.5)*0.006;
+    const num = v=>{ const n = Number(v); return isFinite(n) && v!=="" ? n : 0; };
+    Store.saveExclusive(eid, { ...x, ListingKey:"PX-"+eid, ListingId:"Off-market", StandardStatus:$("#xStatus").value,
+      UnparsedAddress:$("#xAddr").value.trim(), SubdivisionName:hood, City:"Denver", StateOrProvince:"CO", PostalCode:hc.zip,
+      Latitude:x.SubdivisionName===hood&&x.Latitude?x.Latitude:hc.lat+jit(), Longitude:x.SubdivisionName===hood&&x.Longitude?x.Longitude:hc.lng+jit(),
+      ListPrice:parseMoney($("#xPrice").value), BedroomsTotal:num($("#xBeds").value), BathroomsTotalInteger:num($("#xBaths").value), LivingArea:num($("#xSqft").value),
+      YearBuilt:num($("#xYear").value), PropertySubType:$("#xType").value, PublicRemarks:$("#xRemarks").value.trim(),
+      ListOfficeName:"The Miller Group", ListAgentFullName:IDX.BROKER.name, OnMarketDate:x.OnMarketDate||localDay(), exclusive:true, published:$("#xPub").checked });
+    $("#dlgForm").close();
+  });
+  $("#dlgForm").showModal();
+}
+
+/* Marketing */
+const TEMPLATES = [["just-listed","Just listed"],["coming-soon","Coming soon"],["open-house","Open house"],["price-improved","Price improved"],["just-sold","Just sold"]];
+let mk = { key:"", tpl:"just-listed", date:"", start:"", end:"", caps:null, busy:false, err:"" };
+function marketingPool(){
+  const pool = new Map();
+  exclusiveRecords().map(normalize).forEach(l=>pool.set(l.key,l));
+  (IDX.MODE==="sample" ? SAMPLE.map(normalize) : [...ListingProvider.cache.values()]).forEach(l=>pool.set(l.key,l));
+  return [...pool.values()];
+}
+function flyerSVG(l){
+  const t = (TEMPLATES.find(x=>x[0]===mk.tpl)||TEMPLATES[0])[1];
+  const sub = mk.tpl==="open-house" && mk.date ? `${dayLabel(mk.date)}${mk.start?` · ${fmtTime(mk.start)}${mk.end?`–${fmtTime(mk.end)}`:""}`:""}` : l.hood;
+  const photo = art(l).replace("<svg ", `<svg x="0" y="0" width="1080" height="700" `);
+  const x = s=>esc(s);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350">
+    <rect width="1080" height="1350" fill="#141A26"/>${photo}
+    <rect y="640" width="1080" height="60" fill="#141A26" opacity=".35"/>
+    <text x="70" y="800" fill="#B8935A" font-family="Cormorant Garamond, Georgia, serif" font-size="56" font-style="italic">${x(t)}</text>
+    <text x="70" y="920" fill="#F4EFE7" font-family="Cormorant Garamond, Georgia, serif" font-size="120" font-weight="600">${x(money(l.price))}</text>
+    <text x="70" y="1000" fill="#F4EFE7" font-family="Inter, Helvetica, Arial, sans-serif" font-size="40">${x(`${l.beds} bd · ${l.baths} ba · ${Number(l.sqft||0).toLocaleString()} sq ft`)}</text>
+    <text x="70" y="1060" fill="#C9C2B5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="36">${x(l.address)}</text>
+    <text x="70" y="1110" fill="#C9C2B5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="36">${x(sub)}</text>
+    <line x1="70" y1="1190" x2="1010" y2="1190" stroke="#B8935A" stroke-width="2"/>
+    <text x="70" y="1260" fill="#F4EFE7" font-family="Cormorant Garamond, Georgia, serif" font-size="46" font-weight="600">The Miller Group</text>
+    <text x="1010" y="1260" fill="#F4EFE7" font-family="Inter, Helvetica, Arial, sans-serif" font-size="32" text-anchor="end">${x(IDX.BROKER.name)} · ${x(IDX.BROKER.phone)}</text>
+  </svg>`;
+}
+function marketingHTML(){
+  const pool = marketingPool();
+  if (!mk.key && pool.length) mk.key = pool[0].key;
+  const l = pool.find(p=>p.key===mk.key);
+  const opt = (list,val)=>list.map(([v,t])=>`<option value="${esc(v)}" ${val===v?"selected":""}>${esc(t)}</option>`).join("");
+  const cap = (k,label)=>`<label for="cap-${k}">${label}<button class="remove" type="button" data-copy="cap-${k}">Copy</button></label><textarea id="cap-${k}">${esc(mk.caps?.[k]||"")}</textarea>`;
+  return `<div class="tourform"><label for="mkListing">Listing</label><select id="mkListing" data-mk="key">${opt(pool.map(p=>[p.key,`${p.address} · ${short(p.price)}${p.exclusive?" · Off-market":""}`]),mk.key)}</select>
+      <label for="mkTpl">Template</label><select id="mkTpl" data-mk="tpl">${opt(TEMPLATES,mk.tpl)}</select>
+      ${mk.tpl==="open-house"?`<div class="row2"><div><label for="mkDate">Date</label><input id="mkDate" type="date" data-mk="date" value="${esc(mk.date)}"></div><div class="row2"><div><label for="mkStart">Start</label><input id="mkStart" type="time" data-mk="start" value="${esc(mk.start)}"></div><div><label for="mkEnd">End</label><input id="mkEnd" type="time" data-mk="end" value="${esc(mk.end)}"></div></div></div>`:""}</div>
+    ${l ? `<div class="flyer">${flyerSVG(l)}</div>
+      <div class="quick"><button class="btn gold" data-mkpng>Download image</button><button class="btn ghost" data-mkcaps ${mk.busy?"disabled":""}>${mk.busy?"Writing…":mk.caps?"Rewrite captions":"Write captions"}</button></div>
+      ${mk.err?`<p class="msg">${esc(mk.err)}</p>`:""}
+      ${mk.caps?`<div class="caps">${cap("instagram","Instagram")}${cap("facebook","Facebook")}${cap("email_subject","Email subject")}${cap("email_body","Email")}</div><p class="addr">Review before posting. Captions are written to stay within Fair Housing advertising rules, but you’re responsible for the final copy.</p>`:""}`
+    : `<div class="empty"><strong>No listings to market</strong>Add an off-market listing or run a search first.</div>`}`;
+}
+async function downloadFlyer(){
+  const l = marketingPool().find(p=>p.key===mk.key); if (!l) return;
+  try{
+    const svg = flyerSVG(l), img = new Image();
+    await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); });
+    const c = document.createElement("canvas"); c.width = 1080; c.height = 1350; c.getContext("2d").drawImage(img,0,0,1080,1350);
+    const blob = await new Promise(r=>c.toBlob(r,"image/png"));
+    const dl = await window.claude?.use?.("downloads");
+    if (!dl){ toast("Downloads aren’t available here."); return; }
+    await dl.save({ filename:`${mk.tpl}-${l.address.replace(/[^\w]+/g,"-")}.png`, data:blob });
+  }catch(e){ /* declined or failed */ }
+}
+async function writeCaptions(){
+  const l = marketingPool().find(p=>p.key===mk.key); if (!l) return;
+  const sample = await window.claude?.use?.("sample");
+  if (!sample){ mk.err = "AI writing isn’t available in this view."; renderAgent(); return; }
+  mk.busy = true; mk.err = ""; renderAgent();
+  const t = (TEMPLATES.find(x=>x[0]===mk.tpl)||TEMPLATES[0])[1];
+  const when2 = mk.tpl==="open-house" && mk.date ? ` The open house is ${dayLabel(mk.date)}${mk.start?` from ${fmtTime(mk.start)}${mk.end?` to ${fmtTime(mk.end)}`:""}`:""}.` : "";
+  const facts = { address:l.address, neighborhood:l.hood, city:l.city, price:money(l.price), beds:l.beds, baths:l.baths, sqft:l.sqft, type:typeName(l.type), year_built:l.year, description:l.remarks, status:l.status, exclusive:l.exclusive };
+  try{
+    mk.caps = await sample.json(`You write real estate marketing copy for The Miller Group, a Denver brokerage. Agent: ${IDX.BROKER.name}, ${IDX.BROKER.phone}.
+Post type: ${t}.${when2}
+Listing facts (use only these; never invent features, schools, or numbers): ${JSON.stringify(facts)}
+Rules: follow U.S. Fair Housing advertising rules. Describe the home and its features, not who should live there. Never mention or imply race, color, religion, sex, disability, familial status, national origin, or any other protected class, and avoid phrases like "perfect for families," "safe neighborhood," or "exclusive community." Warm, confident, specific; no clichés like "dream home" or "won’t last long."
+Return only a JSON object with string fields: "instagram" (under 900 characters, up to 6 relevant hashtags at the end), "facebook" (2 short paragraphs), "email_subject" (under 60 characters), "email_body" (3 short paragraphs ending with how to reach ${IDX.BROKER.name.split(" ")[0]}).`, { cache:false });
+  }catch(e){ mk.err = e && e.code==="not_granted" ? "AI writing was turned off for this page." : "The captions didn’t come through. Try again."; }
+  mk.busy = false; renderAgent();
+}
+
+/* AI assistant */
+let ai = { msgs:[], busy:false, ctl:null };
+const AI_TOOLS = [
+  { name:"list_contacts", description:"List CRM contacts with role, pipeline stage, budget or list price, areas, and contact info.", inputSchema:{ type:"object", properties:{ role:{ type:"string", enum:["buyer","seller","any"] } } },
+    execute:({ role }={})=>contacts().filter(c=>!role||role==="any"||(role==="buyer"?isBuyer(c):isSeller(c))).map(c=>({ id:c.id, name:c.name, role:c.role, buyerStage:isBuyer(c)?c.buyerStage:undefined, sellerStage:isSeller(c)?c.sellerStage:undefined, budget:c.budget, areas:c.area, listingAddress:c.listingAddress, listPrice:c.listPrice, contractPrice:c.salePrice, closeDate:c.closeDate, phone:c.phone, email:c.email, notes:c.notes, updatedAt:c.updatedAt, usesApp:!!c.clientId })) },
+  { name:"get_client_activity", description:"Homes a contact saved in the app, with their reactions and notes, plus their recent messages. Needs a contact id.", inputSchema:{ type:"object", properties:{ contact_id:{ type:"string" } }, required:["contact_id"] },
+    execute:({ contact_id })=>{ const c = Store.crm.contacts[contact_id]; if (!c) throw new Error("No contact with that id"); if (!c.clientId) return { usesApp:false };
+      return { saved: clientItems(c.clientId).map(i=>{ const l = listingSync(i.key); return { address:l?.address, price:l?.price, collection:i.col, reaction:i.reaction||null, note:i.note||null }; }),
+        lastMessage: Store.threads[c.clientId] ? { text:Store.threads[c.clientId].lastText, from:Store.threads[c.clientId].lastFrom, at:Store.threads[c.clientId].updatedAt } : null }; } },
+  { name:"list_tasks", description:"Open tasks with due dates and linked contacts.", execute:()=>tasks().filter(t=>!t.done).map(t=>({ title:t.title, due:t.due, contact:Store.crm.contacts[t.contactId]?.name||null })) },
+  { name:"add_task", description:"Create a task in the CRM. Only call when the user asks you to add or schedule a task.", inputSchema:{ type:"object", properties:{ title:{ type:"string" }, due:{ type:"string", description:"YYYY-MM-DD" }, contact_id:{ type:"string" } }, required:["title"] },
+    execute:({ title, due, contact_id })=>{ const id = Store.saveCrm("tasks", null, { title:String(title).slice(0,200), due:/^\d{4}-\d{2}-\d{2}$/.test(due||"")?due:"", contactId:Store.crm.contacts[contact_id]?contact_id:"", done:false, createdAt:new Date().toISOString() }); return { created:true, id }; } },
+  { name:"search_listings", description:"Search current listings, including Miller Group off-market listings.", inputSchema:{ type:"object", properties:{ text:{ type:"string", description:"neighborhood, city, zip, or address" }, max_price:{ type:"number" }, min_beds:{ type:"number" } } },
+    execute:async ({ text, max_price, min_beds }={})=>(await ListingProvider.search({ text:text||"", maxPrice:max_price||"", minBeds:min_beds||"", type:"", status:"", sort:"new" })).slice(0,15).map(l=>({ address:l.address, neighborhood:l.hood, price:l.price, beds:l.beds, baths:l.baths, sqft:l.sqft, status:l.status, exclusive:l.exclusive, listed:l.listed })) },
+  { name:"showing_requests", description:"Showing requests from clients with status.", execute:()=>allRequests().slice(0,30).map(r=>({ name:r.name, address:r.address, status:r.status, message:r.message, at:r.createdAt })) },
+  { name:"business_summary", description:"Closed GCI this year, goal, and estimated GCI by pipeline stage.", execute:()=>{ const b = bizStats(); return { year:b.yr, goal:b.goal, commissionRatePct:b.rate, closedGCI:Math.round(b.closedG), underContractGCI:Math.round(b.pendG), activeGCI:Math.round(b.activeG), earlyGCI:Math.round(b.earlyG), closedDeals:b.closed.length }; } }
+];
+function assistantHTML(){
+  const chips = ["Who should I follow up with today?","Summarize my pipeline","Which homes fit my buyers’ budgets?","Draft a check-in text to my newest buyer"];
+  return `<div class="chatlog tall" id="aiLog">${ai.msgs.length ? ai.msgs.map(m=>`<div class="bub ${m.role==="user"?"me":"ai"}">${esc(m.content||(m.role==="assistant"&&ai.busy?"Thinking…":""))}</div>`).join("") : `<p class="count" style="text-align:center;margin:24px 0">Ask about your contacts, tasks, listings, or pipeline. It can add tasks when you ask.</p>`}</div>
+    ${ai.msgs.length ? "" : `<div class="chips">${chips.map(c=>`<button data-aiask="${esc(c)}">${esc(c)}</button>`).join("")}</div>`}
+    <form class="chatform" id="aiForm"><div class="chatrow"><textarea id="aiText" rows="2" placeholder="Ask the assistant" aria-label="Message to the assistant" ${ai.busy?"disabled":""}></textarea><button class="btn gold" type="submit" ${ai.busy?"disabled":""}>Send</button></div></form>
+    ${ai.msgs.length?`<div class="quick" style="margin-top:8px"><button class="btn ghost" data-aiclear>New conversation</button></div>`:""}`;
+}
+function updateAiLog(){
+  const log = $("#aiLog"); if (!log) return;
+  const last = log.lastElementChild, m = ai.msgs[ai.msgs.length-1];
+  if (last && m && m.role==="assistant" && log.children.length===ai.msgs.length) last.textContent = m.content || "Thinking…"; else renderAgent();
+  log.scrollTop = log.scrollHeight;
+}
+async function askAI(q){
+  q = (q||"").trim(); if (!q || ai.busy) return;
+  const sample = await window.claude?.use?.("sample");
+  ai.msgs.push({ role:"user", content:q });
+  if (!sample){ ai.msgs.push({ role:"assistant", content:"The assistant isn’t available in this view." }); renderAgent(); return; }
+  ai.msgs.push({ role:"assistant", content:"" }); ai.busy = true; ai.ctl = new AbortController(); renderAgent();
+  const intro = `You are the assistant inside The Miller Group’s agent app, working for ${IDX.BROKER.name}, a Denver real estate broker. Today is ${localDay()}. Use the tools to look up his CRM data rather than guessing, and say so when data is missing. Be concise and practical; when drafting a text or email, write it ready to send in his voice. Follow Fair Housing rules in anything client-facing. Plain text only, no markdown tables or headings.\n\n`;
+  const input = ai.msgs.slice(0,-1).map((m,i)=>({ role:m.role, content: i===0 ? intro + m.content : m.content }));
+  try{
+    const res = await sample(input, { tools:AI_TOOLS, cache:false, signal:ai.ctl.signal, onText:({ text })=>{ ai.msgs[ai.msgs.length-1].content = text; updateAiLog(); } });
+    ai.msgs[ai.msgs.length-1].content = res.text;
+  }catch(e){ ai.msgs[ai.msgs.length-1].content = e && e.code==="not_granted" ? "The assistant was turned off for this page." : (e && e.text) || "That didn’t go through. Try again in a moment."; }
+  ai.busy = false; ai.ctl = null; renderAgent();
+}
+
+/* Team */
+let rosterQuery = "";
+function rosterList(){
+  const list = Object.entries(Store.roster).filter(([,a])=>a).map(([id,a])=>({ id, ...a }));
+  if (!list.length) list.push({ id:"", name:IDX.BROKER.name, title:"Broker", phone:IDX.BROKER.phone, email:"", areas:"Denver metro", languages:"English", bio:"" });
+  const q = rosterQuery.toLowerCase();
+  return list.filter(a=>!q || [a.name,a.areas,a.languages,a.title].some(v=>String(v||"").toLowerCase().includes(q))).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function rosterCards(){
+  const list = rosterList();
+  return list.length ? list.map(a=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(a.name)}</strong><p>${esc(a.title||"Agent")}${a.areas?` · ${esc(a.areas)}`:""}${a.languages?` · ${esc(a.languages)}`:""}</p>${a.bio?`<p>${esc(a.bio)}</p>`:""}</div></div>
+    <div class="links">${telLink(a.phone)}${mailLink(a.email)}${a.slug?`<button data-copylink="${esc(a.slug)}">Copy their link</button>`:""}${a.id && (Store.isBroker || a.id===Store.uid)?`<button data-editagent="${a.id}">Edit</button>`:""}</div></div>`).join("") : `<p class="addr">No agents match.</p>`;
+}
+function agentsHTML(){
+  return `<input class="roster-search" id="rosterQ" type="search" placeholder="Search by name, area, or language" aria-label="Search agents" value="${esc(rosterQuery)}">
+    ${Store.isBroker?`<div class="quick"><button class="btn gold" data-newagent>Add agent</button></div>`:""}<div id="rosterList">${rosterCards()}</div>`;
+}
+function openInviteForm(){
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>Add agent</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <p class="addr">Have the agent open ${esc(IDX.APP_URL)} and sign in once with their email. Then enter that email here to give them the agent tools.</p>
+    <form id="inviteForm"><label for="iEmail">Agent’s sign-in email</label><input id="iEmail" type="email" required autocomplete="off">
+      <div class="actions"><button class="btn gold" type="submit">Give agent access</button></div><p class="msg" id="inviteMsg" role="status"></p></form>`;
+  $("#inviteForm").addEventListener("submit", async e=>{
+    e.preventDefault(); const m = $("#inviteMsg");
+    try{ const r = await window.MillerCloud.rpc("add_agent", { agent_email:$("#iEmail").value.trim() });
+      m.textContent = r ? "Done. They’ll see the Agent tab next time they open the app, and should fill in their profile under Settings." : "No account with that email yet. Ask them to sign in once first."; }
+    catch(err){ m.textContent = "That didn’t work: " + (err.message||err); }
+  });
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+function openAgentForm(id){
+  const a = id ? { ...Store.roster[id] } : {};
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>${id?"Edit agent":"Add agent"}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="agentForm"><label for="aName">Name</label><input id="aName" required value="${esc(a.name||"")}">
+      <label for="aTitle">Title</label><input id="aTitle" placeholder="Broker associate" value="${esc(a.title||"")}">
+      <div class="row2"><div><label for="aPhone">Phone</label><input id="aPhone" type="tel" value="${esc(a.phone||"")}"></div><div><label for="aEmail">Email</label><input id="aEmail" type="email" value="${esc(a.email||"")}"></div></div>
+      <label for="aAreas">Areas</label><input id="aAreas" placeholder="Highland, Berkeley, Golden" value="${esc(a.areas||"")}">
+      <label for="aLang">Languages</label><input id="aLang" value="${esc(a.languages||"")}">
+      <label for="aBio">Short bio</label><textarea id="aBio" rows="3">${esc(a.bio||"")}</textarea>
+      <div class="actions"><button class="btn gold" type="submit">Save agent</button>${id?`<button class="btn ghost" type="button" data-delagent="${id}">Remove</button>`:""}</div></form>`;
+  $("#agentForm").addEventListener("submit", e=>{ e.preventDefault(); Store.saveRoster(id, { name:$("#aName").value.trim(), title:$("#aTitle").value.trim(), phone:$("#aPhone").value.trim(), email:$("#aEmail").value.trim(), areas:$("#aAreas").value.trim(), languages:$("#aLang").value.trim(), bio:$("#aBio").value.trim() }); $("#dlgForm").close(); });
+  $("#dlgForm").showModal();
+}
+
+/* ===================== PHASE 4 ===================== */
+async function resolveAgentSlug(slug){
+  slug = String(slug||"").toLowerCase().trim(); if (!slug) return null;
+  const hit = Object.entries(Store.team).find(([,a])=>a && String(a.slug||"").toLowerCase()===slug);
+  if (hit) return hit[0];
+  try{ const sn = await Store.db.collection("team").get(); for (const d of sn.docs){ const a = d.data(); if (a && String(a.slug||"").toLowerCase()===slug) return d.id; } }catch(e){}
+  return null;
+}
+const slugify = v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
+const myLink = ()=>{ const slug = Store.site && Store.site.slug; return IDX.APP_URL + (slug ? `?agent=${encodeURIComponent(slug)}` : ""); };
+function applyProfile(){
+  const p = (typeof Store!=="undefined" && Store.site) || {};
+  if (p.name) IDX.BROKER.name = p.name; if (p.phone) IDX.BROKER.phone = p.phone;
+  if (p.email) IDX.BROKER.email = p.email;
+}
+async function shareApp(){
+  const url = Store.isAgent ? myLink() : IDX.APP_URL;
+  try{ if (navigator.share){ await navigator.share({ title:`${IDX.BROKER.firm} home search`, url }); return; } }catch(e){ if (e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(url); toast("Link copied"); return; }catch(e){}
+  window.prompt("Copy this link to share the app", url);
+}
+
+/* Payment estimate */
+const TAX_RATE = 0.0055, INSURANCE = 175;
+function payment(price, downPct, ratePct){
+  const loan = price*(1-downPct/100), r = ratePct/1200, n = 360;
+  const pi = r ? loan*r/(1-Math.pow(1+r,-n)) : loan/n;
+  return pi + price*TAX_RATE/12 + INSURANCE;
+}
+function paymentHTML(l){
+  if (!l.price) return "";
+  return `<details class="pay" data-price="${l.price}"><summary><span>Estimated payment</span><span><b id="payOut">${money(payment(l.price,20,6.5))}</b>/mo</span></summary>
+    <div class="row2"><div><label for="payDown">Down payment (%)</label><input id="payDown" data-pay inputmode="decimal" value="20"></div><div><label for="payRate">Interest rate (%)</label><input id="payRate" data-pay inputmode="decimal" value="6.5"></div></div>
+    <p class="addr">30-year fixed principal and interest, plus estimated property tax (${(TAX_RATE*100).toFixed(2)}% a year) and $${INSURANCE}/month insurance. HOA dues aren’t included. This is an estimate, not a loan offer; enter the rate from your own quote.</p>
+    <a class="btn gold" href="https://nestkey.ai" target="_blank" rel="noopener">Get pre-qualified</a></details>`;
+}
+
+/* Saved searches */
+let activeSearch = null, searchCounts = {}, lastSearchVer = -1;
+function describeFilters(f){
+  const st = { "Active":"For sale", "Coming Soon":"Coming soon", "Pending":"Pending", "Private Exclusive":"Off-market" };
+  return [f.text, f.maxPrice?`Up to ${short(+f.maxPrice)}`:"", f.minBeds?`${f.minBeds}+ beds`:"", f.type?typeName(f.type):"", f.status?st[f.status]:""].filter(Boolean).join(" · ") || "All homes";
+}
+function savedStripHTML(){
+  const ss = Object.entries(Store.searches).filter(([,x])=>x);
+  return `<div class="sstrip"><button class="btn ghost small" data-savesearch>Save this search</button>${ss.map(([id,x])=>`<button class="schip ${activeSearch===id?"on":""}" data-runsearch="${id}">${esc(x.name)}${searchCounts[id]?`<span class="badge" aria-label="${searchCounts[id]} new">${searchCounts[id]}</span>`:""}</button>`).join("")}${ss.length?`<button class="remove" data-managesearch>Manage</button>`:""}</div>`;
+}
+async function refreshSearchCounts(){
+  const out = {};
+  for (const [id,x] of Object.entries(Store.searches)){ if (!x) continue; try{ const l = await ListingProvider.search(x.filters||{}); out[id] = l.filter(k=>!(x.seenKeys||[]).includes(k.key)).length; }catch(e){} }
+  searchCounts = out; if (!$("#v-search").classList.contains("hidden")) renderSearch();
+}
+function applyFilters(f){
+  $("#q").value = f.text||""; $("#fPrice").value = f.maxPrice||""; $("#fBeds").value = f.minBeds||"";
+  $("#fType").value = f.type||""; $("#fStatus").value = f.status||""; $("#fSort").value = f.sort||"new";
+}
+async function runSaved(id){
+  const x = Store.searches[id]; if (!x) return;
+  applyFilters(x.filters||{}); activeSearch = id;
+  if (location.hash!=="#search") location.hash = "search";
+  await runSearch();
+  const seen = [...new Set([...(x.seenKeys||[]), ...results.map(l=>l.key)])];
+  searchCounts[id] = 0;
+  Store.saveSearch(id, { ...x, seenKeys:seen, lastRun:new Date().toISOString() });
+}
+function openManageSearches(){
+  const ss = Object.entries(Store.searches).filter(([,x])=>x);
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>Saved searches</h2><button class="close" data-close aria-label="Close">×</button></div>
+    ${ss.length ? ss.map(([id,x])=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(x.name)}</strong><p>${esc(describeFilters(x.filters||{}))}</p></div></div><div class="links"><button data-runsearch="${id}">Show homes</button><button data-delsearch="${id}">Delete</button></div></div>`).join("") : `<p class="addr">No saved searches.</p>`}`;
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+async function savedSearchesHTML(){
+  const rows = [];
+  for (const [cid,c] of Object.entries(Store.clients)) for (const [sid,sv] of Object.entries(c.searches||{})) if (sv) rows.push({ cid, sid, sv });
+  if (!rows.length) return `<div class="empty"><strong>No saved searches yet</strong>When clients save a search, it shows here with how many homes match.</div>`;
+  let html = "";
+  for (const r of rows){
+    let list = []; try{ list = await ListingProvider.search(r.sv.filters||{}); }catch(e){}
+    const fresh = list.filter(l=>!(r.sv.seenKeys||[]).includes(l.key)).length;
+    html += `<div class="pcard"><div class="pcard-top"><div><strong>${esc(nameOf(r.cid))}</strong><p>${esc(r.sv.name)} · ${esc(describeFilters(r.sv.filters||{}))}</p><p>${list.length} ${list.length===1?"match":"matches"}${fresh?` · ${fresh} they haven’t seen`:""}</p></div></div>
+      <div class="links"><button data-viewsearch="${esc(r.cid)}|${esc(r.sid)}">View results</button><button data-panel="thread:${esc(r.cid)}">Message</button></div></div>`;
+  }
+  return html;
+}
+
+/* Open houses */
+function openHouseRecords(){
+  if (Store.demo) return [...Object.values(Store.publicOH), ...Object.values(Store.crm.openhouses).filter(o=>o&&o.published)].filter(Boolean);
+  return Store.isAgent ? Object.values(Store.crm.openhouses).filter(o=>o&&o.published) : Object.values(Store.publicOH).filter(Boolean);
+}
+function nextOpenHouse(key){
+  const t = localDay();
+  return openHouseRecords().filter(o=>o.listingKey===key && o.date>=t).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start))[0];
+}
+function openHousesHTML(){
+  const t = localDay();
+  const list = Object.entries(Store.crm.openhouses).filter(([,o])=>o).sort((a,b)=>(a[1].date||"").localeCompare(b[1].date||""));
+  const visitors = Object.entries(Store.crm.ohvisitors).filter(([,v])=>v);
+  const card = ([id,o])=>{ const l = listingSync(o.listingKey); const vs = visitors.filter(([,v])=>v.ohId===id);
+    return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(l?l.address:"Listing")}</strong><p>${dayLabel(o.date)} · ${fmtTime(o.start)}${o.end?`–${fmtTime(o.end)}`:""}${o.published?" · Shown to clients":" · Private"}</p>${o.notes?`<p>${esc(o.notes)}</p>`:""}</div></div>
+      ${vs.length?`<ul class="client" style="padding:6px 12px;margin:8px 0 0">${vs.map(([vid,v])=>{ const inC = contacts().find(c=>c.email && c.email===v.email); return `<li><b>${esc(v.name)}</b>${v.phone?` · ${esc(v.phone)}`:""}${v.email?` · ${esc(v.email)}`:""}<br>Agent: ${esc(v.agent||"–")} · Pre-approved: ${esc(v.preapproved||"–")} · ${inC?`<button class="remove" data-editcontact="${inC.id}">In contacts</button>`:`<button class="remove" data-ohcontact="${vid}">Add to contacts</button>`}</li>`; }).join("")}</ul>`:""}
+      <div class="links"><button data-signin="${id}">Open sign-in sheet</button><button data-editoh="${id}">Edit</button><span class="addr">${vs.length} ${vs.length===1?"visitor":"visitors"}</span></div></div>`; };
+  const up = list.filter(([,o])=>o.date>=t), past = list.filter(([,o])=>o.date<t).reverse();
+  return `<div class="quick"><button class="btn gold" data-newoh>Schedule open house</button></div>` +
+    (up.length?`<div class="stage-h">Upcoming<span>${up.length}</span></div>${up.map(card).join("")}`:`<div class="empty"><strong>No upcoming open houses</strong>Schedule one and it shows on the listing for clients.</div>`) +
+    (past.length?`<div class="stage-h">Past<span>${past.length}</span></div>${past.map(card).join("")}`:"");
+}
+function openOHForm(id, presetKey){
+  const o = id ? { ...Store.crm.openhouses[id] } : { listingKey:presetKey||"", date:localDay(), start:"11:00", end:"13:00", published:true };
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>${id?"Edit open house":"Schedule open house"}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="ohForm"><label for="oListing">Listing</label><select id="oListing" required>${marketingPool().map(l=>`<option value="${esc(l.key)}" ${o.listingKey===l.key?"selected":""}>${esc(l.address)} · ${short(l.price)}</option>`).join("")}</select>
+      <label for="oDate">Date</label><input id="oDate" type="date" required value="${esc(o.date||"")}">
+      <div class="row2"><div><label for="oStart">Start</label><input id="oStart" type="time" required value="${esc(o.start||"")}"></div><div><label for="oEnd">End</label><input id="oEnd" type="time" value="${esc(o.end||"")}"></div></div>
+      <label for="oNotes">Notes for visitors</label><input id="oNotes" placeholder="Parking, entry, shoe covers" value="${esc(o.notes||"")}">
+      <label class="check"><input type="checkbox" id="oPub" ${o.published?"checked":""}> Show on the listing for clients</label>
+      <div class="actions"><button class="btn gold" type="submit">Save open house</button>${id?`<button class="btn ghost" type="button" data-deloh="${id}">Delete</button>`:""}</div></form>`;
+  $("#ohForm").addEventListener("submit", e=>{ e.preventDefault(); Store.saveOpenHouse(id, { ...o, listingKey:$("#oListing").value, date:$("#oDate").value, start:$("#oStart").value, end:$("#oEnd").value, notes:$("#oNotes").value.trim(), published:$("#oPub").checked, createdAt:o.createdAt||new Date().toISOString() }); $("#dlgForm").close(); });
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+function openSignIn(ohId){
+  const o = Store.crm.openhouses[ohId]; if (!o) return;
+  const l = listingSync(o.listingKey);
+  const draw = (thanks)=>{
+    $("#formBody").innerHTML = `<div class="sheettop"><span class="addr">${esc(IDX.BROKER.firm)}</span><button class="close" data-close aria-label="Close sign-in sheet">×</button></div>
+      <div class="kiosk"><h2>Welcome to ${esc(l?l.address:"the open house")}</h2><p class="addr">Please sign in. ${esc(IDX.BROKER.name)} will only use this to follow up about homes.</p>
+      ${thanks?`<p class="msg" role="status"><strong>Thanks for signing in, ${esc(thanks)}.</strong> Enjoy the tour.</p>`:""}
+      <form id="kioskForm"><label for="kName">Name</label><input id="kName" required autocomplete="off">
+        <div class="row2"><div><label for="kEmail">Email</label><input id="kEmail" type="email" autocomplete="off"></div><div><label for="kPhone">Phone</label><input id="kPhone" type="tel" autocomplete="off"></div></div>
+        <div class="row2"><div><label for="kAgent">Working with an agent?</label><select id="kAgent"><option>No</option><option>Yes</option></select></div><div><label for="kPre">Pre-approved?</label><select id="kPre"><option>Not yet</option><option>Yes</option></select></div></div>
+        <div class="actions"><button class="btn gold" type="submit">Sign in</button></div></form></div>`;
+    $("#kioskForm").addEventListener("submit", e=>{ e.preventDefault(); const name = $("#kName").value.trim(); if (!name) return;
+      Store.saveCrm("ohvisitors", null, { ohId, name, email:$("#kEmail").value.trim(), phone:$("#kPhone").value.trim(), agent:$("#kAgent").value, preapproved:$("#kPre").value, createdAt:new Date().toISOString() });
+      draw(name.split(" ")[0]); });
+  };
+  draw(""); if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+
+/* CMAs */
+function cmaComps(cma){
+  const sub = cma.subject||{};
+  return marketingPool().filter(l=>l.key!==cma.subjectKey && !l.exclusive).map(l=>{
+    let score = 0; if (l.hood===sub.hood) score += 3; if (l.type===sub.type) score += 2;
+    if (sub.sqft && l.sqft) score += Math.max(0, 2 - Math.abs(l.sqft-sub.sqft)/sub.sqft*4);
+    if (sub.beds) score += Math.max(0, 1 - Math.abs(l.beds-sub.beds)*0.5);
+    return { l, score };
+  }).sort((a,b)=>b.score-a.score);
+}
+function cmaCalc(cma){
+  const sub = cma.subject||{};
+  const rows = (cma.compKeys||[]).map(k=>listingSync(k)).filter(l=>l && l.sqft).map(l=>{ const adj = Number(cma.adj?.[l.key]||0); const ap = l.price+adj; return { l, adj, ap, ppsf:ap/l.sqft }; });
+  const ps = rows.map(r=>r.ppsf).sort((a,b)=>a-b);
+  if (!ps.length || !sub.sqft) return { rows, value:0, low:0, high:0 };
+  const q = p=>{ const i = (ps.length-1)*p, lo = Math.floor(i), hi = Math.ceil(i); return ps[lo]+(ps[hi]-ps[lo])*(i-lo); };
+  const r5k = v=>Math.round(v/5000)*5000;
+  return { rows, value:r5k(median(ps)*sub.sqft), low:r5k(q(.25)*sub.sqft), high:r5k(q(.75)*sub.sqft), mppsf:median(ps) };
+}
+function cmasHTML(){
+  const list = Object.entries(Store.crm.cmas).filter(([,c])=>c).sort((a,b)=>(b[1].updatedAt||"").localeCompare(a[1].updatedAt||""));
+  const head = `<div class="quick"><button class="btn gold" data-newcma>New CMA</button></div>`;
+  if (!list.length) return head + `<div class="empty"><strong>No CMAs yet</strong>Pick a subject home, choose comps, and get a suggested price range.</div>`;
+  return head + list.map(([id,c])=>{ const r = cmaCalc(c); return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong><p>${(c.compKeys||[]).length} comps${r.value?` · ${short(r.low)}–${short(r.high)}`:""} · ${when(c.updatedAt||c.createdAt)}</p></div></div><div class="links"><button data-panel="cma:${id}">Open</button></div></div>`; }).join("");
+}
+function openCMAForm(presetKey){
+  const pre = presetKey ? listingSync(presetKey) : null;
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>New CMA</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="cmaForm"><label for="mFrom">Start from a listing (optional)</label><select id="mFrom"><option value="">Enter the home manually</option>${marketingPool().map(l=>`<option value="${esc(l.key)}" ${pre&&pre.key===l.key?"selected":""}>${esc(l.address)}</option>`).join("")}</select>
+      <label for="mAddr">Subject address</label><input id="mAddr" required value="${esc(pre?pre.address:"")}">
+      <div class="row2"><div><label for="mHood">Neighborhood</label><select id="mHood">${HOODS.map(([h])=>`<option ${pre&&pre.hood===h?"selected":""}>${esc(h)}</option>`).join("")}</select></div><div><label for="mType">Home type</label><select id="mType">${[["Single Family Residence","House"],["Townhouse","Townhome"],["Condominium","Condo"]].map(([v,t])=>`<option value="${v}" ${pre&&pre.type===v?"selected":""}>${t}</option>`).join("")}</select></div></div>
+      <div class="row2"><div><label for="mBeds">Beds</label><input id="mBeds" type="number" min="0" value="${pre?pre.beds:""}"></div><div><label for="mBaths">Baths</label><input id="mBaths" type="number" min="0" value="${pre?pre.baths:""}"></div></div>
+      <div class="row2"><div><label for="mSqft">Square feet</label><input id="mSqft" type="number" min="0" required value="${pre?pre.sqft:""}"></div><div><label for="mYear">Year built</label><input id="mYear" type="number" value="${pre?pre.year:""}"></div></div>
+      <div class="actions"><button class="btn gold" type="submit">Create CMA</button></div></form>`;
+  $("#mFrom").addEventListener("change", e=>{ const l = listingSync(e.target.value); if (!l) return; $("#mAddr").value = l.address; $("#mHood").value = l.hood; $("#mType").value = l.type; $("#mBeds").value = l.beds; $("#mBaths").value = l.baths; $("#mSqft").value = l.sqft; $("#mYear").value = l.year||""; });
+  $("#cmaForm").addEventListener("submit", e=>{ e.preventDefault();
+    const subject = { address:$("#mAddr").value.trim(), hood:$("#mHood").value, type:$("#mType").value, beds:+$("#mBeds").value||0, baths:+$("#mBaths").value||0, sqft:+$("#mSqft").value||0, year:+$("#mYear").value||0 };
+    const cma = { name:subject.address, subjectKey:$("#mFrom").value, subject, compKeys:[], adj:{}, notes:"", createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+    cma.compKeys = cmaComps(cma).slice(0,4).map(x=>x.l.key);
+    const id = Store.saveCrm("cmas", null, cma); $("#dlgForm").close(); agentPanel = "cma:"+id; renderAgent(); window.scrollTo(0,0); });
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+function editCMA(id, fn){ const c = structuredClone(Store.crm.cmas[id]); if (!c) return; c.adj = c.adj||{}; c.compKeys = c.compKeys||[]; fn(c); c.updatedAt = new Date().toISOString(); Store.saveCrm("cmas", id, c); }
+let cmaBusy = "";
+function cmaHTML(id){
+  const c = Store.crm.cmas[id], back = `<button class="back" data-panel="cmas">‹ All CMAs</button>`;
+  if (!c) return back + `<div class="empty"><strong>CMA not found</strong>It may have been deleted.</div>`;
+  const sub = c.subject||{}, r = cmaCalc(c), cand = cmaComps(c).slice(0,10);
+  return `${back}<div class="colhead"><h2>${esc(c.name)}</h2><button class="btn ghost" data-delcma="${id}">Delete</button></div>
+    <p class="addr">${esc(sub.hood)} · ${esc(typeName(sub.type))} · ${sub.beds} bd · ${sub.baths} ba · ${Number(sub.sqft||0).toLocaleString()} sq ft${sub.year?` · Built ${sub.year}`:""}</p>
+    <div class="cmares">${r.value?`<p>Suggested list range</p><b>${money(r.low)} – ${money(r.high)}</b><p>Indicated value ${money(r.value)} at a median $${Math.round(r.mppsf)}/sq ft across ${r.rows.length} adjusted comps.</p>`:`<p>Choose at least one comp below to see a price range.</p>`}</div>
+    ${IDX.MODE==="sample"?`<p class="note-c">Comps are active and pending sample listings. With the IDX feed connected, use closed sales from the last 6 months for the final opinion of value.</p>`:""}
+    ${r.rows.length?`<div class="scroll"><table class="mtable"><thead><tr><th>Comp</th><th>Status</th><th>Price</th><th>Sq ft</th><th>Adjustment</th><th>Adjusted</th><th>$/sq ft</th></tr></thead><tbody>
+      ${r.rows.map(x=>`<tr><td>${esc(x.l.address)}</td><td>${esc(x.l.status)}</td><td>${short(x.l.price)}</td><td>${x.l.sqft.toLocaleString()}</td><td><input data-cmaadj="${id}|${esc(x.l.key)}" inputmode="decimal" aria-label="Adjustment for ${esc(x.l.address)}" value="${x.adj||""}" placeholder="0"></td><td>${short(x.ap)}</td><td>$${Math.round(x.ppsf)}</td></tr>`).join("")}
+    </tbody></table></div><p class="addr">Enter adjustments in dollars, like -25000 for a smaller lot or 15000 for an extra bath.</p>`:""}
+    <h3 class="agent-h">Comps</h3>
+    <div class="complist">${cand.map(({l})=>`<label><input type="checkbox" data-cmacomp="${id}|${esc(l.key)}" ${(c.compKeys||[]).includes(l.key)?"checked":""}><span><strong>${esc(l.address)}</strong> · ${short(l.price)} · ${l.beds} bd · ${l.sqft.toLocaleString()} sq ft<br><span class="addr">${esc(l.hood)} · ${esc(l.status)}</span></span></label>`).join("")}</div>
+    <h3 class="agent-h">Summary for your client</h3>
+    <div class="tourform"><textarea id="cmaNotes" data-cmafield="${id}|notes" rows="6" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)" placeholder="Write a summary or let the assistant draft one">${esc(c.notes||"")}</textarea></div>
+    <div class="quick" style="margin-top:10px"><button class="btn ghost" data-cmasummary="${id}" ${cmaBusy===id||!r.value?"disabled":""}>${cmaBusy===id?"Writing…":"Draft summary"}</button><button class="btn ghost" data-cmacsv="${id}" ${r.rows.length?"":"disabled"}>Download CSV</button></div>`;
+}
+async function cmaSummary(id){
+  const c = Store.crm.cmas[id]; if (!c) return; const r = cmaCalc(c);
+  const sample = await window.claude?.use?.("sample"); if (!sample){ toast("AI writing isn’t available here."); return; }
+  cmaBusy = id; renderAgent();
+  try{
+    const res = await sample(`Write a short comparative market analysis summary that ${IDX.BROKER.name} of ${IDX.BROKER.firm} can send to a seller. Plain text, 2–3 short paragraphs, warm and professional, no headings. Use only these facts and do not invent any.
+Subject: ${JSON.stringify(c.subject)}
+Comps (address, status, list price, sq ft, agent adjustment, adjusted $/sq ft): ${JSON.stringify(r.rows.map(x=>({ address:x.l.address, neighborhood:x.l.hood, status:x.l.status, price:x.l.price, sqft:x.l.sqft, adjustment:x.adj, adjusted_ppsf:Math.round(x.ppsf) })))}
+Suggested list range: ${money(r.low)} to ${money(r.high)}; indicated value ${money(r.value)}.
+Note that these comps are current listings rather than closed sales${IDX.MODE==="sample"?"":" where that applies"}, and that the final price recommendation will reflect a walkthrough of the home.`, { cache:false });
+    editCMA(id, x=>{ x.notes = res.text.trim(); });
+  }catch(e){ toast(e && e.code==="not_granted" ? "AI writing was turned off for this page." : "The summary didn’t come through. Try again."); }
+  cmaBusy = ""; renderAgent();
+}
+async function cmaCSV(id){
+  const c = Store.crm.cmas[id]; if (!c) return; const r = cmaCalc(c);
+  const rows = [["Comp","Neighborhood","Status","Price","Sq ft","Adjustment","Adjusted price","Adjusted $/sq ft"], ...r.rows.map(x=>[x.l.address,x.l.hood,x.l.status,x.l.price,x.l.sqft,x.adj,x.ap,Math.round(x.ppsf)]), [], ["Subject",c.subject.address,"","","",c.subject.sqft], ["Suggested range",r.low,r.high], ["Indicated value",r.value]];
+  const csv = rows.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  try{ const dl = await window.claude?.use?.("downloads"); if (!dl){ toast("Downloads aren’t available here."); return; } await dl.save({ filename:`CMA-${c.name.replace(/[^\w]+/g,"-")}.csv`, data:csv }); }catch(e){}
+}
+
+/* Listings + insights */
+function myListingKeys(){
+  const keys = new Set();
+  (Store.demo ? Object.values(Store.crm.exclusives) : exclusiveRecords()).filter(Boolean).forEach(r=>keys.add(r.ListingKey));
+  contacts().filter(c=>c.listingKey).forEach(c=>keys.add(c.listingKey));
+  [...ListingProvider.cache.values()].filter(l=>l.agent===IDX.BROKER.name).forEach(l=>keys.add(l.key));
+  return [...keys];
+}
+function engagement(){
+  const m = {}, g = k=>(m[k] = m[k]||{ saves:0, love:0, maybe:0, pass:0, notes:0, requests:0 });
+  Object.keys(Store.clients).forEach(cid=>clientItems(cid).forEach(i=>{ const e = g(i.key); e.saves++; if (i.reaction) e[i.reaction]++; if (i.note) e.notes++; }));
+  allRequests().forEach(r=>{ if (r.listingKey) g(r.listingKey).requests++; });
+  return m;
+}
+function listingsHTML(){
+  const keys = myListingKeys(), eng = engagement();
+  if (!keys.length) return `<div class="empty"><strong>No listings yet</strong>Link a seller to their listing on the contact form, or add an off-market listing.</div>`;
+  return keys.map(k=>{ const l = listingSync(k); if (!l) return ""; const e = eng[k]||{}; const seller = contacts().find(c=>c.listingKey===k); const oh = Object.values(Store.crm.openhouses).filter(o=>o&&o.listingKey===k&&o.date>=localDay()).length;
+    return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(l.address)}</strong><p>${money(l.price)} · ${esc(l.exclusive?(l.status==="Private Exclusive"?"Off-market":"Coming soon"):l.status)}${seller?` · ${esc(seller.name)}`:""}</p>
+      <p>${e.saves||0} saves · ${e.love||0} loves · ${e.pass||0} passes · ${e.requests||0} showing requests${oh?` · ${oh} open ${oh===1?"house":"houses"} scheduled`:""}</p></div></div>
+      <div class="links"><button data-open="${esc(k)}">View</button><button data-ohfor="${esc(k)}">Open house</button><button data-mklisting="${esc(k)}">Marketing</button><button data-cmafor="${esc(k)}">CMA</button></div></div>`; }).join("");
+}
+function insightsHTML(){
+  const since = Date.now()-30*864e5, recent = x=>x && new Date(x).getTime()>=since;
+  const items = []; Object.keys(Store.clients).forEach(cid=>clientItems(cid).forEach(i=>items.push({ cid, ...i })));
+  const reqs = allRequests();
+  const active = new Set([...items.filter(i=>recent(i.updatedAt||i.addedAt)).map(i=>i.cid), ...reqs.filter(r=>recent(r.createdAt)).map(r=>r.cid)]);
+  const stat = (n,t)=>`<div><b>${n}</b><span>${t}</span></div>`;
+  const eng = engagement();
+  const top = Object.entries(eng).map(([k,e])=>({ k, e, l:listingSync(k), score:e.saves+e.love*2+e.requests*3-e.pass })).filter(x=>x.l).sort((a,b)=>b.score-a.score).slice(0,8);
+  const days = Array.from({ length:14 }, (_,i)=>{ const d = new Date(); d.setDate(d.getDate()-13+i); return d.toLocaleDateString("en-CA"); });
+  const dayOf = iso=>iso ? new Date(iso).toLocaleDateString("en-CA") : "";
+  const counts = days.map(d=>items.filter(i=>dayOf(i.addedAt)===d).length + items.filter(i=>i.reaction && dayOf(i.updatedAt)===d && dayOf(i.addedAt)!==d).length + reqs.filter(r=>dayOf(r.createdAt)===d).length);
+  const mx = Math.max(...counts,1);
+  const bars = counts.map((v,i)=>`<rect x="${i*25+4}" y="${100-v/mx*90}" width="17" height="${Math.max(v/mx*90,1)}" rx="3" fill="${v?"var(--accent)":"var(--line)"}"><title>${days[i]}: ${v}</title></rect>${i%2===0?`<text x="${i*25+12}" y="116" text-anchor="middle">${Number(days[i].slice(8))}</text>`:""}`).join("");
+  return `<p class="addr">Last 30 days of client activity in the app.</p>
+    <div class="stats">${stat(items.filter(i=>recent(i.addedAt)).length,"Homes saved")}${stat(items.filter(i=>i.reaction==="love"&&recent(i.updatedAt||i.addedAt)).length,"Loves")}${stat(reqs.filter(r=>recent(r.createdAt)).length,"Showing requests")}${stat(active.size,"Active clients")}</div>
+    <div class="chart"><svg viewBox="0 0 352 122" role="img" aria-label="Client activity per day over the last 14 days">${bars}</svg></div>
+    <h3 class="agent-h">Most engaged homes</h3>
+    ${top.length?`<div class="scroll"><table class="mtable"><thead><tr><th>Home</th><th>Saves</th><th>Loves</th><th>Passes</th><th>Requests</th></tr></thead><tbody>${top.map(x=>`<tr><td>${esc(x.l.address)}</td><td>${x.e.saves}</td><td>${x.e.love}</td><td>${x.e.pass}</td><td>${x.e.requests}</td></tr>`).join("")}</tbody></table></div>`:`<p class="addr">No client activity yet.</p>`}`;
+}
+
+/* Miller Picks */
+let openShow = null;
+const showcaseAll = ()=>({ ...(Store.demo?Store.demoShowcase:{}), ...Store.showcase });
+function showcaseStripHTML(){
+  const sc = Object.entries(showcaseAll()).filter(([,x])=>x && (x.keys||[]).length);
+  if (!sc.length) return "";
+  return `<h3 class="agent-h">Miller Picks</h3><div class="collist">${sc.map(([id,x])=>`<button class="colcard" data-openshow="${id}"><h3>${esc(x.name)}</h3><p>${(x.keys||[]).length} homes${x.description?` · ${esc(x.description)}`:""}</p></button>`).join("")}</div>`;
+}
+function showcaseListHTML(){
+  const sc = Object.entries(showcaseAll()).filter(([,x])=>x);
+  return `<p class="addr">Curated lists every visitor sees in their Shortlists tab.</p><div class="quick"><button class="btn gold" data-newshow>New Miller Pick</button></div>` +
+    (sc.length ? sc.map(([id,x])=>`<div class="pcard"><div class="pcard-top"><div><strong>${esc(x.name)}</strong><p>${(x.keys||[]).length} homes${x.description?` · ${esc(x.description)}`:""}</p></div></div><div class="links"><button data-panel="showcase:${id}">Edit</button></div></div>`).join("") : `<div class="empty"><strong>No Miller Picks yet</strong>Group homes by theme, like condos under $500K or homes near light rail.</div>`);
+}
+function showcaseEditHTML(id){
+  const x = showcaseAll()[id], back = `<button class="back" data-panel="showcase">‹ Miller Picks</button>`;
+  if (!x) return back + `<div class="empty"><strong>List not found</strong>It may have been deleted.</div>`;
+  const keys = x.keys||[], pool = marketingPool().filter(l=>!keys.includes(l.key));
+  return `${back}<div class="colhead"><h2>${esc(x.name)}</h2><button class="btn ghost" data-delshow="${id}">Delete</button></div>
+    <div class="tourform"><label for="scName">Name</label><input id="scName" data-showfield="${id}|name" value="${esc(x.name)}"><label for="scDesc">Description</label><input id="scDesc" data-showfield="${id}|description" value="${esc(x.description||"")}"></div>
+    <h3 class="agent-h">Homes</h3>
+    ${keys.map(k=>{ const l = listingSync(k); return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(l?l.address:k)}</strong><p>${l?`${short(l.price)} · ${l.beds} bd · ${esc(l.hood)}`:""}</p></div><button class="remove" data-showremove="${id}|${esc(k)}">Remove</button></div></div>`; }).join("") || `<p class="addr">No homes yet.</p>`}
+    <div class="tourform"><label for="scAdd">Add a home</label><select id="scAdd" data-showadd="${id}"><option value="">Choose a home</option>${pool.map(l=>`<option value="${esc(l.key)}">${esc(l.address)} · ${short(l.price)}</option>`).join("")}</select></div>`;
+}
+function editShowcase(id, fn){ const x = structuredClone(showcaseAll()[id]); if (!x) return; x.keys = x.keys||[]; fn(x); x.updatedAt = new Date().toISOString(); Store.saveShowcase(id, x); }
+
+/* Settings + help */
+function settingsHTML(){
+  const b = IDX.BROKER, p = Store.site||{};
+  const others = Object.entries(Store.team).filter(([,a])=>a).sort((x,y)=>(x[1].name||"").localeCompare(y[1].name||""));
+  return `${Store.isBroker && others.length ? `<div class="tourform"><h3 class="agent-h" style="margin-top:0">Broker view</h3><label for="viewAs">Show the CRM for</label><select id="viewAs">${others.map(([id,a])=>`<option value="${esc(id)}" ${id===Store.crmOwner?"selected":""}>${esc(a.name||"Unnamed agent")}${id===Store.uid?" (you)":""}</option>`).join("")}</select><p class="addr">Client shortlists, messages, and showing requests from every agent always show for you.</p></div>` : ""}
+    <form id="profileForm" class="tourform"><h3 class="agent-h">Profile shown to your clients</h3>
+      <label for="pName">Name</label><input id="pName" required value="${esc(p.name||"")}">
+      <label for="pTitle">Title</label><input id="pTitle" placeholder="Broker associate" value="${esc(p.title||"")}">
+      <div class="row2"><div><label for="pPhone">Phone</label><input id="pPhone" type="tel" value="${esc(p.phone||"")}"></div><div><label for="pEmail">Email</label><input id="pEmail" type="email" value="${esc(p.email||"")}"></div></div>
+      <label for="pAreas">Areas</label><input id="pAreas" placeholder="Highland, Berkeley, Golden" value="${esc(p.areas||"")}">
+      <label for="pLang">Languages</label><input id="pLang" value="${esc(p.languages||"")}">
+      <label for="pBio">Short bio</label><textarea id="pBio" rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)">${esc(p.bio||"")}</textarea>
+      <label for="pSlug">Your link name</label><input id="pSlug" required pattern="[a-z0-9-]{2,40}" placeholder="sara-clark" value="${esc(p.slug||"")}">
+      <p class="addr">Clients who sign up through your link are assigned to you: ${esc(IDX.APP_URL)}?agent=${esc(p.slug||"your-name")}</p>
+      <div class="actions"><button class="btn gold" type="submit">Save profile</button>${p.slug?`<button class="btn ghost" type="button" data-copymine>Copy my link</button>`:""}</div><p class="msg" id="profileMsg" role="status"></p></form>
+    <h3 class="agent-h">Business</h3><div class="menu"><button data-editgoals>Goals and commission rate<span>${Store.settings.gciGoal?short(Store.settings.gciGoal):"Not set"} · ${Store.settings.commissionRate??2.5}%</span></button></div>
+    <h3 class="agent-h">App</h3><div class="menu"><button data-share>Share my link</button><button data-panel="help">Help and support</button></div>
+    <p class="addr" style="margin-top:14px">Listings: ${IDX.MODE==="sample"?"sample data (IDX not connected yet)":`live from ${esc(IDX.MLS_NAME)}`}. Signed in as ${Store.isBroker?"broker":"agent"}.</p>`;
+}
+function helpHTML(){
+  const q = (t,a)=>`<details><summary>${t}</summary><p>${a}</p></details>`;
+  return `<div class="faq">
+    ${q("How do clients get access?","Share your personal link from Settings. Clients who sign in through it are assigned to you, and their shortlists, searches, messages, and showing requests appear in your Agent tab. Anyone can browse without signing in.")}
+    ${q("Who can see my contacts and deals?","Only you and the broker. Other agents can’t see your clients, contacts, tasks, CMAs, or deals. Clients see only their own shortlists, searches, messages, and the showing days you share with them.")}
+    ${q("What do other agents see of my listings?","Off-market listings, open houses, and Miller Picks you publish are public, so every agent and client can see them. Drafts stay private to you.")}
+    ${q("Where do listings come from?",IDX.MODE==="sample"?"Sample listings for now. Once the REcolorado IDX feed is connected, search, Market Pulse, and CMAs use live data.":"The REcolorado IDX feed, plus any off-market listings you publish.")}
+    ${q("How do off-market listings and open houses reach clients?","Check “Show to clients” on the off-market listing or the open house. They appear in search with a Miller Group badge, and open houses show on the listing card and details.")}
+    ${q("How do I share a showing day?","Link the buyer to their app account on the contact form, then check “Show this in their app” on the showing day.")}
+    </div>
+    <div class="agent"><div class="mono">?</div><div><strong>Need help with the app?</strong><p>Contact ${esc(IDX.BROKER.name)} at <a href="tel:${esc(IDX.BROKER.phone.replace(/\D/g,""))}">${esc(IDX.BROKER.phone)}</a>${IDX.BROKER.email?` or <a href="mailto:${esc(IDX.BROKER.email)}">${esc(IDX.BROKER.email)}</a>`:""}.</p></div></div>`;
+}
+
+async function renderAgent(){
+  const el = $("#v-agent");
+  if (!Store.isAgent){ el.innerHTML = `<div class="empty"><strong>This area is for The Miller Group</strong>Open the Shortlists tab to see your saved homes.</div>`; return; }
+  const back = `<button class="back" data-panel="home">‹ Agent home</button>`;
+  const head = (t,extra="")=>`${back}<div class="colhead"><h2>${t}</h2>${extra}</div>`;
+  if (Store.isAgent && agentPanel.startsWith("thread:")){
+    const cid = agentPanel.slice(7);
+    const log = $("#agentChatLog");
+    if (log && log.dataset.cid===cid){ updateAgentChat(cid); return; }
+    el.innerHTML = `<button class="back" data-panel="inbox">‹ Inbox</button><div class="colhead"><h2>${esc(nameOf(cid))}</h2></div>
+      <div class="chatlog tall" id="agentChatLog" data-cid="${esc(cid)}"></div>
+      <form class="chatform" id="agentChatForm"><div class="chatrow"><textarea id="agentChatText" rows="2" placeholder="Write a message" aria-label="Message" required></textarea><button class="btn gold" type="submit">Send</button></div></form>`;
+    Store.openAgentThread(cid);
+    $("#agentChatForm").addEventListener("submit", e=>{ e.preventDefault(); const t = $("#agentChatText").value.trim(); if (!t) return; Store.sendMessage(cid, "agent", t); $("#agentChatText").value = ""; });
+    updateAgentChat(cid); return;
+  }
+  let html;
+  switch (agentPanel.includes(":") ? agentPanel.split(":")[0] : agentPanel){
+    case "searches": html = head("Saved searches") + await savedSearchesHTML(); break;
+    case "openhouses": html = head("Open houses") + openHousesHTML(); break;
+    case "cmas": html = head("CMAs") + cmasHTML(); break;
+    case "cma": html = cmaHTML(agentPanel.slice(4)); break;
+    case "listings": html = head("Listings") + listingsHTML(); break;
+    case "insights": html = head("Insights") + insightsHTML(); break;
+    case "showcase": html = agentPanel.includes(":") ? showcaseEditHTML(agentPanel.slice(9)) : head("Miller Picks") + showcaseListHTML(); break;
+    case "settings": html = head("Settings") + settingsHTML(); break;
+    case "help": html = head("Help and support") + helpHTML(); break;
+    case "inbox": html = head("Inbox") + inboxHTML(); break;
+    case "market": html = head("Market pulse") + marketHTML(); break;
+    case "exclusives": html = head("Off-market & coming soon") + exclusivesHTML(); break;
+    case "marketing": html = head("Marketing") + marketingHTML(); break;
+    case "assistant": html = head("AI assistant") + assistantHTML(); break;
+    case "agents": html = head("Team") + agentsHTML(); break;
+    case "notifications": html = head("Notifications") + notificationsHTML(); break;
+    case "biz": html = head("GCI tracker", `<button class="btn ghost" data-editgoals>Goals</button>`) + bizHTML(); break;
+    case "tours": html = head("Showing days") + toursHTML(); break;
+    case "tour": html = tourHTML(agentPanel.slice(5)); break;
+    case "requests": html = head("Showing requests", allRequests().length?`<button class="btn ghost" data-export>Download CSV</button>`:"") + requestsHTML(); break;
+    case "activity": html = head("Client shortlists") + await activityHTML(); break;
+    case "buyers": html = head("Buyers") + pipelineHTML("buyer"); break;
+    case "sellers": html = head("Sellers") + pipelineHTML("seller"); break;
+    case "contacts": html = head("Contacts") + contactsHTML(); break;
+    case "tasks": html = head("Tasks") + tasksHTML(); break;
+    default: html = agentHomeHTML();
+  }
+  el.innerHTML = (Store.demo ? `<p class="note-c">Demo mode: sample clients and deals. Changes stay in this browser and reset when the page reloads.</p>` : "") + html;
+  const pf = $("#profileForm");
+  if (pf) pf.addEventListener("submit", async e=>{ e.preventDefault(); const m = $("#profileMsg");
+    const slug = slugify($("#pSlug").value);
+    const taken = Object.entries(Store.team).some(([id,a])=>a && id!==Store.crmOwner && String(a.slug||"")===slug);
+    if (!slug || taken){ if (m) m.textContent = taken ? "Another agent already uses that link name." : "Add a link name."; return; }
+    try{ await Store.saveProfile({ name:$("#pName").value.trim(), title:$("#pTitle").value.trim(), phone:$("#pPhone").value.trim(), email:$("#pEmail").value.trim(), areas:$("#pAreas").value.trim(), languages:$("#pLang").value.trim(), bio:$("#pBio").value.trim(), slug }); if (m) m.textContent = "Profile saved."; }
+    catch(err){ if (m) m.textContent = "That didn’t save. Try again."; } });
+  const va = $("#viewAs");
+  if (va) va.addEventListener("change", ()=>{ try{ if (va.value===Store.uid) sessionStorage.removeItem("tmg-view-as"); else sessionStorage.setItem("tmg-view-as", va.value); }catch(e){} location.reload(); });
+  if (agentPanel==="assistant"){
+    const f = $("#aiForm"); if (f) f.addEventListener("submit", e=>{ e.preventDefault(); const t = $("#aiText"); askAI(t.value); });
+    const log = $("#aiLog"); if (log) log.scrollTop = log.scrollHeight;
+  }
+}
+
+/* Contact and task forms */
+function knownClients(){
+  return [...new Set([...Object.keys(Store.clients), ...Object.keys(Store.leads)])].map(cid=>[cid, Store.clientName(cid)]);
+}
+function openContactForm(id, preset={}){
+  const c = id ? { ...Store.crm.contacts[id] } : { role:"buyer", buyerStage:"lead", sellerStage:"prospect", ...preset };
+  const opt = (list,val)=>list.map(([v,t])=>`<option value="${v}" ${val===v?"selected":""}>${esc(t)}</option>`).join("");
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>${id?"Edit contact":"New contact"}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="contactForm">
+      <label for="cName">Name</label><input id="cName" required value="${esc(c.name||"")}">
+      <div class="row2"><div><label for="cPhone">Phone</label><input id="cPhone" type="tel" value="${esc(c.phone||"")}"></div><div><label for="cEmail">Email</label><input id="cEmail" type="email" value="${esc(c.email||"")}"></div></div>
+      <label for="cRole">Type</label><select id="cRole">${opt(ROLES,c.role)}</select>
+      <div id="buyerFields"><div class="row2"><div><label for="cBStage">Buyer stage</label><select id="cBStage">${opt(BUYER_STAGES,c.buyerStage)}</select></div><div><label for="cBudget">Budget</label><input id="cBudget" placeholder="$900K" value="${esc(c.budget||"")}"></div></div>
+        <label for="cArea">Areas</label><input id="cArea" placeholder="Wash Park, Platt Park" value="${esc(c.area||"")}"></div>
+      <div id="sellerFields"><div class="row2"><div><label for="cSStage">Seller stage</label><select id="cSStage">${opt(SELLER_STAGES,c.sellerStage)}</select></div><div><label for="cPrice">List price</label><input id="cPrice" placeholder="$1.2M" value="${esc(c.listPrice||"")}"></div></div>
+        <label for="cAddr">Property address</label><input id="cAddr" value="${esc(c.listingAddress||"")}">
+        <label for="cListing">Linked listing</label><select id="cListing"><option value="">None</option>${marketingPool().map(l=>`<option value="${esc(l.key)}" ${c.listingKey===l.key?"selected":""}>${esc(l.address)} · ${short(l.price)}</option>`).join("")}</select></div>
+      <div id="dealFields"><div class="row2"><div><label for="cSale">Contract price</label><input id="cSale" placeholder="$1.1M" value="${esc(c.salePrice||"")}"></div><div><label for="cClose">Closing date</label><input id="cClose" type="date" value="${esc(c.closeDate||"")}"></div></div></div>
+      <label for="cClient">App account</label><select id="cClient"><option value="">Not linked</option>${knownClients().map(([v,t])=>`<option value="${esc(v)}" ${c.clientId===v?"selected":""}>${esc(t)}</option>`).join("")}</select>
+      <label for="cNotes">Notes</label><textarea id="cNotes" rows="3">${esc(c.notes||"")}</textarea>
+      <div class="actions"><button class="btn gold" type="submit">Save contact</button>${id?`<button class="btn ghost" type="button" data-delcontact="${id}">Delete</button>`:""}</div>
+    </form>`;
+  const sync = ()=>{ const r=$("#cRole").value; $("#buyerFields").classList.toggle("hidden", !(r==="buyer"||r==="both")); $("#sellerFields").classList.toggle("hidden", !(r==="seller"||r==="both")); $("#dealFields").classList.toggle("hidden", r==="other"); };
+  $("#cRole").addEventListener("change", sync); sync();
+  $("#contactForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    const now = new Date().toISOString();
+    Store.saveCrm("contacts", id, { ...c, name:$("#cName").value.trim(), phone:$("#cPhone").value.trim(), email:$("#cEmail").value.trim(), role:$("#cRole").value,
+      buyerStage:$("#cBStage").value, budget:$("#cBudget").value.trim(), area:$("#cArea").value.trim(),
+      sellerStage:$("#cSStage").value, listPrice:$("#cPrice").value.trim(), listingAddress:$("#cAddr").value.trim(), listingKey:$("#cListing").value,
+      salePrice:$("#cSale").value.trim(), closeDate:$("#cClose").value,
+      clientId:$("#cClient").value, notes:$("#cNotes").value.trim(), createdAt:c.createdAt||now, updatedAt:now });
+    $("#dlgForm").close();
+  });
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+function openTaskForm(id, contactId=""){
+  const t = id ? { ...Store.crm.tasks[id] } : { due:localDay(), contactId };
+  $("#formBody").innerHTML = `<div class="sheettop"><h2>${id?"Edit task":"New task"}</h2><button class="close" data-close aria-label="Close">×</button></div>
+    <form id="taskForm">
+      <label for="tTitle">Task</label><input id="tTitle" required placeholder="Send Wash Park comps" value="${esc(t.title||"")}">
+      <div class="row2"><div><label for="tDue">Due</label><input id="tDue" type="date" value="${esc(t.due||"")}"></div>
+      <div><label for="tContact">Contact</label><select id="tContact"><option value="">None</option>${contacts().map(c=>`<option value="${c.id}" ${t.contactId===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div></div>
+      <div class="actions"><button class="btn gold" type="submit">Save task</button>${id?`<button class="btn ghost" type="button" data-deltask="${id}">Delete</button>`:""}</div>
+    </form>`;
+  $("#taskForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    Store.saveCrm("tasks", id, { ...t, title:$("#tTitle").value.trim(), due:$("#tDue").value, contactId:$("#tContact").value, done:!!t.done, createdAt:t.createdAt||new Date().toISOString() });
+    $("#dlgForm").close();
+  });
+  if (!$("#dlgForm").open) $("#dlgForm").showModal();
+}
+
+async function exportCSV(){
+  const rows = [["Received","Name","Email","Phone","Property","MLS key","Status","Message"]].concat(
+    allRequests().map(r=>[r.createdAt,r.name,r.email,r.phone,r.address,r.listingKey,r.status,r.message]));
+  const csv = rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  try{
+    const dl = await window.claude.use("downloads");
+    if (!dl){ toast("Downloads aren’t available here."); return; }
+    await dl.save({ filename:`showing-requests-${new Date().toISOString().slice(0,10)}.csv`, data:csv });
+  }catch(e){ /* viewer declined */ }
+}
+
+/* Routing (#search, #map, #collections, #agent) */
+const VIEWS = ["search","map","collections","agent"];
+function route(){
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "search";
+  VIEWS.forEach(n=>$("#v-"+n).classList.toggle("hidden", n!==v));
+  document.querySelectorAll("nav.tabs a").forEach(a=>{ if(a.dataset.view===v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  const side = v==="collections" || v==="agent";
+  $("#searchUI").classList.toggle("hidden", side);
+  $("#dataBanner").classList.toggle("hidden", side || IDX.MODE!=="sample");
+  if (v==="collections") renderCollections();
+  if (v==="agent") renderAgent();
+}
+
+/* Events */
+document.addEventListener("click", e=>{
+  const ex = e.target.closest("[data-export]"); if (ex){ exportCSV(); return; }
+  const ch = e.target.closest("[data-chat],[data-clearabout]");
+  if (ch){ if (ch.dataset.clearabout!==undefined){ chatListing = ""; $("#chatAbout")?.remove(); } else openClientChat(ch.dataset.chat); return; }
+  const p4 = e.target.closest("[data-savesearch],[data-runsearch],[data-managesearch],[data-delsearch],[data-viewsearch],[data-share],[data-newoh],[data-editoh],[data-deloh],[data-signin],[data-ohcontact],[data-ohfor],[data-newcma],[data-cmafor],[data-delcma],[data-cmasummary],[data-cmacsv],[data-mklisting],[data-newshow],[data-delshow],[data-showremove],[data-openshow],[data-closeshow]");
+  if (p4){
+    const d = p4.dataset;
+    if (d.savesearch!==undefined){ const f = filters(); const name = prompt("Name this search", describeFilters(f)); if (name && name.trim()){ activeSearch = Store.saveSearch(null, { name:name.trim(), filters:f, seenKeys:results.map(l=>l.key), createdAt:new Date().toISOString() }); renderSearch(); } }
+    else if (d.runsearch!==undefined){ if ($("#dlgForm").open) $("#dlgForm").close(); runSaved(d.runsearch); }
+    else if (d.managesearch!==undefined) openManageSearches();
+    else if (d.delsearch!==undefined){ Store.saveSearch(d.delsearch, null); if (activeSearch===d.delsearch) activeSearch = null; openManageSearches(); }
+    else if (d.viewsearch!==undefined){ const [cid,sid] = d.viewsearch.split("|"); const sv = Store.clients[cid]?.searches?.[sid]; if (sv){ applyFilters(sv.filters||{}); activeSearch = null; location.hash = "search"; runSearch(); } }
+    else if (d.share!==undefined) shareApp();
+    else if (d.newoh!==undefined) openOHForm(null);
+    else if (d.ohfor!==undefined) openOHForm(null, d.ohfor);
+    else if (d.editoh!==undefined) openOHForm(d.editoh);
+    else if (d.deloh!==undefined){ if (confirm("Delete this open house?")){ Store.saveOpenHouse(d.deloh, null); $("#dlgForm").close(); } }
+    else if (d.signin!==undefined) openSignIn(d.signin);
+    else if (d.ohcontact!==undefined){ const v = Store.crm.ohvisitors[d.ohcontact]; const o = v && Store.crm.openhouses[v.ohId]; if (v) openContactForm(null, { name:v.name, email:v.email, phone:v.phone, role:"buyer", notes:`Signed in at the open house at ${o?addrOf(o.listingKey):"a listing"} on ${o?dayLabel(o.date):""}. Working with an agent: ${v.agent}. Pre-approved: ${v.preapproved}.` }); }
+    else if (d.newcma!==undefined) openCMAForm();
+    else if (d.cmafor!==undefined) openCMAForm(d.cmafor);
+    else if (d.delcma!==undefined){ if (confirm("Delete this CMA?")){ Store.saveCrm("cmas", d.delcma, null); agentPanel = "cmas"; renderAgent(); } }
+    else if (d.cmasummary!==undefined) cmaSummary(d.cmasummary);
+    else if (d.cmacsv!==undefined) cmaCSV(d.cmacsv);
+    else if (d.mklisting!==undefined){ mk.key = d.mklisting; mk.caps = null; agentPanel = "marketing"; renderAgent(); window.scrollTo(0,0); }
+    else if (d.newshow!==undefined){ const n = prompt("Name this Miller Pick list"); if (n && n.trim()){ const id = Store.saveShowcase(null, { name:n.trim(), description:"", keys:[], createdAt:new Date().toISOString() }); agentPanel = "showcase:"+id; renderAgent(); } }
+    else if (d.delshow!==undefined){ if (confirm("Delete this Miller Pick list?")){ Store.saveShowcase(d.delshow, null); agentPanel = "showcase"; renderAgent(); } }
+    else if (d.showremove!==undefined){ const [id,k] = d.showremove.split("|"); editShowcase(id, x=>{ x.keys = x.keys.filter(y=>y!==k); }); }
+    else if (d.openshow!==undefined){ openShow = d.openshow; renderCollections(); window.scrollTo(0,0); }
+    else if (d.closeshow!==undefined){ openShow = null; renderCollections(); }
+    return;
+  }
+  const cl = e.target.closest("[data-copylink],[data-copymine]");
+  if (cl){ const url = cl.dataset.copymine!==undefined ? myLink() : IDX.APP_URL + "?agent=" + encodeURIComponent(cl.dataset.copylink);
+    (navigator.clipboard?.writeText(url)||Promise.reject()).then(()=>toast("Link copied")).catch(()=>window.prompt("Copy this link", url)); return; }
+  const p3 = e.target.closest("[data-newex],[data-editex],[data-delex],[data-mkpng],[data-mkcaps],[data-copy],[data-aiask],[data-aiclear],[data-newagent],[data-editagent],[data-delagent]");
+  if (p3){
+    const d = p3.dataset;
+    if (d.newex!==undefined) openExclusiveForm(null);
+    else if (d.editex!==undefined) openExclusiveForm(d.editex);
+    else if (d.delex!==undefined){ if (confirm("Delete this listing? It will also leave client search.")){ Store.saveExclusive(d.delex, null); $("#dlgForm").close(); } }
+    else if (d.mkpng!==undefined) downloadFlyer();
+    else if (d.mkcaps!==undefined) writeCaptions();
+    else if (d.copy!==undefined){ const ta = document.getElementById(d.copy); ta.select(); (navigator.clipboard?.writeText(ta.value)||Promise.reject()).then(()=>{ p3.textContent="Copied"; setTimeout(()=>p3.textContent="Copy",1500); }).catch(()=>{ try{ document.execCommand("copy"); p3.textContent="Copied"; }catch(_){ } }); }
+    else if (d.aiask!==undefined) askAI(d.aiask);
+    else if (d.aiclear!==undefined){ ai.ctl?.abort(); ai = { msgs:[], busy:false, ctl:null }; renderAgent(); }
+    else if (d.newagent!==undefined) openInviteForm();
+    else if (d.editagent!==undefined) openAgentForm(d.editagent);
+    else if (d.delagent!==undefined){ if (confirm("Remove this agent? They lose the agent tools, and their profile leaves the Team page. Their clients stay assigned to them until you reassign.")){ window.MillerCloud?.rpc?.("remove_agent", { agent_id:d.delagent }).catch(()=>{}); Store.saveRoster(d.delagent, null); $("#dlgForm").close(); } }
+    return;
+  }
+  const tr = e.target.closest("[data-newtour],[data-deltour],[data-stopmove],[data-stopdel],[data-optimize],[data-addloved],[data-editgoals]");
+  if (tr){
+    const d = tr.dataset;
+    if (d.newtour!==undefined) newTour(d.newtour);
+    else if (d.deltour!==undefined){ if (confirm("Delete this showing day?")){ Store.saveTour(d.deltour, null); agentPanel = "tours"; renderAgent(); } }
+    else if (d.stopmove!==undefined){ const [id,i,dir] = d.stopmove.split("|"); editTour(id, t=>{ const a=+i, b=a+(+dir); if (b<0||b>=t.stops.length) return; [t.stops[a],t.stops[b]] = [t.stops[b],t.stops[a]]; }); }
+    else if (d.stopdel!==undefined){ const [id,i] = d.stopdel.split("|"); editTour(id, t=>t.stops.splice(+i,1)); }
+    else if (d.optimize!==undefined) editTour(d.optimize, t=>{ t.stops = optimizeStops(t.stops); });
+    else if (d.addloved!==undefined) editTour(d.addloved, t=>{ const c = Store.crm.contacts[t.contactId]; if (!c||!c.clientId) return; clientItems(c.clientId).filter(i=>i.reaction==="love" && !t.stops.some(s=>s.listingKey===i.key)).forEach(i=>t.stops.push({ listingKey:i.key, time:"", note:"" })); });
+    else if (d.editgoals!==undefined) openGoalsForm();
+    return;
+  }
+  const a = e.target.closest("[data-panel],[data-newcontact],[data-newtask],[data-editcontact],[data-edittask],[data-addcontact],[data-delcontact],[data-deltask]");
+  if (a){
+    const d = a.dataset;
+    if (d.panel!==undefined){
+      if (d.panel==="notifications"){ notifPrevSeen = Store.settings.notifSeenAt||""; Store.saveSettings({ notifSeenAt:new Date().toISOString() }); }
+      agentPanel = d.panel;
+      if (location.hash!=="#agent") location.hash = "agent";
+      renderAgent(); window.scrollTo(0,0);
+    }
+    else if (d.newcontact!==undefined) openContactForm(null, d.newcontact==="seller" ? { role:"seller" } : {});
+    else if (d.newtask!==undefined) openTaskForm(null, d.newtask);
+    else if (d.editcontact!==undefined) openContactForm(d.editcontact);
+    else if (d.edittask!==undefined) openTaskForm(d.edittask);
+    else if (d.addcontact!==undefined){ const [cid,rid] = d.addcontact.split("|"); const r = Store.leads[cid]?.requests?.[rid]||{}; openContactForm(null, { name:r.name||"", email:r.email||"", phone:r.phone||"", clientId:cid, notes:r.address?`Requested a showing at ${r.address}.`:"" }); }
+    else if (d.delcontact!==undefined){ if (confirm("Delete this contact?")){ Store.saveCrm("contacts", d.delcontact, null); $("#dlgForm").close(); } }
+    else if (d.deltask!==undefined){ Store.saveCrm("tasks", d.deltask, null); $("#dlgForm").close(); }
+    return;
+  }
+  const t = e.target.closest("[data-save],[data-open],[data-pin],[data-pick],[data-close],[data-col],[data-back],[data-newcol],[data-delcol],[data-react],[data-unsave]");
+  if (!t) return;
+  const d = t.dataset;
+  if (d.save!==undefined){ e.stopPropagation(); openSave(d.save); }
+  else if (d.open!==undefined){ e.preventDefault(); openListing(d.open); }
+  else if (d.pin!==undefined){ selectedPin = d.pin; renderMap(); }
+  else if (d.pick!==undefined) Store.toggle(d.pick, saveKey);
+  else if (d.close!==undefined) t.closest("dialog").close();
+  else if (d.col!==undefined){ openCol = d.col; renderCollections(); window.scrollTo(0,0); }
+  else if (d.back!==undefined){ openCol = null; renderCollections(); }
+  else if (d.newcol!==undefined){ const n = prompt("Name this shortlist"); if (n && n.trim()){ openCol = Store.create(n.trim()); renderCollections(); } }
+  else if (d.delcol!==undefined){ if (confirm("Delete this shortlist and its notes?")){ Store.remove(d.delcol); openCol=null; renderCollections(); } }
+  else if (d.react!==undefined){ const cur = Store.cols[openCol]?.items?.[d.key]?.reaction; Store.setItem(openCol, d.key, { reaction: cur===d.react ? "" : d.react }); }
+  else if (d.unsave!==undefined){ Store.toggle(openCol, d.unsave); }
+});
+document.addEventListener("keydown", e=>{
+  if ((e.key==="Enter"||e.key===" ") && e.target.matches("[data-open],[data-pin]")){ e.preventDefault(); e.target.click(); }
+});
+document.addEventListener("change", e=>{
+  if (e.target.matches("[data-note]")) Store.setItem(openCol, e.target.dataset.note, { note: e.target.value.trim() });
+  if (e.target.matches("[data-cmaadj]")){ const [id,k] = e.target.dataset.cmaadj.split("|"); const v = parseFloat(String(e.target.value).replace(/[$,\s]/g,"")); editCMA(id, c=>{ if (isFinite(v) && v) c.adj[k] = v; else delete c.adj[k]; }); }
+  if (e.target.matches("[data-cmacomp]")){ const [id,k] = e.target.dataset.cmacomp.split("|"); editCMA(id, c=>{ c.compKeys = e.target.checked ? [...new Set([...c.compKeys,k])] : c.compKeys.filter(x=>x!==k); }); }
+  if (e.target.matches("[data-cmafield]")){ const [id,f] = e.target.dataset.cmafield.split("|"); editCMA(id, c=>{ c[f] = e.target.value; }); }
+  if (e.target.matches("[data-showfield]")){ const [id,f] = e.target.dataset.showfield.split("|"); editShowcase(id, x=>{ x[f] = e.target.value.trim(); }); }
+  if (e.target.matches("[data-showadd]") && e.target.value){ const id = e.target.dataset.showadd, k = e.target.value; editShowcase(id, x=>{ if (!x.keys.includes(k)) x.keys.push(k); }); }
+  if (e.target.matches("[data-mk]")){ mk[e.target.dataset.mk] = e.target.value; if (e.target.dataset.mk==="key"||e.target.dataset.mk==="tpl") mk.caps = null; renderAgent(); }
+  if (e.target.matches("[data-tourfield]")){
+    const [id,field] = e.target.dataset.tourfield.split("|");
+    editTour(id, t=>{
+      if (field==="shared") t.shared = e.target.checked;
+      else if (field==="contactId"){ t.contactId = e.target.value; t.clientId = Store.crm.contacts[t.contactId]?.clientId||""; if (!t.clientId) t.shared = false; }
+      else t[field] = e.target.value.trim();
+    });
+  }
+  if (e.target.matches("[data-stopfield]")){ const [id,i,field] = e.target.dataset.stopfield.split("|"); editTour(id, t=>{ if (t.stops[+i]) t.stops[+i][field] = e.target.value.trim(); }); }
+  if (e.target.matches("[data-addstop]") && e.target.value){ const id = e.target.dataset.addstop, k = e.target.value; editTour(id, t=>{ if (!t.stops.some(s=>s.listingKey===k)) t.stops.push({ listingKey:k, time:"", note:"" }); }); }
+  if (e.target.matches("[data-stage]")){ const [id,field] = e.target.dataset.stage.split("|"); const c = Store.crm.contacts[id]; if (c) Store.saveCrm("contacts", id, { ...c, [field]:e.target.value, updatedAt:new Date().toISOString() }); }
+  if (e.target.matches("[data-taskdone]")){ const id = e.target.dataset.taskdone; const t = Store.crm.tasks[id]; if (t) Store.saveCrm("tasks", id, { ...t, done:e.target.checked, doneAt:e.target.checked?new Date().toISOString():"" }); }
+  if (e.target.matches("[data-status]")){ const [cid,rid] = e.target.dataset.status.split("|"); Store.setLeadStatus(cid, rid, e.target.value); }
+});
+$("#dlgChat").addEventListener("close", ()=>Store.markRead(Store.uid, "client"));
+document.querySelectorAll("dialog").forEach(dl=>dl.addEventListener("click", e=>{ if (e.target===dl) dl.close(); }));
+document.addEventListener("input", e=>{
+  if (e.target.matches("[data-pay]")){ const box = e.target.closest("details.pay"); const out = box && box.querySelector("#payOut"); const dn = parseFloat($("#payDown").value), rt = parseFloat($("#payRate").value);
+    if (out && isFinite(dn) && isFinite(rt) && dn>=0 && dn<100 && rt>=0) out.textContent = money(payment(+box.dataset.price, dn, rt)); }
+});
+document.addEventListener("input", e=>{ if (e.target.id==="rosterQ"){ rosterQuery = e.target.value; const l = $("#rosterList"); if (l) l.innerHTML = rosterCards(); } });
+document.addEventListener("keydown", e=>{ if (e.target.id==="aiText" && e.key==="Enter" && !e.shiftKey){ e.preventDefault(); askAI(e.target.value); } });
+let qTimer; $("#q").addEventListener("input", ()=>{ activeSearch = null; clearTimeout(qTimer); qTimer = setTimeout(runSearch, 250); });
+["#fPrice","#fBeds","#fType","#fStatus","#fSort"].forEach(s=>$(s).addEventListener("change", ()=>{ activeSearch = null; runSearch(); }));
+window.addEventListener("hashchange", route);
+
+let lastExVer = 0;
+Store.onChange(()=>{
+  if (Store.exVer!==lastExVer){ lastExVer = Store.exVer; runSearch(); lastSearchVer = -1; }
+  if (Store.searchVer!==lastSearchVer){ lastSearchVer = Store.searchVer; refreshSearchCounts(); }
+  if (!$("#v-search").classList.contains("hidden")) renderSearch();
+  if (!$("#v-map").classList.contains("hidden")) renderMap();
+  if (!$("#v-collections").classList.contains("hidden")) renderCollections();
+  const ae = document.activeElement, typing = ae && $("#v-agent").contains(ae) && ae.matches("input,select,textarea");
+  if (!$("#v-agent").classList.contains("hidden") && (agentPanel.startsWith("thread:") || !typing)) renderAgent();
+  if ($("#dlgChat").open) updateClientChat();
+  $("#agentTab").classList.toggle("hidden", !Store.isAgent);
+  if (Store.isAgent){ const n = unseenCount(); $("#agentBadge").textContent = n ? (n>99?"99+":String(n)) : ""; }
+  if ($("#dlgSave").open) renderSave();
+});
+
+$("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX.MLS_NAME}. ${IDX.BROKER.firm}.`;
+try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
+route(); runSearch(); Store.init();
+</script>
+</body>
+</html>
