@@ -45,9 +45,9 @@
   }
   O.watch = function () {
     if (O.watching) return; O.watching = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
@@ -55,7 +55,7 @@
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog", "scripts"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -753,7 +753,7 @@
   // Sample office content for demo mode (nothing is saved).
   O.seedDemo = function () {
     if (O.seeded) return; O.seeded = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const y = new Date().getFullYear(), ts = nowIso();
@@ -788,7 +788,11 @@
     if (c.dct4) c.dct4 = { ...c.dct4, birthday: "1985-" + d(0).slice(5), folders: ["Past clients"] };
     if (c.dct3) c.dct3 = { ...c.dct3, folders: ["Spring sellers"] };
     c.dct6 = { name: "Renee Ortiz", email: "renee@example.com", phone: "720-555-0166", role: "seller", sellerStage: "prospect", buyerStage: "lead", purchaseDate: ago(8), notes: "Kids moving out, may downsize.", folders: ["Sphere"], createdAt: ts, updatedAt: ago(1) };
-    Store.settings = { ...Store.settings, followups: { anniversary: true, birthday: true, checkinDays: 0 } };
+    Store.settings = { ...Store.settings, listFeePct: 2.5, followups: { anniversary: true, birthday: true, checkinDays: 0 } };
+    const close = new Date(); close.setDate(close.getDate() + 60);
+    Store.crm.presentations = { dpr1: { contactId: "dct3", cmaId: "dcm1", preparedFor: "Tom and Alicia Grant", address: "2210 S Fillmore St",
+      sections: {}, marketing: ["photos", "video", "floorplan", "mls", "matching", "social", "openhouse", "neighbors", "brokers", "feedback"],
+      net: { price: "", listFeePct: 2.5, buyerCompPct: "", title: 2100, closingFee: 300, hoa: 0, annualTaxes: 6200, closeDate: close.toLocaleDateString("en-CA"), payoff: 410000, concessions: 10000, repairs: 3500, other: "" }, createdAt: ts, updatedAt: ts } };
     Store.emit();
   };
   // office.js can load before or after Store finishes starting up; cover both.

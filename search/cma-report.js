@@ -138,12 +138,14 @@
     return { blob: doc.output("blob"), name, doc };
   }
   R.buildPDF = buildPDF;
+  R.loadPdfLib = loadPdfLib; R.brand = brand; R.clean = t;
 
   async function savePDF(blob, name) {
     try { const dl = await window.claude?.use?.("downloads"); if (dl) { await dl.save({ filename: name, data: blob }); return true; } } catch (e) { if (e && e.code && e.code !== "unavailable") return false; }
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); return true;
   }
+  R.savePDF = (...a) => savePDF(...a);
   const toBase64 = blob => new Promise((res, rej) => { const f = new FileReader(); f.onload = () => res(String(f.result).split(",")[1]); f.onerror = rej; f.readAsDataURL(blob); });
 
   /* ---------------- Report sheet ---------------- */

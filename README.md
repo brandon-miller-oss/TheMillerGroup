@@ -101,6 +101,14 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 
 **Seller report (PDF)** makes a branded report with the price range, comps table, adjustment details, a map of the comps, the agent’s summary, and a not-an-appraisal disclaimer. Agents must confirm they reviewed it before downloading or emailing it. With email connected, it’s sent as an attachment; otherwise Send downloads the PDF and opens the agent’s email app. Closed sales replace active listings as comps once the MLS feed is connected.
 
+### Listing presentations
+**Listing presentations** builds a branded PDF for seller appointments, in a data-first layout: cover, agent profile with pledge and client reviews, why The Miller Group, the market right now, property summary, a map and table of comps, a page per comp (with MLS photos once the feed is connected), side-by-side comparison, status comparison and averages, price vs. days on market and price vs. size charts, pricing analysis, pricing strategy, estimated net proceeds at the low, suggested, and high price, home prep checklist, marketing plan, selling process, incentives and offers, questions to ask any agent (answered from the agent’s stats), and next steps. Agents choose sections and marketing items for each seller.
+
+- Start one from the tile, from **Presentation** on a seller, or from **Listing presentation** on a CMA.
+- Each agent fills in **My presentation profile** (title, headshot link, bio, pledge, stats, client reviews, and their usual listing fee for net sheets).
+- The broker updates **Market stats** each month (median prices, days on market, months of supply, concessions, expired listings, mortgage rate, and source). They start with October 2026 REcolorado figures.
+- The net sheet uses Colorado items: owner’s title policy, closing fee, HOA letter and transfer fees, and property taxes prorated because Colorado taxes are paid a year behind. Fees and buyer’s agent compensation are shown as negotiable.
+
 ### Scripts and writing
 The **Scripts and writing** tile drafts listing descriptions, listing presentation and pricing talk tracks, listing video scripts, open house follow-ups, objection handling, expired, FSBO, neighborhood, and sphere call scripts, buyer consultations, and offer cover notes. It pulls facts from a chosen listing, client, or CMA, and every draft follows Fair Housing rules, treats fees as negotiable, and leaves placeholders instead of inventing details. Starter scripts work before the AI is connected. Agents can save scripts to reuse. Before using call scripts for prospecting, scrub numbers against the Do Not Call registry.
 
@@ -114,7 +122,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js` (CMA math and PDF; also needs `npm i jspdf@2.5.1`), `writer.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js` and `presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

@@ -360,10 +360,10 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611141106"></script>
+<script src="../assets/config.js?v=202611141129"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611141106"></script>
+<script src="miller-cloud.js?v=202611141129"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -513,7 +513,7 @@ const SAMPLE = [
    ========================================================================= */
 const Store = {
   cols:{}, mode:"local", db:null, user:null, uid:null, isAgent:false, subs:[], queues:{},
-  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{}}, publicEx:{}, roster:{}, exVer:0,
+  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{},presentations:{}}, publicEx:{}, roster:{}, exVer:0,
   searches:{}, searchVer:0, publicOH:{}, showcase:{}, demoShowcase:{}, site:{},
   team:{}, isBroker:false, crmOwner:null, myAgent:null, marker:null,
   threads:{}, msgs:{}, msgSubs:{}, myThread:null, myTours:{}, settings:{}, agentThread:null,
@@ -533,7 +533,11 @@ const Store = {
   enableDemo(){
     this.demo = true; this.isAgent = true; this.isBroker = true; this.crmOwner = "demo-broker";
     this.team = {
-      "demo-broker":{ name:"Brandon Miller", title:"Employing broker", phone:IDX.BROKER.phone, email:"", slug:"brandon", areas:"Denver metro, Summit County", languages:"English" },
+      "demo-broker":{ name:"Brandon Miller", title:"Employing broker", phone:IDX.BROKER.phone, email:"", slug:"brandon", areas:"Denver metro, Summit County", languages:"English",
+        presBio:"I pride myself on providing high-quality, innovative real estate service along the Front Range. My clients’ needs always come first. I’ve built my business one satisfied client at a time, and my goal is to exceed your expectations at every turn with marketing that gets your home maximum exposure.",
+        presPledge:["Honesty and integrity in every situation","Ongoing communication to keep you up to date","Continuous improvement, with the goal of exceeding your expectations","A calm, stress-free process so you can enjoy your move","Service after the sale for everything you need during and after the move"],
+        presStats:{ years:"2016", homes:"250+", areas:"Denver metro, Front Range, and Western Slope", avgDom:"", listToSale:"" },
+        testimonials:[{ quote:"Brandon was very easy to work with and made the sale of our house seamless. He was there for us every step of the way and continues to be even after the closing was complete. Very professional and quick to respond to any questions we had.", name:"Denise and Kenneth Robinson", place:"Aurora, CO" },{ quote:"He was extremely honest, upfront, and expedient, and explained everything in a way that made me feel confident about the choice I was making. He was extremely communicative and responsive, and truly made me feel like I was his only client.", name:"Kristy Silva", place:"Denver, CO" }] },
       "demo-agent":{ name:"Alex Rivera", title:"Broker associate", phone:"720-555-0150", email:"", slug:"alex", areas:"Highland, Berkeley, Golden", languages:"English, Spanish" }
     };
     this.roster = this.team; this.refreshProfile();
@@ -1085,6 +1089,7 @@ function toolSections(){
       ["listings","Listings","Your listings and their activity","building",0],
       ["exclusives","Off-market & coming soon","Homes not on the MLS","star",0],
       ["openhouses","Open houses","Schedule and sign-in sheet","door",ohUp],
+      ["presentations","Listing presentations","Branded PDF for seller meetings","home",0],
       ["cmas","CMAs","Comps and a suggested price","chart",0],
       ["market","Market pulse","Prices and pace by neighborhood","pulse",0],
       ["insights","Insights","Client engagement over time","trend",0]]],
@@ -1194,7 +1199,7 @@ function pipelineHTML(kind){
         : [c.listingAddress?esc(c.listingAddress):"", c.listPrice?esc(c.listPrice):""].filter(Boolean).join(" · ");
       return `<div class="pcard"><div class="pcard-top"><div><strong>${esc(c.name)}</strong>${sub?`<p>${sub}</p>`:""}</div>
         <select data-stage="${c.id}|${field}" aria-label="Stage for ${esc(c.name)}">${stages.map(([sv,st])=>`<option value="${sv}" ${(c[field]||stages[0][0])===sv?"selected":""}>${st}</option>`).join("")}</select></div>
-        <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}${buyer?`<button data-newtour="${c.id}">Plan showings</button>`:`<button data-cmacontact="${c.id}">Create CMA</button>`}<button data-newtask="${c.id}">Add task</button><button data-editcontact="${c.id}">Edit</button></div></div>`;
+        <div class="links">${telLink(c.phone)}${mailLink(c.email)}${c.clientId?`<button data-panel="thread:${esc(c.clientId)}">Message</button>`:""}${buyer?`<button data-newtour="${c.id}">Plan showings</button>`:`<button data-cmacontact="${c.id}">Create CMA</button><button data-pr-for="contact|${c.id}">Presentation</button>`}<button data-newtask="${c.id}">Add task</button><button data-editcontact="${c.id}">Edit</button></div></div>`;
     }).join("");
   }).join("");
 }
@@ -1887,7 +1892,7 @@ function cmaHTML(id){
     <div class="complist">${cand.map(({l})=>`<label><input type="checkbox" data-cmacomp="${id}|${esc(l.key)}" ${(c.compKeys||[]).includes(l.key)?"checked":""}><span><strong>${esc(l.address)}</strong> · ${short(l.price)} · ${l.beds} bd · ${l.sqft.toLocaleString()} sq ft<br><span class="addr">${esc(l.hood)} · ${esc(l.status)}</span></span></label>`).join("")}</div>
     <h3 class="agent-h">Summary for your client</h3>
     <div class="tourform"><textarea id="cmaNotes" data-cmafield="${id}|notes" rows="6" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)" placeholder="Write a summary or let the assistant draft one">${esc(c.notes||"")}</textarea></div>
-    <div class="quick" style="margin-top:10px"><button class="btn ghost" data-cmasummary="${id}" ${cmaBusy===id||!r.value?"disabled":""}>${cmaBusy===id?"Writing…":c.notes?"Redraft summary":"Draft summary"}</button><button class="btn ghost" data-cmacsv="${id}" ${r.rows.length?"":"disabled"}>Download CSV</button><button class="btn ghost" data-wr-for="presentation|cma|${id}">Presentation script</button></div>`;
+    <div class="quick" style="margin-top:10px"><button class="btn ghost" data-cmasummary="${id}" ${cmaBusy===id||!r.value?"disabled":""}>${cmaBusy===id?"Writing…":c.notes?"Redraft summary":"Draft summary"}</button><button class="btn ghost" data-cmacsv="${id}" ${r.rows.length?"":"disabled"}>Download CSV</button><button class="btn ghost" data-pr-for="cma|${id}">Listing presentation</button><button class="btn ghost" data-wr-for="presentation|cma|${id}">Presentation script</button></div>`;
 }
 async function cmaSummary(id, quiet){
   const c = Store.crm.cmas[id]; if (!c) return; const r = cmaCalc(c); if (!r.value) return;
@@ -2029,6 +2034,9 @@ async function renderAgent(){
   }
   let html = window.Office ? Office.render(agentPanel, head) : null;
   if (html == null) switch (agentPanel.includes(":") ? agentPanel.split(":")[0] : agentPanel){
+    case "presentations": html = head("Listing presentations") + (window.Presentation ? Presentation.listHTML() : ""); break;
+    case "presentation": html = window.Presentation ? Presentation.html(agentPanel.slice(13)) : ""; break;
+    case "pres-profile": html = `<button class="back" data-panel="presentations">‹ Listing presentations</button><div class="colhead"><h2>My presentation profile</h2></div>` + (window.Presentation ? Presentation.profileHTML() : ""); break;
     case "writer": html = head("Scripts and writing") + (window.Writer ? Writer.html() : `<p class="addr">Reload the page to load the writer.</p>`); break;
     case "searches": html = head("Saved searches") + await savedSearchesHTML(); break;
     case "openhouses": html = head("Open houses") + openHousesHTML(); break;
@@ -2059,6 +2067,7 @@ async function renderAgent(){
   }
   el.innerHTML = (Store.demo ? `<p class="note-c"><strong>Demo mode.</strong> Sample clients, deals, and office content, with broker access turned on. Nothing you change is saved, and reloading resets it.</p>` : "") + html;
   if (agentPanel==="home" && toolQuery) filterTools();
+  if (agentPanel==="pres-profile") window.Presentation?.bindProfile();
   const pf = $("#profileForm");
   if (pf) pf.addEventListener("submit", async e=>{ e.preventDefault(); const m = $("#profileMsg");
     const slug = slugify($("#pSlug").value);
@@ -2310,8 +2319,9 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="office.js?v=202611141106"></script>
-<script src="cma-report.js?v=202611141106"></script>
-<script src="ai-writer.js?v=202611141106"></script>
+<script src="office.js?v=202611141129"></script>
+<script src="cma-report.js?v=202611141129"></script>
+<script src="ai-writer.js?v=202611141129"></script>
+<script src="presentation.js?v=202611141129"></script>
 </body>
 </html>
