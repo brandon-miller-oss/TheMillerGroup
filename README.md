@@ -119,6 +119,17 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 - Each has an agent-only **appointment checklist** (disclosures before confidential discussion, Exclusive Right-to-Buy, mold, wire fraud, radon, lead-based paint, packet contents, pre-approval, proof of funds, MLS portal). It never prints.
 - Assistance program and loan details are general and change every year; the PDF tells buyers to confirm with a participating lender.
 
+### Marketing: print studio
+**Marketing** opens on the **Print studio** (social posts are on the second tab). Agents make:
+
+- **Flyers** (8.5 × 11): hero photo, three more photos, price, details, description, agent bar, and a QR code to the listing.
+- **Tri-fold listing brochures** (11 × 8.5, inside and outside): cover, photos, home facts, description, agent panel, and a showing call to action.
+- **Postcards** (6 × 4 or 9 × 6): just listed, just sold, open house, coming soon, price improved, "thinking of selling?", and market updates that pull the broker's monthly market stats. The back keeps the right half clear for postage and the address and includes a not-a-solicitation note.
+- **Event mailers** (5 × 7): open houses, client appreciation events, homebuyer seminars, or any event, with when, where, and RSVP.
+- **Business cards** (3.5 × 2): front and back, with the agent's headshot (from their presentation profile) or initials and a QR code to their personal link.
+
+Agents pick a listing, then tap its photos in the order they want (the first is the main photo) or add their own. Off-market listings take photo links, and MLS photos appear once the feed is connected. Agents edit the headline and message (or draft them with AI), preview each side, and download a vector PDF, with an optional 1/8 in. bleed for print shops. Every piece shows the brokerage name, as Colorado advertising rules require, and Equal Housing Opportunity. The app warns when a listing belongs to another brokerage, since advertising it needs that broker's permission and their photos usually can't be used.
+
 ### Road to Closed training
 The **Training** section has **Road to Closed training**: 19 short lessons along one road, built from the 2026 Road to Closed Training Guide (financing, the buyer side, the listing side, contract clauses and FIRPTA, and CTM). Each lesson opens with a "Know this" card, then multiple-choice questions with an explanation after every answer. Missed questions come back at the end of the lesson. Lessons unlock in order, XP and a daily streak carry over, and finishing the road unlocks the 20-question **Road test** (80% to pass), which certifies the agent. The broker sees every agent's lessons, XP, streak, and certification under **Team progress**. Update the lessons in `search/training.js` when the guide changes; loan limits and assistance programs change every year.
 
@@ -135,7 +146,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js` (also needs `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

@@ -360,10 +360,10 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611141216"></script>
+<script src="../assets/config.js?v=202611141226"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611141216"></script>
+<script src="miller-cloud.js?v=202611141226"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -1111,7 +1111,7 @@ function toolSections(){
     ["Business", [
       ["biz","GCI tracker","Pipeline and yearly goal","trend",0],
       ["tasks","Tasks","Follow-ups and to-dos","check",ts.length],
-      ["marketing","Marketing","Social graphics and captions","megaphone",0],
+      ["marketing","Marketing","Flyers, postcards, brochures, cards, and social posts","megaphone",0],
       ["showcase","Miller Picks","Curated lists for every visitor","star",0],
       ["writer","Scripts and writing","Listing copy, talk tracks, call scripts","doc",0],
       ["assistant","AI assistant","Ask about your business","spark",0],
@@ -1466,6 +1466,7 @@ function openExclusiveForm(id){
       <div class="row2"><div><label for="xBeds">Beds</label><input id="xBeds" type="number" min="0" value="${esc(x.BedroomsTotal??"")}"></div><div><label for="xBaths">Baths</label><input id="xBaths" type="number" min="0" value="${esc(x.BathroomsTotalInteger??"")}"></div></div>
       <div class="row2"><div><label for="xSqft">Square feet</label><input id="xSqft" type="number" min="0" value="${esc(x.LivingArea??"")}"></div><div><label for="xYear">Year built</label><input id="xYear" type="number" value="${esc(x.YearBuilt??"")}"></div></div>
       <label for="xType">Home type</label><select id="xType">${opt([["Single Family Residence","House"],["Townhouse","Townhome"],["Condominium","Condo"]],x.PropertySubType)}</select>
+      <label for="xPhotos">Photo links (one per line, first is the main photo)</label><textarea id="xPhotos" rows="3" placeholder="https://…/front.jpg">${esc((x.Media||[]).filter(m=>m.MediaCategory==="Photo").sort((a,b)=>(a.Order||0)-(b.Order||0)).map(m=>m.MediaURL).join("\n"))}</textarea>
       <label for="xRemarks">Description</label><textarea id="xRemarks" rows="4">${esc(x.PublicRemarks||"")}</textarea>
       <label class="check"><input type="checkbox" id="xPub" ${x.published?"checked":""}> Show to clients in search</label>
       <div class="actions"><button class="btn gold" type="submit">Save listing</button>${id?`<button class="btn ghost" type="button" data-delex="${id}">Delete</button>`:""}</div>
@@ -1481,6 +1482,7 @@ function openExclusiveForm(id){
       Latitude:x.SubdivisionName===hood&&x.Latitude?x.Latitude:hc.lat+jit(), Longitude:x.SubdivisionName===hood&&x.Longitude?x.Longitude:hc.lng+jit(),
       ListPrice:parseMoney($("#xPrice").value), BedroomsTotal:num($("#xBeds").value), BathroomsTotalInteger:num($("#xBaths").value), LivingArea:num($("#xSqft").value),
       YearBuilt:num($("#xYear").value), PropertySubType:$("#xType").value, PublicRemarks:$("#xRemarks").value.trim(),
+      Media:$("#xPhotos").value.split(/\s+/).map(u=>u.trim()).filter(u=>/^https:\/\//.test(u)).slice(0,40).map((u,i)=>({ MediaCategory:"Photo", MediaURL:u, Order:i })),
       ListOfficeName:"The Miller Group", ListAgentFullName:IDX.BROKER.name, OnMarketDate:x.OnMarketDate||localDay(), exclusive:true, published:$("#xPub").checked });
     $("#dlgForm").close();
   });
@@ -1515,6 +1517,12 @@ function flyerSVG(l){
   </svg>`;
 }
 function marketingHTML(){
+  const tab = window.PrintStudio ? (PrintStudio.tab || "print") : "social";
+  const tabs = window.PrintStudio ? `<div class="mk-tabs" role="tablist"><button role="tab" aria-selected="${tab==="print"}" class="${tab==="print"?"on":""}" data-mk-tab="print">Print studio</button><button role="tab" aria-selected="${tab==="social"}" class="${tab==="social"?"on":""}" data-mk-tab="social">Social posts</button></div>` : "";
+  if (tab==="print") return tabs + PrintStudio.html();
+  return tabs + socialHTML();
+}
+function socialHTML(){
   const pool = marketingPool();
   if (!mk.key && pool.length) mk.key = pool[0].key;
   const l = pool.find(p=>p.key===mk.key);
@@ -2196,7 +2204,7 @@ document.addEventListener("click", e=>{
     else if (d.cmareport!==undefined) window.CMAReport ? CMAReport.open(d.cmareport) : toast("The report tool didn’t load. Reload the page.");
     else if (d.cmarates!==undefined) window.CMAReport?.openRates();
     else if (d.cmacontact!==undefined) quickCMA(d.cmacontact);
-    else if (d.mklisting!==undefined){ mk.key = d.mklisting; mk.caps = null; agentPanel = "marketing"; renderAgent(); window.scrollTo(0,0); }
+    else if (d.mklisting!==undefined){ mk.key = d.mklisting; mk.caps = null; if (window.PrintStudio){ PrintStudio.state.key = d.mklisting; PrintStudio.state.picks = null; } agentPanel = "marketing"; renderAgent(); window.scrollTo(0,0); }
     else if (d.newshow!==undefined){ const n = prompt("Name this Miller Pick list"); if (n && n.trim()){ const id = Store.saveShowcase(null, { name:n.trim(), description:"", keys:[], createdAt:new Date().toISOString() }); agentPanel = "showcase:"+id; renderAgent(); } }
     else if (d.delshow!==undefined){ if (confirm("Delete this Miller Pick list?")){ Store.saveShowcase(d.delshow, null); agentPanel = "showcase"; renderAgent(); } }
     else if (d.showremove!==undefined){ const [id,k] = d.showremove.split("|"); editShowcase(id, x=>{ x.keys = x.keys.filter(y=>y!==k); }); }
@@ -2326,11 +2334,12 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="office.js?v=202611141216"></script>
-<script src="cma-report.js?v=202611141216"></script>
-<script src="ai-writer.js?v=202611141216"></script>
-<script src="presentation.js?v=202611141216"></script>
-<script src="training.js?v=202611141216"></script>
-<script src="buyer-presentation.js?v=202611141216"></script>
+<script src="office.js?v=202611141226"></script>
+<script src="cma-report.js?v=202611141226"></script>
+<script src="ai-writer.js?v=202611141226"></script>
+<script src="presentation.js?v=202611141226"></script>
+<script src="print-studio.js?v=202611141226"></script>
+<script src="training.js?v=202611141226"></script>
+<script src="buyer-presentation.js?v=202611141226"></script>
 </body>
 </html>
