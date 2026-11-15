@@ -11,6 +11,9 @@ const MAX_TOP = 50;
 
 // Only these fields leave the proxy, so non-IDX data can't leak to the page.
 const FIELDS = ["ListingKey","ListingId","StandardStatus","ListPrice","BedroomsTotal","BathroomsTotalInteger","LivingArea","LotSizeAcres","YearBuilt","PropertySubType","UnparsedAddress","City","StateOrProvince","PostalCode","SubdivisionName","Latitude","Longitude","PublicRemarks","ListOfficeName","ListAgentFullName","OnMarketDate","ModificationTimestamp"];
+// Cost-of-ownership fields (tax bill and HOA dues). If REcolorado's feed lacks one, list the ones it has in BRIDGE_COST_FIELDS
+// (comma separated) or set it to "none". A request the feed rejects is retried once without them.
+const COST_FIELDS = process.env.BRIDGE_COST_FIELDS === "none" ? [] : (process.env.BRIDGE_COST_FIELDS || "TaxAnnualAmount,TaxYear,AssociationFee,AssociationFeeFrequency,AssociationFee2,AssociationFee2Frequency").split(",").map(s => s.trim()).filter(f => /^[A-Za-z0-9]+$/.test(f));
 const MEDIA_FIELDS = ["MediaURL","MediaCategory","Order"];
 const ORDER_OK = /^(OnMarketDate|ListPrice|LivingArea|ModificationTimestamp)( (asc|desc))?$/;
 const KEY_OK = /^[A-Za-z0-9_\-]{1,64}$/;
@@ -32,7 +35,7 @@ function cors(req, res) {
   }
 }
 
-function buildQuery(q) {
+function buildQuery(q, withCost = true) {
   const p = new URLSearchParams();
   if (q.key) {
     if (!KEY_OK.test(q.key)) throw new Error("Invalid listing key");
@@ -49,13 +52,13 @@ function buildQuery(q) {
     if (skip) p.set("$skip", String(Math.min(skip, 2000)));
     if (q.$orderby && ORDER_OK.test(q.$orderby)) p.set("$orderby", q.$orderby);
   }
-  p.set("$select", [...FIELDS, "Media"].join(","));
+  p.set("$select", [...FIELDS, ...(withCost ? COST_FIELDS : []), "Media"].join(","));
   return p;
 }
 
 function clean(r) {
   const out = {};
-  for (const f of FIELDS) if (r[f] !== undefined) out[f] = r[f];
+  for (const f of [...FIELDS, ...COST_FIELDS]) if (r[f] !== undefined) out[f] = r[f];
   out.Media = (r.Media || [])
     .filter(m => m && m.MediaURL && (!m.MediaCategory || m.MediaCategory === "Photo"))
     .slice(0, 40)
@@ -76,9 +79,11 @@ module.exports = async function handler(req, res) {
   try { params = buildQuery(req.query || {}); }
   catch (e) { return res.status(400).json({ error: e.message }); }
 
-  const url = `${BASE}/${encodeURIComponent(DATASET)}/${RESOURCE}?${params}`;
+  const url = p => `${BASE}/${encodeURIComponent(DATASET)}/${RESOURCE}?${p}`;
+  const get = p => fetch(url(p), { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/json" } });
   try {
-    const upstream = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/json" } });
+    let upstream = await get(params);
+    if (upstream.status === 400 && COST_FIELDS.length) { console.error("Bridge rejected cost fields; retrying without them"); upstream = await get(buildQuery(req.query || {}, false)); }
     if (!upstream.ok) {
       const detail = (await upstream.text()).slice(0, 300);
       console.error("Bridge error", upstream.status, detail);

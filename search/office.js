@@ -165,6 +165,7 @@
         <div class="tt"><span>${esc(x.label)}</span><p>${x.date ? `${dayLabel(x.date)}${!x.done && n < 0 ? " · Overdue" : ""}` : "No date"}${DEADLINE_HINT[x.label] ? ` · <span title="Training guide recommendation">Typical: ${esc(DEADLINE_HINT[x.label])}</span>` : ""}</p></div><input type="date" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" aria-label="Date for ${esc(x.label)}" data-o-dldate="${id}|${i}" value="${esc(x.date || "")}"></div>`; }).join("")}
       <div class="quick" style="margin-top:6px"><button class="btn ghost small" data-o-adddl="${id}">Add a date</button></div>
       ${window.ClientNotify ? ClientNotify.dealHTML(id, d) : ""}
+      ${window.ClientGuide ? ClientGuide.dealHTML(id, d) : ""}
       <h3 class="agent-h">Documents</h3><p class="addr">Check each item off once it’s in the file. Paste a link to where the signed copy is stored.</p>
       ${(d.docs || []).map((x, i) => `<div class="task ${x.done ? "done" : ""}"><input type="checkbox" data-o-doc="${id}|${i}" ${x.done ? "checked" : ""} aria-label="${esc(x.label)} received">
         <div class="tt"><span>${esc(x.label)}</span>${x.url ? `<p><a href="${esc(x.url)}" target="_blank" rel="noopener">Open document</a></p>` : ""}</div><input style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" placeholder="Link" aria-label="Link for ${esc(x.label)}" data-o-docurl="${id}|${i}" value="${esc(x.url || "")}"></div>`).join("")}

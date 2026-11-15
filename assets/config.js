@@ -16,15 +16,17 @@ window.MG_CONFIG = {
   // Home search and agent tools (search/). Leave the two addresses blank to run on sample listings with no AI.
   IDX_ENDPOINT: '',                 // live listings, e.g. 'https://miller-tools.vercel.app/api/idx'
   AI_ENDPOINT: '',                  // agent AI tools, e.g. 'https://miller-tools.vercel.app/api/ai'
-  DEFAULT_AGENT_SLUG: 'brandon',
+  DEFAULT_AGENT_SLUG: 'brandon',    // clients who arrive without an agent's link are assigned to this agent
   DEMO_MODE: true,                  // testing: anyone who isn't a signed-in agent can open the Agent tab with sample data
                                     // (nothing they change is saved). Set to false before launch.
   AGENT_PAGES_URL: '',              // server-rendered agent pages for search engines, e.g. 'https://miller-tools.vercel.app/a' (blank: pages use /p/)
-  EMAIL_ENDPOINT: '',
+  EMAIL_ENDPOINT: '',               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)
   NOTIFY_ENDPOINT: '',              // client updates by email and text, e.g. 'https://miller-tools.vercel.app/api/notify'
-  SMS_ENABLED: false,
+  SMS_ENABLED: false,               // true once Twilio is set up on the server (see server/.env.example)
   NEWSLETTER_ENDPOINT: '',          // e.g. 'https://miller-tools.vercel.app/api/newsletter'
-  NEWS_ENDPOINT: '',                // broker's News desk search, e.g. 'https://miller-tools.vercel.app/api/news'               // true once Twilio is set up on the server (see server/.env.example)               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)    // clients who arrive without an agent's link are assigned to this agent
+  NEWS_ENDPOINT: '',                // broker's News desk search, e.g. 'https://miller-tools.vercel.app/api/news'
+  HAZARDS_ENDPOINT: '',             // FEMA flood zone lookup for listings, e.g. 'https://miller-tools.vercel.app/api/hazards'
+  GUIDE_ENDPOINT: '',               // client transaction guide answers, e.g. 'https://miller-tools.vercel.app/api/guide'
 
   // Ad tracking (optional)
   GA4_ID: '',                       // e.g. 'G-XXXXXXXXXX'

@@ -35,6 +35,12 @@
     },
     "api/daily.js": {
       "maxDuration": 300
+    },
+    "api/hazards.js": {
+      "maxDuration": 10
+    },
+    "api/guide.js": {
+      "maxDuration": 30
     }
   },
   "headers": [

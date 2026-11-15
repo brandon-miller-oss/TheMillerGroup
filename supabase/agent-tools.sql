@@ -14,6 +14,12 @@
 --   commission plan (company/*)
 --   Agent websites and landing pages  everyone reads published pages; the agent
 --   (sites/<agent>/pages/*)           who owns them (and the broker) edits
+--   Cost facts (costfacts/<listing>)  everyone reads; any agent edits; only the
+--                                     broker edits costfacts/config
+--   Showing coverage (coverage/<id>)  every agent reads; the posting agent edits;
+--                                     others claim through claim_coverage(); the
+--                                     access notes (coverage/<id>/access) are only
+--                                     for the posting agent and whoever claimed it
 -- =====================================================================
 
 create table if not exists public.docs (
@@ -57,7 +63,10 @@ drop function if exists public.can_read_doc(text);
 create or replace function public.can_read_doc(p text, d jsonb) returns boolean
 language sql stable as $$
   select
-    public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'team')
+    public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'team', 'costfacts')
+    or (public.doc_top(p) = 'coverage' and public.is_agent() and (array_length(string_to_array(p, '/'), 1) = 2
+          or exists (select 1 from public.docs c where c.path = 'coverage/' || public.doc_owner(p)
+                     and (c.data->>'agentId' = auth.uid()::text or c.data->>'claimedBy' = auth.uid()::text))))
     or (public.doc_top(p) = 'company' and (public.is_agent() or p like 'company/brandok/items/%'))  -- brand approvals are public so agent pages can show approved brands
     or (public.doc_top(p) = 'deals' and public.is_agent() and d->>'agentId' = auth.uid()::text)
     or public.is_admin()
@@ -77,7 +86,11 @@ language sql stable as $$
           public.doc_owner(p) = auth.uid()::text
           or (public.is_agent() and public.client_agent(public.doc_owner(p)) = auth.uid()::text)))
     or (public.doc_top(p) in ('agent', 'team', 'sites') and public.is_agent() and public.doc_owner(p) = auth.uid()::text)
-    or (public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'deals') and public.is_agent() and d->>'agentId' = auth.uid()::text));
+    or (public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'deals') and public.is_agent() and d->>'agentId' = auth.uid()::text)
+    or (public.doc_top(p) = 'costfacts' and p <> 'costfacts/config' and public.is_agent())
+    or (public.doc_top(p) = 'coverage' and public.is_agent() and (
+          (array_length(string_to_array(p, '/'), 1) = 2 and d->>'agentId' = auth.uid()::text)
+          or (array_length(string_to_array(p, '/'), 1) = 3 and exists (select 1 from public.docs c where c.path = 'coverage/' || public.doc_owner(p) and c.data->>'agentId' = auth.uid()::text)))));
 -- company/* falls through to is_admin() only.
 $$;
 
@@ -148,6 +161,31 @@ begin
 end $$;
 revoke all on function public.submit_agent_lead(text, text, text, text, text, text, text, text, jsonb, text) from public;
 grant execute on function public.submit_agent_lead(text, text, text, text, text, text, text, text, jsonb, text) to anon, authenticated;
+
+-- ---------- Showing coverage: claim or release a request ----------
+-- Any agent except the one who posted it can claim an open request. Only the
+-- agent who claimed it can release it. Fees are paid by the brokerage.
+create or replace function public.claim_coverage(p_id text, p_take boolean default true) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare cur jsonb; who text := auth.uid()::text; nm text;
+begin
+  if not public.is_agent() then raise exception 'Only agents can claim coverage'; end if;
+  select data into cur from public.docs where path = 'coverage/' || p_id for update;
+  if cur is null then raise exception 'That request is gone'; end if;
+  if p_take then
+    if cur->>'agentId' = who then raise exception 'You posted this one'; end if;
+    if coalesce(cur->>'status', 'open') <> 'open' or coalesce(cur->>'claimedBy', '') <> '' then raise exception 'Someone already claimed this'; end if;
+    select data->>'name' into nm from public.docs where path = 'team/' || who;
+    cur := cur || jsonb_build_object('status', 'claimed', 'claimedBy', who, 'claimedName', coalesce(nm, ''), 'claimedAt', now());
+  else
+    if cur->>'claimedBy' is distinct from who then raise exception 'You haven''t claimed this'; end if;
+    cur := (cur - 'claimedBy' - 'claimedName' - 'claimedAt') || jsonb_build_object('status', 'open', 'releasedAt', now());
+  end if;
+  update public.docs set data = cur, updated_at = now() where path = 'coverage/' || p_id;
+  return cur;
+end $$;
+revoke all on function public.claim_coverage(text, boolean) from public, anon;
+grant execute on function public.claim_coverage(text, boolean) to authenticated;
 
 -- ---------- Live updates ----------
 do $$ begin

@@ -86,3 +86,13 @@ async function isBroker(token) {
   return r.ok && (await r.json()) === true;
 }
 module.exports.sendBatch = sendBatch; module.exports.fromLine = fromLine; module.exports.isBroker = isBroker;
+
+// Any signed-in user (clients included): returns their user id, or null.
+async function userId(token) {
+  if (!token) return null;
+  const u = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: `Bearer ${token}`, apikey: SERVICE_KEY } });
+  if (!u.ok) return null;
+  const { id } = await u.json();
+  return id || null;
+}
+module.exports.userId = userId;

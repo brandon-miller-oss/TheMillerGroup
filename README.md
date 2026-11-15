@@ -140,6 +140,20 @@ Clients hear from you automatically when showings are set or change, the day bef
 - **Server:** `server/api/notify.js` sends email and text. It looks up the contact itself, so the browser never chooses the recipient. `server/api/client-reminders.js` runs daily at 8 AM and sends day-before reminders once each. Set `NOTIFY_ENDPOINT` (and `SMS_ENABLED` once Twilio works) in `assets/config.js`. Texting needs a Twilio account with US A2P 10DLC registration; see `server/.env.example`.
 - Every update is logged under **Client updates** with what happened on each channel.
 
+### What it really costs (every listing)
+Every home shows a monthly all-in number, not just the mortgage: principal and interest, mortgage insurance under 20% down, property tax (metro districts included), HOA dues (both associations when there are two), homeowners insurance adjusted for wildfire risk, and flood insurance when the home is in a FEMA high-risk zone. Each line is labeled **From the listing**, **Verified by agent**, or **Estimate**. Cards show "About $X/mo all-in."
+
+- **Checks before you buy:** flood zone, wildfire risk, metro district, radon, sewer scope (older homes), lead paint (before 1978), well and septic (acreage), and HOA documents, each with a link to the official lookup.
+- **Agent facts:** any agent can open a listing and add what they've verified (tax bill, metro district, HOA dues, flood zone, wildfire risk, insurance quote, radon, sewer scope). Every client who opens that home sees it. Stored at `costfacts/<listing key>`.
+- **Flags:** new construction taxed as vacant land, missing HOA dues on condos and townhomes, high wildfire risk, and required flood insurance.
+- **Data:** tax and HOA come from the MLS feed (`TaxAnnualAmount`, `AssociationFee`, and related fields; if REcolorado's feed lacks one, set `BRIDGE_COST_FIELDS` on the server). The optional `/api/hazards` looks up the FEMA flood zone for each home (`HAZARDS_ENDPOINT` in config). The broker can change the estimate rates in `costfacts/config`. Everything marked Estimate is rough; it's not a loan offer or insurance quote.
+
+### Showing coverage
+Agents post a showing, open house, inspection access, or lockbox appointment they can't make, with an optional fee. Another Miller Group agent taps "I'll cover it." Access notes (lockbox and gate codes) are only visible to the posting agent and the one who claimed it. Claiming goes through `claim_coverage()` so two agents can't take the same request. Fees are paid by the brokerage, never agent to agent; the broker sees completed fees under "Fees to pay" and marks them paid.
+
+### Client portal: transaction guide
+On a transaction, check "Show [client] this transaction in their app." The client sees a timeline of their contract dates with a plain-English explanation of each, days until the next one, and summaries of documents you share. Paste an inspection report or HOA document, let AI draft a summary, edit it, and share it. Clients can ask questions; the guide answers only from their dates and documents, never advises on decisions, and flags those questions for you. You see every question and can add a note under the answer. Commission, broker review, notes, and document links never reach the client. Server: `server/api/guide.js` (`GUIDE_ENDPOINT` in config), 15 questions an hour per client.
+
 ### Newsletters
 Every agent gets their own automated newsletter, tailored to them: their brand (with "Brokered by The Miller Group"), their areas, their current listings and off-market exclusives, their open houses in the next three weeks, their events, this month's market numbers, and Colorado real estate news.
 
@@ -193,7 +207,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, `sites.test.js`, `client-notify.test.js`, and `newsletter.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, `node server/test/pages.test.js`, `node server/test/notify.test.js`, and `node server/test/newsletter.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, `sites.test.js`, `client-notify.test.js`, `newsletter.test.js`, `home-cost.test.js`, `coverage.test.js`, and `client-guide.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, `node server/test/pages.test.js`, `node server/test/notify.test.js`, `node server/test/newsletter.test.js`, and `node server/test/guide.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.
