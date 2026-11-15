@@ -130,6 +130,15 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 
 Agents pick a listing, then tap its photos in the order they want (the first is the main photo) or add their own. Off-market listings take photo links, and MLS photos appear once the feed is connected. Agents edit the headline and message (or draft them with AI), preview each side, and download a vector PDF, with an optional 1/8 in. bleed for print shops. Every piece shows the brokerage name, as Colorado advertising rules require, and Equal Housing Opportunity. The app warns when a listing belongs to another brokerage, since advertising it needs that broker's permission and their photos usually can't be used.
 
+### Agent brands and the starter kit
+Agents can market under their own business name, brokered by The Miller Group (the eXp-style model). In **My brand and starter kit** an agent sets a business name, tagline, two colors (presets or custom), and optional logos for light and dark backgrounds, then submits it.
+
+- **Broker approval:** the broker approves or requests changes under **Agent brands**. Approvals live in `company/brandok/items/<agent id>`, which only the broker can write. Any later change to the name, colors, or logos needs a new approval; until then, materials fall back to The Miller Group brand. The broker's own brand is approved when saved.
+- **Where it shows:** an approved brand leads every print studio piece, listing and buyer presentation, and CMA report. "Brokered by The Miller Group" always appears right with it (at least about half the size of the business name), plus the brokerage in every footer. The broker can switch the print studio to "Making materials for" any agent.
+- **Colorado rules built in:** Rule 6.10 requires advertising to be clearly and conspicuously in the brokerage firm's name, and team names can't include Realty, Real estate, Realtors, Company, Corp., Inc., LLC, LP, LLP, or anything that suggests a separate entity. The name check blocks those words (plus Brokerage, Ltd., and Limited) and flags colors that would be hard to read.
+- **Starter marketing kit:** one PDF with a brand sheet (colors, type, and the usage rules), business cards, letterhead, a "Meet your agent" one-pager, a farming postcard, and an open house sign-in sheet. Agents also get a copy-ready email signature and social profile and cover images. "Set up your brand" is a Get started step for new agents.
+- PDFs now use the agent who made them (name, phone, profile), not the broker's.
+
 ### Road to Closed training
 The **Training** section has **Road to Closed training**: 19 short lessons along one road, built from the 2026 Road to Closed Training Guide (financing, the buyer side, the listing side, contract clauses and FIRPTA, and CTM). Each lesson opens with a "Know this" card, then multiple-choice questions with an explanation after every answer. Missed questions come back at the end of the lesson. Lessons unlock in order, XP and a daily streak carry over, and finishing the road unlocks the 20-question **Road test** (80% to pass), which certifies the agent. The broker sees every agent's lessons, XP, streak, and certification under **Team progress**. Update the lessons in `search/training.js` when the guide changes; loan limits and assistance programs change every year.
 
@@ -146,7 +155,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js` (also needs `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js` and `agent-brand.test.js` (these also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

@@ -18,34 +18,39 @@
     ["brochure", "Listing brochure", "Tri-fold, 11 × 8.5 in", "Six panels: cover, photos, details, and your info"],
     ["postcard", "Postcard", "6 × 4 or 9 × 6 in", "Just listed, just sold, open house, farming, and market updates"],
     ["mailer", "Event mailer", "5 × 7 in", "Open houses, client appreciation, homebuyer seminars"],
-    ["bizcard", "Business card", "3.5 × 2 in", "Front and back with your contact details and QR code"]
+    ["bizcard", "Business card", "3.5 × 2 in", "Front and back with your contact details and QR code"],
+    ["onepager", "Meet your agent", "8.5 × 11 in", "Your story, services, and what clients say"],
+    ["letterhead", "Letterhead", "8.5 × 11 in", "For letters, notes, and offers"],
+    ["signin", "Open house sign-in", "8.5 × 11 in", "Sign-in sheet with a QR code to the listing"]
   ];
   const THEMES = {
     flyer: [["just-listed", "Just listed"], ["coming-soon", "Coming soon"], ["open-house", "Open house"], ["price-improved", "Price improved"], ["off-market", "Off-market opportunity"]],
     brochure: [["just-listed", "Just listed"], ["coming-soon", "Coming soon"], ["open-house", "Open house"], ["off-market", "Off-market opportunity"]],
     postcard: [["just-listed", "Just listed"], ["just-sold", "Just sold"], ["open-house", "Open house"], ["coming-soon", "Coming soon"], ["price-improved", "Price improved"], ["thinking", "Thinking of selling?"], ["market", "Market update"]],
     mailer: [["open-house", "Open house"], ["appreciation", "Client appreciation event"], ["seminar", "Homebuyer seminar"], ["event", "Other event"]],
-    bizcard: [["classic", "Classic"], ["light", "Light"]]
+    bizcard: [["classic", "Classic"], ["light", "Light"]],
+    onepager: [["standard", "Standard"]], brandsheet: [["standard", "Standard"]], letterhead: [["standard", "Standard"]], signin: [["standard", "Standard"]]
   };
   const HEADLINES = { "just-listed": "Just listed", "just-sold": "Just sold", "open-house": "Open house", "coming-soon": "Coming soon", "price-improved": "Price improved", "off-market": "Off-market opportunity",
-    thinking: "Curious what your home is worth?", market: "Your neighborhood market update", appreciation: "You’re invited", seminar: "Homebuyer seminar", event: "You’re invited", classic: "Real estate along the Front Range", light: "Real estate along the Front Range" };
-  const USES_LISTING = { flyer: true, brochure: true, postcard: t => !["thinking", "market"].includes(t), mailer: t => t === "open-house", bizcard: false };
-  const PHOTO_SLOTS = { flyer: 4, brochure: 5, postcard: 1, mailer: 1, bizcard: 0 };
+    thinking: "Curious what your home is worth?", market: "Your neighborhood market update", appreciation: "You’re invited", seminar: "Homebuyer seminar", event: "You’re invited", classic: "Real estate along the Front Range", light: "Real estate along the Front Range", standard: "" };
+  const USES_LISTING = { flyer: true, brochure: true, postcard: t => !["thinking", "market"].includes(t), mailer: t => t === "open-house", bizcard: false, onepager: false, brandsheet: false, letterhead: false, signin: true };
+  const PHOTO_SLOTS = { flyer: 4, brochure: 5, postcard: 1, mailer: 1, bizcard: 0, onepager: 0, brandsheet: 0, letterhead: 0, signin: 0 };
 
   const S = PS.state = { product: "flyer", theme: "just-listed", size: "6x4", key: "", picks: null, uploads: [], headline: "", body: "", bleed: false, side: 0,
     ev: { title: "", date: "", start: "", end: "", place: "", rsvp: "" }, busy: false, msg: "", ready: false, loading: false };
 
   /* ------------------------------ Helpers ------------------------------ */
-  const B = () => (window.CMAReport && CMAReport.brand) || { midnight: [20, 26, 38], gold: [184, 147, 90], linen: [244, 239, 231], ink: [20, 26, 38], gray: [110, 116, 128], line: [221, 212, 197] };
+  const B = () => (window.AgentBrand && AgentBrand.palette()) || (window.CMAReport && CMAReport.brand) || { midnight: [20, 26, 38], gold: [184, 147, 90], linen: [244, 239, 231], ink: [20, 26, 38], gray: [110, 116, 128], line: [221, 212, 197] };
   const hex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
   const WHITE = [255, 255, 255];
   const clean = s => (window.CMAReport && CMAReport.clean ? CMAReport.clean(String(s ?? "")) : String(s ?? ""));
   const usesListing = () => { const u = USES_LISTING[S.product]; return typeof u === "function" ? u(S.theme) : u; };
   const listing = () => S.key ? marketingPool().find(p => p.key === S.key) : null;
   const agent = () => {
-    const t = (Store.team || {})[Store.crmOwner] || {}, prof = window.Presentation ? Presentation._t.profile() : {};
-    return { name: t.name || IDX.BROKER.name, title: prof.title || t.title || "Broker", phone: t.phone || IDX.BROKER.phone, email: t.email || "",
-      firm: IDX.BROKER.firm || "The Miller Group", photo: prof.photoUrl || "", link: IDX.APP_URL + (t.slug ? `?agent=${encodeURIComponent(t.slug)}` : ""), web: (C.SITE_URL || "").replace(/^https?:\/\//, "").replace(/\/$/, "") };
+    if (window.AgentBrand) return AgentBrand.current();
+    const t = (Store.team || {})[Store.crmOwner] || {};
+    return { name: t.name || IDX.BROKER.name, title: t.title || "Broker", phone: t.phone || IDX.BROKER.phone, email: t.email || "", firm: IDX.BROKER.firm || "The Miller Group", display: IDX.BROKER.firm || "The Miller Group", byline: "", brand: null, photo: t.photoUrl || "",
+      link: IDX.APP_URL + (t.slug ? `?agent=${encodeURIComponent(t.slug)}` : ""), web: (C.SITE_URL || "").replace(/^https?:\/\//, "").replace(/\/$/, "") };
   };
   const license = () => C.LICENSE_TEXT && !/\[add/i.test(C.LICENSE_TEXT) ? C.LICENSE_TEXT : "";
   const fmtDate = d => d ? new Date(d + "T12:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) : "";
@@ -78,15 +83,30 @@
     const T = (text, x, y, size, o = {}) => ({ t: "text", text, x, y, size, font: "sans", style: "normal", color: b.ink, align: "left", ...o });
     const I = (x, y, w, h, photo) => ({ t: "img", x, y, w, h, photo: photo || { kind: "blank" } });
     const L = (x1, y1, x2, y2, color = b.gold, w = 0.02) => ({ t: "line", x1, y1, x2, y2, color, w });
-    const firmLine = [a.firm, license()].filter(Boolean).join("  ·  ");
+    const firmLine = [a.byline || a.firm, license()].filter(Boolean).join("  ·  ");
+    // The agent's brand mark (logo or name) with "Brokered by The Miller Group" kept clear and readable.
+    const mark = (x, y, size, o = {}) => {
+      const align = o.align || "left", col = o.color || b.gold, bcol = o.bycolor || (o.dark ? WHITE : b.midnight), bys = Math.max(o.minBy || 6.5, size * 0.48), ops = [];
+      if (!a.brand) return [T(a.firm, x, y, size, { font: "serif", style: "bold", color: col, align, shadow: o.shadow, maxW: o.maxW })];
+      const logo = o.dark ? a.brand.logoDark : a.brand.logo, lw0 = o.dark ? a.brand.logoDarkW : a.brand.logoW, lh0 = o.dark ? a.brand.logoDarkH : a.brand.logoH;
+      let byY;
+      if (logo && lw0 && lh0) {
+        let h = size / 72 * 1.8, w = h * lw0 / lh0; const mw = o.maxW || 3.2; if (w > mw) { w = mw; h = w * lh0 / lw0; }
+        const lx = align === "center" ? x - w / 2 : align === "right" ? x - w : x, top = y - size / 72 * 1.05;
+        ops.push({ t: "logo", x: lx, y: top, w, h, src: logo }); byY = top + h + bys / 72 * 1.15;
+      } else { ops.push(T(a.display, x, y, size, { font: "serif", style: "bold", color: col, align, shadow: o.shadow, maxW: o.maxW, maxLines: 1 })); byY = y + bys / 72 * 1.35; }
+      if (!o.noBy) ops.push(T(a.byline, x, byY, bys, { style: "bold", color: bcol, align, shadow: o.shadow }));
+      return ops;
+    };
     const eho = "Equal Housing Opportunity";
     const mountains = (x, y, w, h, color = b.gold) => { const pts = [[0, .7], [.12, .35], [.2, .55], [.33, .1], [.45, .5], [.55, .3], [.68, .62], [.8, .2], [.9, .45], [1, .3]]; return pts.slice(1).map((q, i) => L(x + pts[i][0] * w, y + pts[i][1] * h, x + q[0] * w, y + q[1] * h, color, 0.025)); };
     const body = S.body || defaultBody(theme[0], l, a);
 
     if (S.product === "flyer") {
       const W = 8.5, H = 11, ops = [];
-      ops.push(R(0, 0, W, 0.85, b.midnight), T(a.firm, 0.5, 0.56, 20, { font: "serif", style: "bold", color: b.gold }), T(head, W - 0.5, 0.56, 15, { style: "bold", color: WHITE, align: "right" }));
-      ops.push(I(0, 0.85, W, 5.0, p[0]), R(0, 5.85, W, 0.04, b.gold));
+      const bandH = a.brand ? 1.1 : 0.85;
+      ops.push(R(0, 0, W, bandH, b.midnight), ...mark(0.5, a.brand ? 0.58 : 0.56, a.brand ? 26 : 20, { dark: true, maxW: 5, minBy: 11 }), T(head, W - 0.5, a.brand ? 0.66 : 0.56, 15, { style: "bold", color: WHITE, align: "right" }));
+      ops.push(I(0, bandH, W, 5.85 - bandH, p[0]), R(0, 5.85, W, 0.04, b.gold));
       [1, 2, 3].forEach(i => ops.push(I(0.5 + (i - 1) * 2.55, 6.05, 2.45, 1.55, p[i])));
       ops.push(T(l ? money(l.price) : "", 0.5, 8.25, 30, { font: "serif", style: "bold", color: b.midnight }), T(l ? l.address : "", 0.5, 8.6, 13, { style: "bold" }), T(l ? [l.hood, l.city].filter(Boolean).join(", ") : "", 0.5, 8.85, 11, { color: b.gray }),
         T(facts(l), 0.5, 9.2, 11.5, { color: b.midnight }), S.theme === "open-house" && evLine() ? T(evLine(), 0.5, 9.5, 11.5, { style: "bold", color: b.gold }) : null,
@@ -106,10 +126,10 @@
       out.push(R(P, 0, P, H, WHITE), { t: "avatar", x: P + P / 2 - 0.6, y: 0.8, size: 1.2, initials: initials(a.name), photo: a.photo }, T(a.name, P + P / 2, 2.45, 16, { font: "serif", style: "bold", color: b.midnight, align: "center" }),
         T(a.title, P + P / 2, 2.7, 9.5, { color: b.gray, align: "center" }), L(P + P / 2 - 0.4, 2.9, P + P / 2 + 0.4, 2.9), T(a.phone, P + P / 2, 3.25, 11, { align: "center" }), T(a.email, P + P / 2, 3.48, 10, { align: "center", color: b.gray }),
         R(P + P / 2 - 0.65, 3.9, 1.3, 1.3, WHITE, { stroke: b.line }), { t: "qr", x: P + P / 2 - 0.6, y: 3.95, size: 1.2, data: qrData(l, a) }, T("Scan for photos and details", P + P / 2, 5.45, 8.5, { align: "center", color: b.gray }),
-        T(a.firm, P + P / 2, 7.5, 14, { font: "serif", style: "bold", color: b.gold, align: "center" }), T([license(), eho].filter(Boolean).join("  ·  "), P + P / 2, 7.75, 6.5, { align: "center", color: b.gray, maxW: P - 0.5 }));
+        ...mark(P + P / 2, 7.25, 14, { align: "center", color: b.midnight, maxW: P - 0.6, minBy: 8 }), T([license(), eho].filter(Boolean).join("  ·  "), P + P / 2, 7.95, 6.5, { align: "center", color: b.gray, maxW: P - 0.5 }));
       out.push(R(2 * P, 0, P, H, b.midnight), I(2 * P, 0, P, 4.9, p[0]), R(2 * P, 4.9, P, 0.04, b.gold), T(head, 2 * P + m, 5.5, 13, { font: "serif", style: "italic", color: b.gold }),
         T(l ? l.address : "", 2 * P + m, 5.95, 17, { font: "serif", style: "bold", color: WHITE, maxW: P - 2 * m, lh: 1.15, maxLines: 2 }), T(l ? money(l.price) : "", 2 * P + m, 6.85, 20, { font: "serif", style: "bold", color: WHITE }),
-        S.theme === "open-house" && evLine() ? T(evLine(), 2 * P + m, 7.15, 9.5, { color: b.gold, maxW: P - 2 * m }) : null, T(a.firm, 2 * P + m, 8.0, 10, { style: "bold", color: b.linen }));
+        S.theme === "open-house" && evLine() ? T(evLine(), 2 * P + m, 7.15, 9.5, { color: b.gold, maxW: P - 2 * m }) : null, ...mark(2 * P + m, 7.75, 12, { dark: true, maxW: P - 2 * m, minBy: 7.5 }));
       // Inside: three panels
       inn.push(R(0, 0, W, H, WHITE), T(S.headline || "Welcome home", m, 0.8, 18, { font: "serif", style: "bold", color: b.midnight }), L(m, 0.95, m + 0.5, 0.95), T(body, m, 1.3, 10, { maxW: P - 2 * m, lh: 1.45, maxLines: 28 }));
       inn.push(I(P + m * 0.5, m, P - m, 3.4, p[1]), T("Home facts", P + m, 4.25, 13, { font: "serif", style: "bold", color: b.midnight }));
@@ -118,7 +138,7 @@
       inn.push(I(2 * P + m * 0.5, m, P - m, 3.4, p[2]), R(2 * P + m * 0.5, 4.0, P - m, 4.15, b.midnight), T("See it in person", 2 * P + m, 4.6, 16, { font: "serif", style: "bold", color: b.gold }),
         T(`Call or text ${a.name.split(" ")[0]} at ${a.phone} to schedule a private showing.`, 2 * P + m, 5.0, 10.5, { color: WHITE, maxW: P - 2 * m, lh: 1.4 }),
         S.theme === "open-house" && evLine() ? T(`Open house: ${evLine()}`, 2 * P + m, 5.9, 10, { color: b.gold, maxW: P - 2 * m, style: "bold" }) : null,
-        T(a.name, 2 * P + m, 7.15, 12, { font: "serif", style: "bold", color: WHITE }), T([a.phone, a.email].filter(Boolean).join("  ·  "), 2 * P + m, 7.4, 8.5, { color: b.linen, maxW: P - 2 * m }), T(a.firm, 2 * P + m, 7.65, 8.5, { color: b.linen }),
+        T(a.name, 2 * P + m, 7.15, 12, { font: "serif", style: "bold", color: WHITE }), T([a.phone, a.email].filter(Boolean).join("  ·  "), 2 * P + m, 7.4, 8.5, { color: b.linen, maxW: P - 2 * m }), T(a.display, 2 * P + m, 7.65, 8.5, { color: b.linen, style: "bold" }), a.brand ? T(a.byline, 2 * P + m, 7.85, 8, { color: b.linen }) : null,
         { t: "guide", x1: P, y1: 0, x2: P, y2: H }, { t: "guide", x1: 2 * P, y1: 0, x2: 2 * P, y2: H });
       out.push({ t: "guide", x1: P, y1: 0, x2: P, y2: H }, { t: "guide", x1: 2 * P, y1: 0, x2: 2 * P, y2: H });
       return { w: W, h: H, sides: [out.filter(Boolean), inn.filter(Boolean)], sideNames: ["Outside", "Inside"] };
@@ -132,8 +152,8 @@
       const bw = W * 0.58, bh = listingTheme ? 1.25 * k : 1.05 * k;
       front.push(R(m, H - m - bh, bw, bh, b.midnight, { opacity: 0.92 }), T(listingTheme ? head : head, m + 0.18 * k, H - m - bh + 0.38 * k, 13 * k, { font: "serif", style: "italic", color: b.gold, maxW: bw - 0.3 * k }));
       if (listingTheme) front.push(T(S.theme === "just-sold" ? l.address : money(l.price), m + 0.18 * k, H - m - bh + 0.72 * k, 17 * k, { font: "serif", style: "bold", color: WHITE }), T(S.theme === "just-sold" ? (l.hood || "") : `${l.address}${l.hood ? ", " + l.hood : ""}`, m + 0.18 * k, H - m - 0.2 * k, 8 * k, { color: b.linen, maxW: bw - 0.3 * k }));
-      else front.push(T(a.firm, m + 0.18 * k, H - m - 0.25 * k, 10 * k, { style: "bold", color: WHITE }));
-      front.push(T(a.firm, W - m, m + 0.2 * k, 10 * k, { font: "serif", style: "bold", color: WHITE, align: "right", shadow: true }));
+      else front.push(T(a.display, m + 0.18 * k, H - m - 0.25 * k, 10 * k, { style: "bold", color: WHITE }));
+      front.push(...mark(W - m, m + 0.24 * k, 12 * k, { dark: true, color: WHITE, align: "right", shadow: true, maxW: W * 0.45, minBy: 7 * k }));
       // Back: left half message, right half kept clear for postage and address.
       const half = W * 0.5;
       const bh2 = T(S.theme === "market" ? "Market update" : head, m + 0.05, m + 0.32 * k, 13 * k, { font: "serif", style: "bold", color: b.midnight, maxW: half - m - 0.2, lh: 1.1, maxLines: 2 });
@@ -146,7 +166,7 @@
       }
       back.push(T(body, m + 0.05, by, 7.5 * k, { maxW: half - m - 0.25, lh: 1.4, maxLines: S.theme === "market" ? 5 : 8 }));
       back.push(T(a.name, m + 0.05, H - m - 0.62 * k, 10 * k, { font: "serif", style: "bold", color: b.midnight }), T([a.phone, a.email].filter(Boolean).join("  ·  "), m + 0.05, H - m - 0.45 * k, 6.5 * k, { color: b.ink, maxW: half - 0.9 * k }),
-        T(a.firm, m + 0.05, H - m - 0.3 * k, 6.5 * k, { style: "bold", color: b.gold }), { t: "qr", x: half - 0.7 * k, y: H - m - 0.78 * k, size: 0.55 * k, data: qrData(listingTheme ? l : null, a) },
+        T(a.brand ? `${a.display} · ${a.byline}` : a.firm, m + 0.05, H - m - 0.3 * k, 6.5 * k, { style: "bold", color: b.midnight, maxW: half - 0.9 * k }), { t: "qr", x: half - 0.7 * k, y: H - m - 0.78 * k, size: 0.55 * k, data: qrData(listingTheme ? l : null, a) },
         T([license(), eho, "If your home is listed with another broker, this is not a solicitation."].filter(Boolean).join("  ·  "), m + 0.05, H - 0.12 * k, 4.2 * k, { color: b.gray, maxW: half - m }),
         { t: "guide", box: [half + 0.1, 0.15, W - half - 0.25, H - 0.3], label: "Postage and mailing address (leave blank)" });
       return { w: W, h: H, sides: [front, back], sideNames: ["Front", "Back (address side)"] };
@@ -159,27 +179,90 @@
       if (p[0].kind !== "blank") front.push(I(0, 0, W, 3.9, p[0])); else front.push(...mountains(0, 2.6, W, 1.1));
       front.push(R(0, 3.9, W, 0.04, b.gold), T(head, m, 4.5, 15, { font: "serif", style: "italic", color: b.gold }), T(title, m, 5.0, 22, { font: "serif", style: "bold", color: WHITE, maxW: W - 2 * m, lh: 1.1, maxLines: 2 }),
         T(evLine(), m, 5.95, 11, { style: "bold", color: b.linen, maxW: W - 2 * m }), T(S.ev.place || (S.theme === "open-house" && l ? `${l.address}${l.hood ? ", " + l.hood : ""}` : ""), m, 6.2, 10, { color: b.linen, maxW: W - 2 * m }),
-        T(a.firm, m, H - 0.3, 9.5, { font: "serif", style: "bold", color: b.gold }));
+        ...mark(m, a.brand ? H - 0.42 : H - 0.3, 11, { dark: true, maxW: W - 2 * m, minBy: 7.5 }));
       back.push(R(0, 0, W, H, WHITE), R(0, 0, W, 0.12, b.gold), T(title, m, 0.75, 16, { font: "serif", style: "bold", color: b.midnight, maxW: W - 2 * m, maxLines: 2 }), L(m, 0.92, m + 0.5, 0.92));
       [["When", evLine()], ["Where", S.ev.place || (l ? `${l.address}${l.hood ? ", " + l.hood : ""}` : "")], ["RSVP", S.ev.rsvp || [a.phone, a.email].filter(Boolean).join(" or ")]].forEach((r, i) => back.push(T(r[0], m, 1.3 + i * 0.42, 8.5, { style: "bold", color: b.gold }), T(r[1] || "To be announced", m + 0.75, 1.3 + i * 0.42, 9.5, { maxW: W - 2 * m - 0.75, maxLines: 2 })));
       back.push(T(body, m, 2.75, 9.5, { maxW: W - 2 * m, lh: 1.45, maxLines: 9 }));
       back.push(R(m, 5.35, W - 2 * m, 1.05, b.linen), T(a.name, m + 0.15, 5.68, 13, { font: "serif", style: "bold", color: b.midnight }), T(a.title, m + 0.15, 5.88, 8.5, { color: b.gray }),
-        T([a.phone, a.email].filter(Boolean).join("  ·  "), m + 0.15, 6.1, 8.5, { maxW: W - 2 * m - 1.1 }), T(a.firm, m + 0.15, 6.3, 8.5, { style: "bold", color: b.gold }),
+        T([a.phone, a.email].filter(Boolean).join("  ·  "), m + 0.15, 6.1, 8.5, { maxW: W - 2 * m - 1.1 }), T(a.brand ? `${a.display} · ${a.byline}` : a.firm, m + 0.15, 6.3, 8, { style: "bold", color: b.midnight, maxW: W - 2 * m - 1.1 }),
         R(W - m - 0.95, 5.43, 0.9, 0.9, WHITE), { t: "qr", x: W - m - 0.92, y: 5.46, size: 0.84, data: qrData(S.theme === "open-house" ? l : null, a) },
         T([license(), eho].filter(Boolean).join("  ·  "), W / 2, H - 0.2, 6, { color: b.gray, align: "center", maxW: W - 0.5 }));
       return { w: W, h: H, sides: [front.filter(Boolean), back.filter(Boolean)] };
     }
 
+    if (S.product !== "bizcard") return extraDesign({ b, a, l, p, head, body, R, T, I, L, mark, firmLine, eho });
     // Business card
     const W = 3.5, H = 2, light = S.theme === "light", front = [], back = [];
-    front.push(R(0, 0, W, H, light ? b.linen : b.midnight), T(a.firm, W / 2, 0.98, 20, { font: "serif", style: "bold", color: light ? b.midnight : b.gold, align: "center" }), L(W / 2 - 0.35, 1.13, W / 2 + 0.35, 1.13, b.gold, 0.012),
-      T(head, W / 2, 1.38, 7.5, { color: light ? b.gray : b.linen, align: "center", maxW: W - 0.5 }));
+    const tag = S.headline || (a.brand ? a.tagline : "") || (a.brand ? "" : head);
+    front.push(R(0, 0, W, H, light ? b.linen : b.midnight), ...mark(W / 2, a.brand ? 0.86 : 0.98, a.brand ? 18 : 20, { dark: !light, color: light ? b.midnight : b.gold, align: "center", maxW: W - 0.5, noBy: true }),
+      L(W / 2 - 0.35, a.brand ? 1.08 : 1.13, W / 2 + 0.35, a.brand ? 1.08 : 1.13, b.gold, 0.012), tag ? T(tag, W / 2, a.brand ? 1.3 : 1.38, 7.5, { color: light ? b.gray : b.linen, align: "center", maxW: W - 0.5 }) : null,
+      a.brand ? T(a.byline, W / 2, tag ? 1.6 : 1.4, 8.5, { style: "bold", color: light ? b.midnight : WHITE, align: "center" }) : null);
     back.push(R(0, 0, W, H, WHITE), R(0, 0, W, 0.08, b.gold), { t: "avatar", x: 0.22, y: 0.42, size: 0.72, initials: initials(a.name), photo: a.photo },
       T(a.name, 1.1, 0.62, 12.5, { font: "serif", style: "bold", color: b.midnight }), T(a.title, 1.1, 0.8, 7, { color: b.gray }),
       T(a.phone, 1.1, 1.08, 8), T(a.email, 1.1, 1.24, 7.5, { maxW: 1.65 }), a.web && a.web.length <= 34 ? T(a.web, 1.1, 1.4, 7, { color: b.gray }) : null,
-      { t: "qr", x: W - 0.82, y: 0.6, size: 0.62, data: a.link }, T(a.firm, 0.22, H - 0.3, 7.5, { style: "bold", color: b.gold }),
+      { t: "qr", x: W - 0.82, y: 0.6, size: 0.62, data: a.link }, T(a.brand ? `${a.display} · ${a.byline}` : a.firm, 0.22, H - 0.3, a.brand ? 6.8 : 7.5, { style: "bold", color: b.midnight, maxW: W - 0.44 }),
       T([license(), eho].filter(Boolean).join("  ·  "), 0.22, H - 0.14, 4.6, { color: b.gray, maxW: W - 0.44 }));
-    return { w: W, h: H, sides: [front, back.filter(Boolean)] };
+    if (S.product === "bizcard") return { w: W, h: H, sides: [front.filter(Boolean), back.filter(Boolean)] };
+    return extraDesign({ b, a, l, p, head, body, R, T, I, L, mark, firmLine, eho });
+  }
+  // Meet your agent, letterhead, open house sign-in, and the kit's brand sheet.
+  function extraDesign({ b, a, l, p, head, body, R, T, I, L, mark, firmLine, eho }) {
+    const W = 8.5, H = 11, m = 0.6, ops = [], prof = (Store.team || {})[a.id] || Store.site || {};
+    const footer = (y = H - 0.75) => [R(0, y, W, H - y, b.midnight), T(a.name, m, y + 0.32, 12, { font: "serif", style: "bold", color: WHITE }), T([a.title, a.phone, a.email].filter(Boolean).join("  ·  "), m, y + 0.52, 8.5, { color: b.linen }),
+      T([a.brand ? `${a.display} · ${a.byline}` : a.firm, license(), eho].filter(Boolean).join("  ·  "), W - m, y + 0.52, 7, { color: b.linen, align: "right", maxW: 3.6 })];
+    if (S.product === "letterhead") {
+      ops.push(R(0, 0, W, 0.12, b.gold), ...mark(m, 0.85, 22, { maxW: 4, minBy: 9, color: b.midnight }), T(a.name, W - m, 0.62, 10.5, { style: "bold", align: "right", color: b.midnight }),
+        T([a.title, a.phone, a.email].filter(Boolean).join("\n"), W - m, 0.8, 8.5, { align: "right", color: b.gray, maxW: 3, lh: 1.35 }), L(m, 1.45, W - m, 1.45, b.line, 0.01),
+        { t: "guide", box: [m, 1.75, W - 2 * m, 8.3], label: "Letter body" }, L(m, H - 0.75, W - m, H - 0.75, b.line, 0.01),
+        T([a.brand ? `${a.display} · ${a.byline}` : a.firm, a.web, license(), eho].filter(Boolean).join("  ·  "), W / 2, H - 0.5, 7.5, { align: "center", color: b.gray, maxW: W - 2 * m }));
+      return { w: W, h: H, sides: [ops.filter(Boolean)] };
+    }
+    if (S.product === "signin") {
+      ops.push(R(0, 0, W, 1.25, b.midnight), ...mark(m, 0.55, 18, { dark: true, maxW: 4, minBy: 8.5 }), T("Open house", W - m, 0.58, 20, { font: "serif", style: "italic", color: b.gold, align: "right" }),
+        T(l ? l.address : "", W - m, 0.88, 11, { color: WHITE, align: "right", maxW: 4 }), T(evLine() || "Date: ____________________", m, 1.7, 10.5, { style: "bold", color: b.midnight }),
+        T("Welcome! Please sign in. Are you working with an agent? Let us know so we can respect that relationship.", m, 1.98, 9.5, { color: b.gray, maxW: W - 2 * m - 1.3 }));
+      if (l) ops.push(R(W - m - 1.05, 1.42, 1.05, 1.05, WHITE, { stroke: b.line }), { t: "qr", x: W - m - 1.0, y: 1.47, size: 0.95, data: qrData(l, a) }, T("Photos and details", W - m - 0.52, 2.65, 7, { align: "center", color: b.gray }));
+      const cols = [["Name", 2.0], ["Phone", 1.45], ["Email", 2.2], ["Agent?", 0.85], ["Pre-approved?", 0.8]], top = 2.95, rh = 0.42; let x = m;
+      ops.push(R(m, top, W - 2 * m, 0.34, b.midnight)); cols.forEach(([h, w]) => { ops.push(T(h, x + 0.08, top + 0.23, 8.5, { style: "bold", color: WHITE })); x += w; });
+      for (let i = 0; i < 16; i++) { const y = top + 0.34 + i * rh; if (i % 2) ops.push(R(m, y, W - 2 * m, rh, b.linen)); ops.push(L(m, y + rh, W - m, y + rh, b.line, 0.008)); }
+      x = m; cols.slice(0, -1).forEach(([, w]) => { x += w; ops.push(L(x, top + 0.34, x, top + 0.34 + 16 * rh, b.line, 0.008)); });
+      ops.push(...footer(H - 0.75), T("We never share your information. Fair Housing applies to every showing.", W / 2, H - 0.88, 7, { align: "center", color: b.gray }));
+      return { w: W, h: H, sides: [ops.filter(Boolean)] };
+    }
+    if (S.product === "brandsheet") {
+      const P = b.midnight, A = b.gold;
+      ops.push(R(0, 0, W, 2.6, P), ...mark(m, 1.25, 30, { dark: true, maxW: 5.5, minBy: 13 }), a.tagline ? T(a.tagline, m, 2.2, 11, { color: b.linen }) : null,
+        T("Brand sheet", m, 3.2, 16, { font: "serif", style: "bold", color: P }), L(m, 3.33, m + 0.5, 3.33, A, 0.02),
+        R(m, 3.6, 1.4, 1.0, P), R(m + 1.6, 3.6, 1.4, 1.0, A), R(m + 3.2, 3.6, 1.4, 1.0, b.linen, { stroke: b.line }),
+        T("Main  " + hex(P).toUpperCase(), m, 4.85, 8.5, { style: "bold" }), T("Accent  " + hex(A).toUpperCase(), m + 1.6, 4.85, 8.5, { style: "bold" }), T("Light  " + hex(b.linen).toUpperCase(), m + 3.2, 4.85, 8.5, { style: "bold" }),
+        T("Type: headlines in a classic serif (Times, Georgia, or similar); everything else in a clean sans serif (Helvetica, Arial).", m, 5.35, 9.5, { maxW: W - 2 * m }),
+        T("Using your brand", m, 5.95, 13, { font: "serif", style: "bold", color: P }));
+      const rules = [`Every ad, sign, card, post, website page, and email signature includes "${a.firm}" clearly and conspicuously with ${a.brand ? a.display : "your name"}. Colorado Rule 6.10 requires it.`,
+        `Keep "${a.brand ? a.byline : "Brokered by " + a.firm}" readable: at least half the size of your business name, and never in the fine print.`,
+        "Don’t add Realty, Real estate, Realtors, Company, Inc., LLC, or similar words to your name, and don’t present it as a separate company.",
+        "Changing your name, logo, or colors? Submit it in My brand. Materials switch back to The Miller Group brand until your broker approves the change.",
+        "Include Equal Housing Opportunity on print pieces, and follow Fair Housing advertising rules in every description.",
+        "Only use photos you own or have permission to use. Get the listing broker’s permission before advertising another brokerage’s listing."];
+      let y = 6.3; rules.forEach(r => { ops.push({ t: "circle", x: m + 0.06, y: y - 0.04, r: 0.035, fill: A }, T(r, m + 0.22, y, 9.5, { maxW: W - 2 * m - 0.25, lh: 1.35 })); y += 0.62; });
+      ops.push(...footer(H - 0.75));
+      return { w: W, h: H, sides: [ops.filter(Boolean)] };
+    }
+    // Meet your agent
+    const bio = prof.presBio || prof.bio || `I help buyers and sellers across the Denver metro with clear advice, strong marketing, and steady communication from first call to closing.`;
+    const pledge = (prof.presPledge && prof.presPledge.length ? prof.presPledge : ["Clear, honest advice", "Fast, steady communication", "Marketing that gets results", "Service after the sale"]).slice(0, 5);
+    const quotes = (prof.testimonials || []).filter(q => q && q.quote).slice(0, 2);
+    ops.push(R(0, 0, W, 3.0, b.midnight), ...mark(m, 0.85, 20, { dark: true, maxW: 4, minBy: 9 }), T("Meet your agent", m, 1.75, 12, { font: "serif", style: "italic", color: b.gold }),
+      T(a.name, m, 2.25, 30, { font: "serif", style: "bold", color: WHITE }), T([a.title, prof.areas].filter(Boolean).join("  ·  "), m, 2.6, 10.5, { color: b.linen, maxW: 4.6 }),
+      { t: "avatar", x: W - m - 2.0, y: 0.5, size: 2.0, initials: initials(a.name), photo: a.photo },
+      T("About me", m, 3.65, 14, { font: "serif", style: "bold", color: b.midnight }), L(m, 3.78, m + 0.5, 3.78), T(bio, m, 4.1, 10.5, { maxW: 4.4, lh: 1.5, maxLines: 14 }),
+      R(5.35, 3.4, W - 5.35 - m + 0.05, 3.6, b.linen), T("My promise", 5.55, 3.85, 13, { font: "serif", style: "bold", color: b.midnight }));
+    pledge.forEach((t, i) => ops.push({ t: "circle", x: 5.62, y: 4.22 + i * 0.52, r: 0.035, fill: b.gold }, T(t, 5.78, 4.26 + i * 0.52, 9.5, { maxW: 2.0, lh: 1.3, maxLines: 2 })));
+    ops.push(T("How I help", m, 7.45, 14, { font: "serif", style: "bold", color: b.midnight }), L(m, 7.58, m + 0.5, 7.58));
+    [["Selling", "Pricing from real comps, a pre-listing walk-through, pro photos, and a marketing plan built for your home."], ["Buying", "A clear road to closed: financing options, smart offers, and every deadline tracked."], ["Investing", "Rental and value-add analysis, 1031 timing, and the right local partners."]]
+      .forEach(([h, t], i) => { const x = m + i * 2.47; ops.push(T(h, x, 7.95, 11, { style: "bold", color: b.gold }), T(t, x, 8.18, 9, { maxW: 2.3, lh: 1.35, maxLines: 5 })); });
+    quotes.forEach((q, i) => ops.push(T(`“${q.quote}”`, m + i * 3.15, 9.2, 8.5, { font: "serif", style: "italic", maxW: 2.9, lh: 1.3, maxLines: 5 }), T("— " + [q.name, q.place].filter(Boolean).join(", "), m + i * 3.15, 10.05, 7.5, { color: b.gray, maxW: 2.9 })));
+    ops.push(...footer(H - 0.75), R(W - m - 0.95, H - 1.92, 0.95, 0.95, WHITE), { t: "qr", x: W - m - 0.9, y: H - 1.87, size: 0.85, data: a.link });
+    return { w: W, h: H, sides: [ops.filter(Boolean)] };
   }
   const initials = n => String(n || "").split(/\s+/).map(s => s[0] || "").join("").slice(0, 2).toUpperCase();
   function qrData(l, a) { return l ? `${IDX.APP_URL}#home=${encodeURIComponent(l.key)}` : a.link; }
@@ -220,6 +303,8 @@
     let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${d.w * k} ${d.h * k}" role="img" aria-label="Preview"><defs><clipPath id="psClip"><rect width="${d.w * k}" height="${d.h * k}"/></clipPath></defs><g clip-path="url(#psClip)">`;
     ops.forEach(o => {
       if (o.t === "rect") s += `<rect x="${o.x * k}" y="${o.y * k}" width="${o.w * k}" height="${o.h * k}" fill="${col(o.fill)}"${o.opacity ? ` fill-opacity="${o.opacity}"` : ""}${o.stroke ? ` stroke="${col(o.stroke)}"` : ""}/>`;
+      else if (o.t === "logo") s += `<image href="${esc2(o.src)}" x="${o.x * k}" y="${o.y * k}" width="${o.w * k}" height="${o.h * k}" preserveAspectRatio="xMidYMid meet"/>`;
+      else if (o.t === "circle") s += `<circle cx="${o.x * k}" cy="${o.y * k}" r="${o.r * k}" fill="${col(o.fill)}"/>`;
       else if (o.t === "line") s += `<line x1="${o.x1 * k}" y1="${o.y1 * k}" x2="${o.x2 * k}" y2="${o.y2 * k}" stroke="${col(o.color)}" stroke-width="${o.w * k}" stroke-linecap="round"/>`;
       else if (o.t === "img") s += svgImage(o, k);
       else if (o.t === "avatar") { const r = o.size / 2 * k, cx = o.x * k + r, cy = o.y * k + r; s += o.photo ? `<clipPath id="av${Math.round(cx)}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><image href="${esc2(o.photo)}" x="${o.x * k}" y="${o.y * k}" width="${o.size * k}" height="${o.size * k}" preserveAspectRatio="xMidYMid slice" clip-path="url(#av${Math.round(cx)})"/>` : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col(B().gold)}"/><text x="${cx}" y="${cy + r * 0.32}" font-family="Times New Roman, Times, serif" font-weight="bold" font-size="${r * 0.9}" fill="#fff" text-anchor="middle">${esc2(o.initials)}</text>`; }
@@ -265,32 +350,57 @@
     imgCache.set(key, out); return out;
   }
 
-  async function buildPDF() {
+  // Render one or more designs into a single PDF (each design keeps its own page size).
+  async function renderPDF(designs, bleed) {
     const jsPDF = await CMAReport.loadPdfLib(); await loadQR();
-    const d = design(), bl = S.bleed ? 0.125 : 0, W = d.w + bl * 2, H = d.h + bl * 2;
-    const doc = new jsPDF({ unit: "in", format: [W, H], orientation: W > H ? "landscape" : "portrait" });
-    measureDoc = measureDoc || doc;
-    // Expand anything touching the trim edge into the bleed.
-    const grow = o => { if (!bl) return o; const e = 0.001, n = { ...o }; if (o.x <= e) { n.x -= bl; n.w += bl; } if (o.y <= e) { n.y -= bl; n.h += bl; } if (o.x + o.w >= d.w - e) n.w += bl; if (o.y + o.h >= d.h - e) n.h += bl; return n; };
-    for (let si = 0; si < d.sides.length; si++) {
-      if (si) doc.addPage([W, H], W > H ? "landscape" : "portrait");
-      for (const o0 of d.sides[si]) {
-        const o = (o0.t === "rect" || o0.t === "img") ? grow(o0) : o0, X = v => v + bl;
-        if (o.t === "rect") { doc.setFillColor(...o.fill); if (o.opacity && doc.GState) { doc.setGState(new doc.GState({ opacity: o.opacity })); } if (o.stroke) { doc.setDrawColor(...o.stroke); doc.setLineWidth(0.01); } doc.rect(X(o.x), X(o.y), o.w, o.h, o.stroke ? "FD" : "F"); if (o.opacity && doc.GState) doc.setGState(new doc.GState({ opacity: 1 })); }
-        else if (o.t === "line") { doc.setDrawColor(...o.color); doc.setLineWidth(o.w); doc.line(X(o.x1), X(o.y1), X(o.x2), X(o.y2)); }
-        else if (o.t === "img") { const data = await photoData(o.photo, o.w, o.h); if (data) doc.addImage(data, "JPEG", X(o.x), X(o.y), o.w, o.h, undefined, "MEDIUM"); else drawHouse(doc, X(o.x), X(o.y), o.w, o.h); }
-        else if (o.t === "avatar") { const r = o.size / 2, cx = X(o.x) + r, cy = X(o.y) + r; const data = o.photo ? await photoData({ kind: "url", src: o.photo }, o.size, o.size) : null;
-          if (data) { doc.saveGraphicsState(); doc.circle(cx, cy, r, null); doc.clip(); doc.discardPath(); doc.addImage(data, "JPEG", X(o.x), X(o.y), o.size, o.size); doc.restoreGraphicsState(); }
-          else { doc.setFillColor(...B().gold); doc.circle(cx, cy, r, "F"); doc.setFont("times", "bold"); doc.setFontSize(r * 72 * 0.9); doc.setTextColor(255, 255, 255); doc.text(o.initials, cx, cy + r * 0.32, { align: "center" }); } }
-        else if (o.t === "qr") { const m = qrMatrix(o.data); if (m) { const cs = o.size / m.n; doc.setFillColor(20, 26, 38); for (let r = 0; r < m.n; r++) for (let c = 0; c < m.n; c++) if (m.dark(r, c)) doc.rect(X(o.x) + c * cs, X(o.y) + r * cs, cs + 0.001, cs + 0.001, "F"); } }
-        else if (o.t === "text") { const ls = lines(o); if (!ls.length) continue; doc.setFont(fontName(o.font), pdfStyle(o.style)); doc.setFontSize(o.size); doc.setTextColor(...o.color);
-          ls.forEach((t, i) => doc.text(t, X(o.x), X(o.y) + i * lh(o), o.align && o.align !== "left" ? { align: o.align } : undefined)); }
+    const bl = bleed ? 0.125 : 0; let doc = null;
+    for (const d of designs) {
+      const W = d.w + bl * 2, H = d.h + bl * 2, orient = W > H ? "landscape" : "portrait";
+      if (!doc) { doc = new jsPDF({ unit: "in", format: [W, H], orientation: orient }); measureDoc = measureDoc || doc; } else doc.addPage([W, H], orient);
+      // Expand anything touching the trim edge into the bleed.
+      const grow = o => { if (!bl) return o; const e = 0.001, n = { ...o }; if (o.x <= e) { n.x -= bl; n.w += bl; } if (o.y <= e) { n.y -= bl; n.h += bl; } if (o.x + o.w >= d.w - e) n.w += bl; if (o.y + o.h >= d.h - e) n.h += bl; return n; };
+      for (let si = 0; si < d.sides.length; si++) {
+        if (si) doc.addPage([W, H], orient);
+        for (const o0 of d.sides[si]) await drawOp(doc, (o0.t === "rect" || o0.t === "img") ? grow(o0) : o0, bl);
       }
     }
-    const l = listing(), prod = PRODUCTS.find(p => p[0] === S.product)[1];
-    const name = `${prod}${l && usesListing() ? "_" + l.address : ""}${S.bleed ? "_print-ready" : ""}`.replace(/[^\w]+/g, "_").replace(/^_|_$/g, "") + ".pdf";
+    return doc;
+  }
+  async function drawOp(doc, o, bl) {
+    const X = v => v + bl;
+    if (o.t === "rect") { doc.setFillColor(...o.fill); if (o.opacity && doc.GState) { doc.setGState(new doc.GState({ opacity: o.opacity })); } if (o.stroke) { doc.setDrawColor(...o.stroke); doc.setLineWidth(0.01); } doc.rect(X(o.x), X(o.y), o.w, o.h, o.stroke ? "FD" : "F"); if (o.opacity && doc.GState) doc.setGState(new doc.GState({ opacity: 1 })); }
+    else if (o.t === "line") { doc.setDrawColor(...o.color); doc.setLineWidth(o.w); doc.line(X(o.x1), X(o.y1), X(o.x2), X(o.y2)); }
+    else if (o.t === "circle") { doc.setFillColor(...o.fill); doc.circle(X(o.x), X(o.y), o.r, "F"); }
+    else if (o.t === "logo") { try { doc.addImage(o.src, "PNG", X(o.x), X(o.y), o.w, o.h, undefined, "FAST"); } catch (e) { /* unreadable logo: skip */ } }
+    else if (o.t === "img") { const data = await photoData(o.photo, o.w, o.h); if (data) doc.addImage(data, "JPEG", X(o.x), X(o.y), o.w, o.h, undefined, "MEDIUM"); else drawHouse(doc, X(o.x), X(o.y), o.w, o.h); }
+    else if (o.t === "avatar") { const r = o.size / 2, cx = X(o.x) + r, cy = X(o.y) + r; const data = o.photo ? await photoData({ kind: "url", src: o.photo }, o.size, o.size) : null;
+      if (data) { doc.saveGraphicsState(); doc.circle(cx, cy, r, null); doc.clip(); doc.discardPath(); doc.addImage(data, "JPEG", X(o.x), X(o.y), o.size, o.size); doc.restoreGraphicsState(); }
+      else { doc.setFillColor(...B().gold); doc.circle(cx, cy, r, "F"); doc.setFont("times", "bold"); doc.setFontSize(r * 72 * 0.9); doc.setTextColor(255, 255, 255); doc.text(o.initials, cx, cy + r * 0.32, { align: "center" }); } }
+    else if (o.t === "qr") { const m = qrMatrix(o.data); if (m) { const cs = o.size / m.n; doc.setFillColor(20, 26, 38); for (let r = 0; r < m.n; r++) for (let c = 0; c < m.n; c++) if (m.dark(r, c)) doc.rect(X(o.x) + c * cs, X(o.y) + r * cs, cs + 0.001, cs + 0.001, "F"); } }
+    else if (o.t === "text") { const ls = lines(o); if (!ls.length) return; doc.setFont(fontName(o.font), pdfStyle(o.style)); doc.setFontSize(o.size); doc.setTextColor(...o.color);
+      ls.forEach((t, i) => doc.text(t, X(o.x), X(o.y) + i * lh(o), o.align && o.align !== "left" ? { align: o.align } : undefined)); }
+  }
+  async function buildPDF() {
+    await CMAReport.loadPdfLib(); await loadQR();
+    if (!measureDoc) { const jsPDF = await CMAReport.loadPdfLib(); measureDoc = new jsPDF({ unit: "in", format: "letter" }); }
+    const doc = await renderPDF([design()], S.bleed);
+    const l = listing(), prod = PRODUCTS.find(p => p[0] === S.product)[1], who = agent();
+    const name = `${who.brand ? who.display + "_" : ""}${prod}${l && usesListing() ? "_" + l.address : ""}${S.bleed ? "_print-ready" : ""}`.replace(/[^\w]+/g, "_").replace(/^_|_$/g, "") + ".pdf";
     return { doc, name, blob: doc.output("blob") };
   }
+  // New-agent starter kit: brand sheet, business card, letterhead, meet-your-agent, farming postcard, open house sign-in.
+  PS.buildKit = async function (agentId) {
+    const jsPDF = await CMAReport.loadPdfLib(); await loadQR(); if (!measureDoc) measureDoc = new jsPDF({ unit: "in", format: "letter" });
+    const prevAs = window.AgentBrand ? AgentBrand.as : null; if (window.AgentBrand && agentId) AgentBrand.as = agentId;
+    const keep = { ...S, ev: { ...S.ev } }, designs = [];
+    try {
+      for (const [product, theme, extra] of [["brandsheet", "standard"], ["bizcard", "classic"], ["letterhead", "standard"], ["onepager", "standard"], ["postcard", "thinking", { size: "6x4" }], ["signin", "standard", { key: "" }]]) {
+        Object.assign(S, { product, theme, headline: "", body: "", picks: null, ...(extra || {}) }); designs.push(design());
+      }
+    } finally { Object.assign(S, keep); if (window.AgentBrand) AgentBrand.as = prevAs; }
+    const doc = await renderPDF(designs, false), who = (window.AgentBrand ? AgentBrand.current(agentId) : agent());
+    return { doc, name: `${String(who.brand ? who.display : who.name).replace(/[^\w]+/g, "_")}_Starter_Marketing_Kit.pdf`, blob: doc.output("blob") };
+  };
   function drawHouse(doc, x, y, w, h) {
     const b = B(); doc.setFillColor(...b.linen); doc.rect(x, y, w, h, "F"); const cx = x + w / 2, cy = y + h / 2, s = Math.min(w, h) / 3;
     doc.setDrawColor(...b.gold); doc.setLineWidth(Math.max(0.01, s / 30)); doc.line(cx - s, cy, cx, cy - s * 0.8); doc.line(cx, cy - s * 0.8, cx + s, cy); doc.rect(cx - s * 0.7, cy, s * 1.4, s * 0.8);
@@ -315,17 +425,20 @@
     const opt = (list, val) => list.map(([v, t]) => `<option value="${esc(v)}" ${val === v ? "selected" : ""}>${esc(t)}</option>`).join("");
     const photos = photoPool(), picks = S.picks || photos.map(p => p.id), slots = PHOTO_SLOTS[S.product];
     const foreign = l && usesListing() && !l.exclusive && l.office && !/miller/i.test(l.office);
-    let html = `<div class="ps-products" role="radiogroup" aria-label="What are you making?">${PRODUCTS.map(([k, t, size]) => `<button class="ps-prod ${S.product === k ? "on" : ""}" role="radio" aria-checked="${S.product === k}" data-ps-product="${k}"><strong>${esc(t)}</strong><span>${esc(size)}</span></button>`).join("")}</div>
+    const who = agent(), bst = window.AgentBrand ? AgentBrand.status(who.id) : { state: "none" };
+    let html = `${Store.isBroker && window.AgentBrand ? `<div class="tourform" style="margin-bottom:10px"><label for="psAs">Making materials for</label><select id="psAs" data-ps-as>${Object.entries(Store.team || {}).map(([id, t]) => `<option value="${esc(id)}" ${id === who.id ? "selected" : ""}>${esc(t.name || "Agent")}${AgentBrand.approvedBrand(id) ? ` · ${esc(t.brand.name)}` : ""}</option>`).join("")}</select></div>` : ""}
+      <div class="ab-status ${who.brand ? "ok" : ""}"><strong>${who.brand ? `Branded as ${esc(who.display)}` : `Branded as ${esc(who.firm)}`}</strong><span>${who.brand ? esc(who.byline) + " appears on every piece." : bst.state === "pending" ? "Your own brand is waiting for broker approval." : bst.state === "changes" ? "Your broker asked for brand changes." : "Want your own business name front and center?"} <button class="remove" data-panel="agent-brand">My brand</button></span></div>
+      <div class="ps-products" role="radiogroup" aria-label="What are you making?">${PRODUCTS.map(([k, t, size]) => `<button class="ps-prod ${S.product === k ? "on" : ""}" role="radio" aria-checked="${S.product === k}" data-ps-product="${k}"><strong>${esc(t)}</strong><span>${esc(size)}</span></button>`).join("")}</div>
       <div class="tourform">
-        <div class="row2"><div><label for="psTheme">${S.product === "bizcard" ? "Style" : "Type"}</label><select id="psTheme" data-ps="theme">${opt(THEMES[S.product], S.theme)}</select></div>
+        ${THEMES[S.product].length > 1 ? `<div class="row2"><div><label for="psTheme">${S.product === "bizcard" ? "Style" : "Type"}</label><select id="psTheme" data-ps="theme">${opt(THEMES[S.product], S.theme)}</select></div>` : `<div class="row2" hidden><div></div>`}
         ${S.product === "postcard" ? `<div><label for="psSize">Size</label><select id="psSize" data-ps="size">${opt([["6x4", "6 × 4 in (standard postcard)"], ["9x6", "9 × 6 in (jumbo)"]], S.size)}</select></div>` : "<div></div>"}</div>
         ${usesListing() || (S.product !== "bizcard" && photos.length) ? `<label for="psListing">Listing${usesListing() ? "" : " (for photos, optional)"}</label><select id="psListing" data-ps="key">${opt(pool.map(p => [p.key, `${p.address} · ${short(p.price)}${p.exclusive ? " · Off-market" : ""}`]), S.key)}</select>` : ""}
         ${foreign ? `<p class="note-c">This isn’t a Miller Group listing. You need the listing broker’s permission to advertise it, and their MLS photos usually can’t be used in your marketing.</p>` : ""}
-        ${S.product === "mailer" || S.theme === "open-house" ? `<div class="row2"><div><label for="psDate">Date</label><input id="psDate" type="date" data-ps-ev="date" value="${esc(S.ev.date)}"></div><div class="row2"><div><label for="psStart">Start</label><input id="psStart" type="time" data-ps-ev="start" value="${esc(S.ev.start)}"></div><div><label for="psEnd">End</label><input id="psEnd" type="time" data-ps-ev="end" value="${esc(S.ev.end)}"></div></div></div>` : ""}
+        ${S.product === "mailer" || S.product === "signin" || S.theme === "open-house" ? `<div class="row2"><div><label for="psDate">Date</label><input id="psDate" type="date" data-ps-ev="date" value="${esc(S.ev.date)}"></div><div class="row2"><div><label for="psStart">Start</label><input id="psStart" type="time" data-ps-ev="start" value="${esc(S.ev.start)}"></div><div><label for="psEnd">End</label><input id="psEnd" type="time" data-ps-ev="end" value="${esc(S.ev.end)}"></div></div></div>` : ""}
         ${S.product === "mailer" ? `<label for="psEvTitle">Event name</label><input id="psEvTitle" data-ps-ev="title" placeholder="${S.theme === "open-house" && l ? esc(l.address) : "Client appreciation party"}" value="${esc(S.ev.title)}">
           <div class="row2"><div><label for="psPlace">Where</label><input id="psPlace" data-ps-ev="place" placeholder="Address or venue" value="${esc(S.ev.place)}"></div><div><label for="psRsvp">RSVP</label><input id="psRsvp" data-ps-ev="rsvp" placeholder="By Dec 1 to 303-555-0100" value="${esc(S.ev.rsvp)}"></div></div>` : ""}
-        <label for="psHead">Headline</label><input id="psHead" data-ps="headline" placeholder="${esc(HEADLINES[S.theme] || "")}" value="${esc(S.headline)}">
-        ${S.product !== "bizcard" ? `<label for="psBody">Message<button class="remove" type="button" data-ps-ai ${S.busy ? "disabled" : ""}>${S.busy ? "Writing…" : "Write with AI"}</button></label><textarea id="psBody" rows="4" data-ps="body" placeholder="${esc(defaultBody(S.theme, usesListing() ? l : null, agent()).slice(0, 220))}">${esc(S.body)}</textarea>` : `<p class="addr">Your name, title, phone, email, and headshot come from your profile. <button class="remove" data-panel="pres-profile">Edit profile</button></p>`}
+        ${["onepager", "letterhead", "signin"].includes(S.product) ? `<p class="addr">${S.product === "onepager" ? "Your bio, promise, and testimonials come from your" : "Your name and contact details come from your"} <button class="remove" data-panel="pres-profile">presentation profile</button>.</p>` : `<label for="psHead">Headline</label><input id="psHead" data-ps="headline" placeholder="${esc(HEADLINES[S.theme] || "")}" value="${esc(S.headline)}">
+        ${S.product !== "bizcard" ? `<label for="psBody">Message<button class="remove" type="button" data-ps-ai ${S.busy ? "disabled" : ""}>${S.busy ? "Writing…" : "Write with AI"}</button></label><textarea id="psBody" rows="4" data-ps="body" placeholder="${esc(defaultBody(S.theme, usesListing() ? l : null, agent()).slice(0, 220))}">${esc(S.body)}</textarea>` : `<p class="addr">Your name, title, phone, email, and headshot come from your profile. <button class="remove" data-panel="pres-profile">Edit profile</button></p>`}`}
       </div>`;
     if (slots) {
       html += `<h3 class="agent-h">Photos <span class="addr">${slots === 1 ? "Pick one" : `First pick is the main photo · uses ${slots}`}</span></h3>
@@ -399,6 +512,7 @@ Return only JSON: {"headline": under 40 characters, "body": under ${limit} chara
   document.addEventListener("change", async e => {
     const d = e.target.dataset || {};
     if (d.ps) { const k = d.ps; S[k] = k === "bleed" ? e.target.checked : e.target.value; if (k === "key") { S.picks = null; } if (k === "theme") { S.headline = ""; S.body = ""; } renderAgent(); }
+    else if (d.psAs !== undefined && window.AgentBrand) { AgentBrand.as = e.target.value; renderAgent(); }
     else if (d.psEv) { S.ev[d.psEv] = e.target.value; renderAgent(); }
     else if (d.psUpload !== undefined) {
       const files = [...e.target.files].slice(0, 12);

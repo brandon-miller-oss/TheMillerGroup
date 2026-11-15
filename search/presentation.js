@@ -52,7 +52,8 @@
     presStats: { years: "", homes: "", areas: "", avgDom: "", listToSale: "" },
     testimonials: []
   };
-  const profile = () => { const p = Store.site || {}; return { ...DEFAULT_PROFILE, ...p, presStats: { ...DEFAULT_PROFILE.presStats, ...(p.presStats || {}) }, presPledge: (p.presPledge && p.presPledge.length) ? p.presPledge : DEFAULT_PROFILE.presPledge, testimonials: p.testimonials || [] }; };
+  const profileFor = () => { const id = window.AgentBrand ? AgentBrand.who() : Store.crmOwner; return profile(id === Store.crmOwner ? Store.site : (Store.team || {})[id]); };
+  const profile = (src) => { const p = src || Store.site || {}; return { ...DEFAULT_PROFILE, ...p, presStats: { ...DEFAULT_PROFILE.presStats, ...(p.presStats || {}) }, presPledge: (p.presPledge && p.presPledge.length) ? p.presPledge : DEFAULT_PROFILE.presPledge, testimonials: p.testimonials || [] }; };
 
   const list = () => Object.entries(Store.crm.presentations || {}).filter(([, x]) => x).map(([id, x]) => ({ id, ...x })).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   const newId = () => "pr" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -201,13 +202,18 @@
 
   async function buildPDF(id) {
     const jsPDF = await CMAReport.loadPdfLib();
-    const pr = Store.crm.presentations[id], B = CMAReport.brand, t = CMAReport.clean;
-    const prof = profile(), m = market(), on = k => !pr.sections || pr.sections[k] !== false;
+    const pr = Store.crm.presentations[id], B = window.AgentBrand ? AgentBrand.palette() : CMAReport.brand, t = CMAReport.clean;
+    const prof = profileFor(), m = market(), on = k => !pr.sections || pr.sections[k] !== false;
     const cm = pr.cmaId ? Store.crm.cmas[pr.cmaId] : null, r = cm ? cmaCalc(cm) : null;
     const sub = cm ? cm.subject : {}, subL = cm && cm.subjectKey ? listingSync(cm.subjectKey) : null;
     const comps = r ? r.rows : [];
-    const agent = { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group", first: String(IDX.BROKER.name || "").split(" ")[0], title: prof.title || "Broker" };
     const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const AB0 = window.AgentBrand ? AgentBrand.current() : null;
+    const agent = AB0 ? { name: AB0.name, phone: AB0.phone, email: AB0.email, firm: AB0.display, brokerage: AB0.firm, byline: AB0.byline, logoDark: AB0.brand && AB0.brand.logoDark, logoDarkW: AB0.brand && AB0.brand.logoDarkW, logoDarkH: AB0.brand && AB0.brand.logoDarkH, first: String(AB0.name || "").split(" ")[0], title: AB0.title || prof.title || "Broker" }
+      : { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group", brokerage: IDX.BROKER.firm || "The Miller Group", byline: "", first: String(IDX.BROKER.name || "").split(" ")[0], title: prof.title || "Broker" };
+    const brandLine = agent.byline ? `${agent.firm}  |  ${agent.byline}` : agent.firm;
+    // Brand mark in a dark band: logo (dark version) or the name, with "Brokered by" right under it.
+    const bandMark = (x, y, size) => { if (agent.logoDark && agent.logoDarkW) { const h = size * 1.5, w = Math.min(220, h * agent.logoDarkW / agent.logoDarkH); try { doc.addImage(agent.logoDark, "PNG", x, y - size * 1.1, w, w * agent.logoDarkH / agent.logoDarkW, undefined, "FAST"); } catch (e) { font("times", "bold", size, gold); doc.text(t(agent.firm), x, y); } } else { font("times", "bold", size, gold); doc.text(t(agent.firm), x, y); } if (agent.byline) { font("helvetica", "bold", Math.max(8.5, size * 0.55), white); doc.text(t(agent.byline), x, y + Math.max(11, size * 0.75)); } };
     const W = 612, H = 792, M = 40, CW = W - M * 2, gold = B.gold, mid = B.midnight, lin = B.linen, gray = B.gray, ink = B.ink, line = B.line, white = [255, 255, 255];
     let y = 0, pageNo = 0;
     const font = (f, st, sz, col) => { doc.setFont(f, st); doc.setFontSize(sz); doc.setTextColor(...(col || ink)); };
@@ -216,7 +222,7 @@
     const page = title => {
       if (pageNo) doc.addPage(); pageNo++;
       doc.setFillColor(...mid); doc.rect(0, 0, W, 52, "F"); doc.setFillColor(...gold); doc.rect(0, 52, W, 2, "F");
-      font("times", "bold", 15, gold); doc.text(t(agent.firm), M, 32);
+      if (agent.byline) { font("times", "bold", 14, gold); doc.text(t(agent.firm), M, 26); font("helvetica", "bold", 8.5, white); doc.text(t(agent.byline), M, 41); } else { font("times", "bold", 15, gold); doc.text(t(agent.firm), M, 32); }
       font("helvetica", "bold", 14, white); doc.text(t(title), W - M, 32, { align: "right" });
       y = 84;
     };
@@ -266,7 +272,7 @@
     const coverPhoto = subL && subL.photos && subL.photos[0] ? await toDataURL(subL.photos[0]) : null;
     if (coverPhoto) { try { doc.addImage(coverPhoto, coverPhoto.includes("image/png") ? "PNG" : "JPEG", 0, 120, W, 380, undefined, "FAST"); doc.setFillColor(...mid); doc.setGState && doc.setGState(new doc.GState({ opacity: 0.35 })); doc.rect(0, 120, W, 380, "F"); doc.setGState && doc.setGState(new doc.GState({ opacity: 1 })); } catch (e) {} }
     else { doc.setDrawColor(...gold); doc.setLineWidth(1.6); const pts = [[0, 0], [70, -38], [110, -16], [175, -72], [230, -30], [270, -52], [330, -8], [395, -64], [450, -22], [500, -46], [560, -12], [612, -30]]; for (let i = 1; i < pts.length; i++) doc.line(pts[i - 1][0], 470 + pts[i - 1][1], pts[i][0], 470 + pts[i][1]); }
-    font("times", "bold", 18, gold); doc.text(t(agent.firm), M, 56);
+    bandMark(M, 56, 18);
     font("helvetica", "normal", 12, lin); doc.text("Listing presentation", W - M, 56, { align: "right" });
     font("times", "bold", 38, white); y = 560; wrap(pr.address || sub.address || "Your home", CW).slice(0, 2).forEach(l => { doc.text(l, M, y); y += 42; });
     font("helvetica", "normal", 12, lin); doc.text(t([pr.preparedFor ? `Prepared for ${pr.preparedFor}` : "", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })].filter(Boolean).join("   |   ")), M, y + 4);
@@ -282,7 +288,7 @@
       box(M, y, 150, 180, mid); if (ph) { try { doc.addImage(ph, ph.includes("image/png") ? "PNG" : "JPEG", M, y, 150, 150, undefined, "FAST"); } catch (e) {} } else { doc.setFillColor(...gold); doc.circle(M + 75, y + 70, 44, "F"); font("times", "bold", 34, white); doc.text(t(agent.name.split(" ").map(s => s[0]).join("").slice(0, 2)), M + 75, y + 82, { align: "center" }); }
       font("helvetica", "bold", 11, white); doc.text(t(agent.name), M + 10, y + 166);
       const top = y; let ry = y + 8; const rx = M + 170;
-      [["Phone", agent.phone], ["Email", agent.email], ["Brokerage", agent.firm], ["Areas", prof.presStats.areas]].filter(x => x[1]).forEach(([k, v]) => { kv(rx, ry, k, v, CW - 170); ry += 34; });
+      [["Phone", agent.phone], ["Email", agent.email], ...(agent.byline ? [["Business", agent.firm]] : []), ["Brokerage", agent.brokerage], ["Areas", prof.presStats.areas]].filter(x => x[1]).forEach(([k, v]) => { kv(rx, ry, k, v, CW - 170); ry += 34; });
       y = Math.max(top + 200, ry + 8);
       h2("About me"); para(prof.presBio, 10.5);
       const s = prof.presStats, st = [[s.years ? `Since ${s.years}` : "", "In real estate"], [s.homes, "Homes sold"], [s.avgDom ? `${s.avgDom} days` : "", "Median days on market"], [s.listToSale ? `${s.listToSale}%` : "", "Sale to list price"]].filter(x => x[0]);
@@ -568,14 +574,14 @@
     /* ---------- Next steps ---------- */
     page("Next steps");
     [["Choose a list price and launch date", "Using the analysis and today’s market."], ["Sign the listing agreement and disclosures", "Including the brokerage relationship disclosure Colorado requires."], ["Prepare the home", "Photos are scheduled once it’s ready."], ["Go live", "And start bringing in buyers."]].forEach(([a, b], i) => { badge(M + 11, y - 4, i + 1, 11); font("helvetica", "bold", 11.5, mid); doc.text(t(a), M + 30, y); font("helvetica", "normal", 10.5, ink); doc.text(t(b), M + 30, y + 15); y += 44; });
-    y += 8; doc.setFillColor(...mid); doc.roundedRect(M, y, CW, 90, 6, 6, "F"); font("times", "bold", 20, gold); doc.text(t(agent.name), M + 20, y + 32); font("helvetica", "normal", 10.5, lin); doc.text(t(agent.firm), M + 20, y + 52); doc.text(t([agent.phone, agent.email].filter(Boolean).join("   |   ")), M + 20, y + 70); y += 112;
+    y += 8; doc.setFillColor(...mid); doc.roundedRect(M, y, CW, 90, 6, 6, "F"); font("times", "bold", 20, gold); doc.text(t(agent.name), M + 20, y + 32); font("helvetica", "normal", 10.5, lin); doc.text(t(brandLine), M + 20, y + 52); doc.text(t([agent.phone, agent.email].filter(Boolean).join("   |   ")), M + 20, y + 70); y += 112;
     para("Brokerage fees and any compensation to a buyer’s agent are not set by law and are fully negotiable. Market figures come from the source named on the market page. Values in this presentation are a broker’s opinion, not an appraisal. Equal Housing Opportunity.", 8.5, gray);
 
     // Footers
     const pages = doc.getNumberOfPages();
     for (let p = 2; p <= pages; p++) {
       doc.setPage(p); doc.setFillColor(...mid); doc.rect(0, H - 34, W, 34, "F");
-      font("helvetica", "normal", 8.5, lin); doc.text(t(`${agent.name}  |  ${agent.phone}${agent.email ? "  |  " + agent.email : ""}`), M, H - 14);
+      font("helvetica", "normal", 8.5, lin); doc.text(t(`${agent.name}  |  ${agent.phone}  |  ${brandLine}`), M, H - 14);
       doc.text(`${p} / ${pages}`, W - M, H - 14, { align: "right" });
       font("helvetica", "normal", 7, gray); doc.text(t(`All information deemed reliable but not guaranteed and should be independently verified.${C.LICENSE_TEXT && !/\[add/i.test(C.LICENSE_TEXT) ? "  " + C.LICENSE_TEXT : ""}`), W / 2, H - 40, { align: "center" });
     }
@@ -605,5 +611,5 @@
     else if (d.prKit) { const [id, k] = d.prKit.split("|"); edit(id, x => { x.kit = { ...(x.kit || {}), [k]: e.target.checked }; }); }
     else if (d.prSec) { const [id, k] = d.prSec.split("|"); edit(id, x => { x.sections = { ...(x.sections || {}), [k]: e.target.checked }; }); }
   });
-  P._t = { netCalc, market, MARKET_DEFAULT, profile, SECTIONS, MARKETING, KIT };
+  P._t = { netCalc, market, MARKET_DEFAULT, profile, profileFor, SECTIONS, MARKETING, KIT };
 })();

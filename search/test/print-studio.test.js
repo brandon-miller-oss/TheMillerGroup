@@ -20,7 +20,7 @@ const pdf = async (label) => { const o = await E(`PrintStudio._t.buildPDF().then
 setTimeout(async () => {
   E(`agentPanel = "marketing"; renderAgent()`); await wait(80);
   check("Marketing opens on the Print studio with a Social posts tab", !!$('[data-mk-tab="social"]') && !!$("[data-ps-product]"));
-  check("five products to choose from", $$("[data-ps-product]").length === 5);
+  check("eight products to choose from", $$("[data-ps-product]").length === 8);
   check("flyer preview renders with a QR code", !!$(".ps-preview svg") && $(".ps-preview svg").innerHTML.includes("<path d=\"M"));
   check("photo picker offers listing photos or an illustration plus Add photos", $$(".ps-ph").length >= 2 && !!$("[data-ps-upload]"));
   // Flyer PDF

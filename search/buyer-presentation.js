@@ -12,7 +12,7 @@
   const usd = n => "$" + Math.round(n).toLocaleString("en-US");
   const list = () => Object.entries(Store.crm.buyerpres || {}).filter(([, x]) => x).map(([id, x]) => ({ id, ...x })).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
   const market = () => window.Presentation ? Presentation._t.market() : {};
-  const profile = () => window.Presentation ? Presentation._t.profile() : { presStats: {}, presPledge: [], testimonials: [] };
+  const profile = () => window.Presentation ? Presentation._t.profileFor() : { presStats: {}, presPledge: [], testimonials: [] };
   const partnersBy = cats => Object.values((window.Office && Office.partners) || {}).filter(p => p && cats.includes(p.category)).sort((a, b) => (a.company || a.name || "").localeCompare(b.company || b.name || ""));
 
   // Agent-only checklist from the training guide (Part 2: The Buyer Consultation).
@@ -65,8 +65,13 @@
   /* ============================== PDF ============================== */
   async function buildPDF(id) {
     const jsPDF = await CMAReport.loadPdfLib();
-    const b = Store.crm.buyerpres[id], Bc = CMAReport.brand, t = CMAReport.clean, m = market(), prof = profile();
-    const agent = { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group", first: String(IDX.BROKER.name || "").split(" ")[0], title: prof.title || "Broker" };
+    const b = Store.crm.buyerpres[id], Bc = window.AgentBrand ? AgentBrand.palette() : CMAReport.brand, t = CMAReport.clean, m = market(), prof = profile();
+    const AB0 = window.AgentBrand ? AgentBrand.current() : null;
+    const agent = AB0 ? { name: AB0.name, phone: AB0.phone, email: AB0.email, firm: AB0.display, brokerage: AB0.firm, byline: AB0.byline, logoDark: AB0.brand && AB0.brand.logoDark, logoDarkW: AB0.brand && AB0.brand.logoDarkW, logoDarkH: AB0.brand && AB0.brand.logoDarkH, first: String(AB0.name || "").split(" ")[0], title: AB0.title || prof.title || "Broker" }
+      : { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group", brokerage: IDX.BROKER.firm || "The Miller Group", byline: "", first: String(IDX.BROKER.name || "").split(" ")[0], title: prof.title || "Broker" };
+    const brandLine = agent.byline ? `${agent.firm}  |  ${agent.byline}` : agent.firm;
+    // Brand mark in a dark band: logo (dark version) or the name, with "Brokered by" right under it.
+    const bandMark = (x, y, size) => { if (agent.logoDark && agent.logoDarkW) { const h = size * 1.5, w = Math.min(220, h * agent.logoDarkW / agent.logoDarkH); try { doc.addImage(agent.logoDark, "PNG", x, y - size * 1.1, w, w * agent.logoDarkH / agent.logoDarkW, undefined, "FAST"); } catch (e) { font("times", "bold", size, gold); doc.text(t(agent.firm), x, y); } } else { font("times", "bold", size, gold); doc.text(t(agent.firm), x, y); } if (agent.byline) { font("helvetica", "bold", Math.max(8.5, size * 0.55), white); doc.text(t(agent.byline), x, y + Math.max(11, size * 0.75)); } };
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const W = 612, H = 792, M = 40, CW = W - M * 2, gold = Bc.gold, mid = Bc.midnight, lin = Bc.linen, gray = Bc.gray, ink = Bc.ink, line = Bc.line, white = [255, 255, 255];
     let y = 0, pageNo = 0;
@@ -74,7 +79,7 @@
     const wrap = (s, w) => doc.splitTextToSize(t(s), w);
     const para = (s, sz = 10.5, col = ink, w = CW, x = M, lh = 1.5) => { font("helvetica", "normal", sz, col); wrap(s, w).forEach(l => { ensure(sz * lh); doc.text(l, x, y); y += sz * lh; }); };
     let curTitle = "";
-    const page = title => { if (pageNo) doc.addPage(); pageNo++; curTitle = title; doc.setFillColor(...mid); doc.rect(0, 0, W, 52, "F"); doc.setFillColor(...gold); doc.rect(0, 52, W, 2, "F"); font("times", "bold", 15, gold); doc.text(t(agent.firm), M, 32); font("helvetica", "bold", 14, white); doc.text(t(title), W - M, 32, { align: "right" }); y = 84; };
+    const page = title => { if (pageNo) doc.addPage(); pageNo++; curTitle = title; doc.setFillColor(...mid); doc.rect(0, 0, W, 52, "F"); doc.setFillColor(...gold); doc.rect(0, 52, W, 2, "F"); if (agent.byline) { font("times", "bold", 14, gold); doc.text(t(agent.firm), M, 26); font("helvetica", "bold", 8.5, white); doc.text(t(agent.byline), M, 41); } else { font("times", "bold", 15, gold); doc.text(t(agent.firm), M, 32); } font("helvetica", "bold", 14, white); doc.text(t(title), W - M, 32, { align: "right" }); y = 84; };
     function ensure(h) { if (y + h > H - 70) page(curTitle); }
     const h2 = s => { if (y > 100) y += 8; ensure(40); font("helvetica", "bold", 12, mid); doc.text(t(s), M, y); y += 6; doc.setDrawColor(...gold); doc.setLineWidth(1.2); doc.line(M, y, M + 30, y); y += 16; };
     const badge = (x, yy, n, r = 10, fill = gold) => { doc.setFillColor(...fill); doc.circle(x, yy, r, "F"); font("helvetica", "bold", r * 0.95, white); doc.text(String(n), x, yy + r * 0.34, { align: "center" }); };
@@ -91,7 +96,7 @@
     doc.setDrawColor(...gold); doc.setLineWidth(1.6); const pts = [[0, 0], [70, -38], [110, -16], [175, -72], [230, -30], [270, -52], [330, -8], [395, -64], [450, -22], [500, -46], [560, -12], [612, -30]]; for (let i = 1; i < pts.length; i++) doc.line(pts[i - 1][0], 470 + pts[i - 1][1], pts[i][0], 470 + pts[i][1]);
     // a roofline over the mountains
     doc.setLineWidth(2.2); doc.line(250, 430, 306, 384); doc.line(306, 384, 362, 430);
-    font("times", "bold", 18, gold); doc.text(t(agent.firm), M, 56); font("helvetica", "normal", 12, lin); doc.text("Buyer presentation", W - M, 56, { align: "right" });
+    bandMark(M, 56, 18); font("helvetica", "normal", 12, lin); doc.text("Buyer presentation", W - M, 56, { align: "right" });
     font("times", "bold", 40, white); doc.text("Your road to closed", M, 560);
     font("helvetica", "normal", 13, lin); doc.text(t([b.preparedFor ? `Prepared for ${b.preparedFor}` : "", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })].filter(Boolean).join("   |   ")), M, 590);
     if (b.areas) { font("helvetica", "normal", 11, gold); doc.text(t(`Searching: ${b.areas}${price ? `  |  around ${usd(price)}` : ""}`), M, 612); }
@@ -100,7 +105,7 @@
 
     /* Agent */
     page("Your agent");
-    font("times", "bold", 22, mid); doc.text(t(agent.name), M, y + 6); font("helvetica", "normal", 10, gray); doc.text(t([agent.title, agent.firm, agent.phone, agent.email].filter(Boolean).join("  |  ")), M, y + 24); y += 46;
+    font("times", "bold", 22, mid); doc.text(t(agent.name), M, y + 6); font("helvetica", "normal", 10, gray); doc.text(t([agent.title, brandLine, agent.phone, agent.email].filter(Boolean).join("  |  ")), M, y + 24); y += 46;
     para(prof.presBio || "", 10.5); y += 4;
     const s = prof.presStats || {}, st = [[s.years ? `Since ${s.years}` : "", "In real estate"], [s.homes, "Homes sold"], [s.areas, "Areas I know best"]].filter(x => x[0]);
     if (st.length) { const w = (CW - (st.length - 1) * 8) / st.length; st.forEach((x, i) => { box(M + i * (w + 8), y, w, 56); font("times", "bold", 15, mid); doc.text(wrap(x[0], w - 20)[0], M + i * (w + 8) + 10, y + 24); font("helvetica", "normal", 8.5, gray); doc.text(t(x[1]), M + i * (w + 8) + 10, y + 42); }); y += 72; }
@@ -226,12 +231,12 @@
     y += 126;
     h2("Next steps");
     [["Sign our disclosures and buyer agreement", "So we can talk openly about your plans."], ["Get pre-approved", "Choose a lender and share your approval with me."], ["Start your search", "I’ll set it up today and send matches as they list."], ["Tour your first homes", "Let’s pick a few to see this week."]].forEach(([a, d], i) => { badge(M + 11, y - 4, i + 1, 11); font("helvetica", "bold", 11.5, mid); doc.text(t(a), M + 30, y); font("helvetica", "normal", 10.5, ink); doc.text(t(d), M + 30, y + 15); y += 42; });
-    y += 6; doc.setFillColor(...lin); doc.roundedRect(M, y, CW, 70, 6, 6, "F"); font("times", "bold", 18, mid); doc.text(t(agent.name), M + 18, y + 28); font("helvetica", "normal", 10, ink); doc.text(t([agent.firm, agent.phone, agent.email].filter(Boolean).join("   |   ")), M + 18, y + 48); y += 90;
+    y += 6; doc.setFillColor(...lin); doc.roundedRect(M, y, CW, 70, 6, 6, "F"); font("times", "bold", 18, mid); doc.text(t(agent.name), M + 18, y + 28); font("helvetica", "normal", 10, ink); doc.text(t([brandLine, agent.phone].filter(Boolean).join("   |   ")), M + 18, y + 48); y += 90;
     para("Estimates in this presentation are for planning only. Your lender confirms rates, payments, and costs, and loan and assistance programs change every year. Buyer’s agent compensation is negotiable and set in our written agreement. Equal Housing Opportunity.", 8.5, gray);
 
     const pages = doc.getNumberOfPages();
     for (let p = 2; p <= pages; p++) {
-      doc.setPage(p); doc.setFillColor(...mid); doc.rect(0, H - 34, W, 34, "F"); font("helvetica", "normal", 8.5, lin); doc.text(t(`${agent.name}  |  ${agent.phone}${agent.email ? "  |  " + agent.email : ""}`), M, H - 14); doc.text(`${p} / ${pages}`, W - M, H - 14, { align: "right" });
+      doc.setPage(p); doc.setFillColor(...mid); doc.rect(0, H - 34, W, 34, "F"); font("helvetica", "normal", 8.5, lin); doc.text(t(`${agent.name}  |  ${agent.phone}  |  ${brandLine}`), M, H - 14); doc.text(`${p} / ${pages}`, W - M, H - 14, { align: "right" });
       font("helvetica", "normal", 7, gray); doc.text(t(`Estimates only; verify with your lender.${C.LICENSE_TEXT && !/\[add/i.test(C.LICENSE_TEXT) ? "  " + C.LICENSE_TEXT : ""}`), W / 2, H - 40, { align: "center" });
     }
     const name = `Buyer_Presentation_${(b.preparedFor || "Buyer").replace(/[^\w]+/g, "_").replace(/^_|_$/g, "")}.pdf`;

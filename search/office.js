@@ -16,7 +16,7 @@
    ========================================================================= */
 (function () {
   const O = window.Office = {
-    deals: {}, hub: {}, partners: {}, brand: {}, plan: {}, conn: {},
+    deals: {}, hub: {}, partners: {}, brand: {}, brandok: {}, plan: {}, conn: {},
     watching: false, contactFolder: "", dealFolder: "", importRows: null, rp: { key: "", text: "" }, sending: ""
   };
   const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -51,7 +51,7 @@
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
-    ["hub", "partners", "brand"].forEach(k => sub(`company/${k}/items`, k));
+    ["hub", "partners", "brand", "brandok"].forEach(k => sub(`company/${k}/items`, k));
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
@@ -480,6 +480,7 @@
       { done: contacts().length >= 5, label: "Import or add at least 5 contacts", go: "o-import" },
       { done: !!s.sharedLink, label: "Share your personal link with a client", go: "settings" },
       { done: !!s.gciGoal, label: "Set your yearly GCI goal", go: "biz" },
+      { done: !!(p.brand && p.brand.name), label: "Set up your brand and download your starter kit", go: "agent-brand" },
       { done: !!s.didMarketing, label: "Make your first marketing graphic", go: "marketing" },
       { done: !!s.followups, label: "Turn on follow-up emails", go: "o-followups" },
       { done: myDeals().length > 0, label: "Add your first transaction", go: "o-deals" }
@@ -821,6 +822,7 @@
       p18: { category: "Carpet cleaning", name: "Sample Tech", company: "Fresh Step Carpet Cleaning", phone: "303-555-0171" },
       p19: { category: "Carpet cleaning", name: "Sample Tech", company: "Pure Steam Denver", phone: "720-555-0172" }
     };
+    if (window.AgentBrand) AgentBrand.seedDemo();
     O.brand = { b1: { kind: "logo", title: "Primary logo", url: "https://example.com/logo", notes: "Use on light backgrounds." }, b2: { kind: "template", title: "Just listed social template", url: "https://example.com/template" } };
     Store.crm.referrals = { r1: { direction: "out", client: "The Parks", agent: "Sample Agent", brokerage: "Desert Realty", market: "Phoenix, AZ", feePct: 25, expectedFee: 3200, status: "contract", createdAt: ts } };
     Store.crm.expenses = { e1: { amount: 450, date: d(-12), category: "Marketing", note: "Open house signs" }, e2: { amount: 210, date: d(-30), category: "MLS and association dues" } };

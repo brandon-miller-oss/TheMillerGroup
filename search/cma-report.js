@@ -8,6 +8,7 @@
   const C = window.MG_CONFIG || {};
   const R = window.CMAReport = {};
   const brand = { midnight: [20, 26, 38], gold: [184, 147, 90], linen: [244, 239, 231], ink: [33, 37, 46], gray: [104, 110, 122], line: [221, 212, 197] };
+  const BRAND0 = brand;
   const DISCLAIMER = "This comparative market analysis is a broker’s opinion of value prepared to help price a home for sale. It is not an appraisal and should not be relied on as one. Values are estimates based on the listings and sales shown and may change with market conditions and the home’s condition after a walkthrough.";
 
   let loading = null;
@@ -31,7 +32,8 @@
   async function buildPDF(id, opt) {
     const jsPDF = await loadPdfLib();
     const c = Store.crm.cmas[id], r = cmaCalc(c), sub = c.subject || {};
-    const agent = { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group" };
+    const AB0 = window.AgentBrand ? AgentBrand.current() : null, brand = window.AgentBrand ? AgentBrand.palette() : BRAND0;
+    const agent = AB0 ? { name: AB0.name, phone: AB0.phone, email: AB0.email, firm: AB0.display, byline: AB0.byline } : { name: IDX.BROKER.name, phone: IDX.BROKER.phone, email: IDX.BROKER.email || "", firm: IDX.BROKER.firm || "The Miller Group", byline: "" };
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const W = 612, H = 792, M = 48, CW = W - M * 2;
     let y = 0;
@@ -46,7 +48,7 @@
 
     // Header band
     doc.setFillColor(...brand.midnight); doc.rect(0, 0, W, 64, "F");
-    font("times", "bold", 20, brand.gold); doc.text(t(agent.firm), M, 40);
+    if (agent.byline) { font("times", "bold", 18, brand.gold); doc.text(t(agent.firm), M, 32); font("helvetica", "bold", 9.5, [255, 255, 255]); doc.text(t(agent.byline), M, 49); } else { font("times", "bold", 20, brand.gold); doc.text(t(agent.firm), M, 40); }
     font("helvetica", "normal", 10, brand.linen); doc.text("Comparative Market Analysis", W - M, 40, { align: "right" });
     y = 104;
     font("times", "bold", 26, brand.midnight); doc.splitTextToSize(t(sub.address || c.name), CW).forEach(l => { doc.text(l, M, y); y += 30; });
@@ -129,7 +131,7 @@
     for (let p = 1; p <= pages; p++) {
       doc.setPage(p);
       doc.setDrawColor(...brand.line); doc.line(M, H - 52, W - M, H - 52);
-      font("helvetica", "bold", 9, brand.midnight); doc.text(t(`${agent.name}  |  ${agent.firm}`), M, H - 36);
+      font("helvetica", "bold", 9, brand.midnight); doc.text(t(`${agent.name}  |  ${agent.firm}${agent.byline ? "  |  " + agent.byline : ""}`), M, H - 36);
       font("helvetica", "normal", 8.5, brand.gray); doc.text(t([agent.phone, agent.email].filter(Boolean).join("  |  ")), M, H - 24);
       if (C.LICENSE_TEXT && !/\[add/i.test(C.LICENSE_TEXT)) doc.text(t(C.LICENSE_TEXT), M, H - 13);
       doc.text(`Page ${p} of ${pages}`, W - M, H - 24, { align: "right" });
