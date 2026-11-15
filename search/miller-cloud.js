@@ -137,11 +137,11 @@
   };
 
   // AI for agents: runs Claude through /api/ai and executes the page's tools here.
-  async function callAI(messages, tools, signal) {
+  async function callAI(messages, tools, signal, maxTokens) {
     const r = await fetch(cfg.aiEndpoint, {
       method: "POST", signal,
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${session ? session.access_token : ""}` },
-      body: JSON.stringify({ messages, tools })
+      body: JSON.stringify({ messages, tools, maxTokens })
     });
     if (!r.ok) {
       const e = await r.json().catch(() => ({}));
@@ -155,7 +155,7 @@
     const tools = pageTools.map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema || { type: "object", properties: {} } }));
     for (let round = 0; round < 8; round++) {
       if (opts.signal && opts.signal.aborted) throw { code: "cancelled" };
-      const res = await callAI(messages, tools, opts.signal);
+      const res = await callAI(messages, tools, opts.signal, opts.maxTokens);
       const blocks = res.content || [];
       const text = blocks.filter(b => b.type === "text").map(b => b.text).join("");
       const uses = blocks.filter(b => b.type === "tool_use");

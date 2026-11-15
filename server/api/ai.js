@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: MODEL, max_tokens: 2000, messages, ...(tools.length ? { tools } : {}) })
+      body: JSON.stringify({ model: MODEL, max_tokens: Math.min(8000, Math.max(256, parseInt(body.maxTokens, 10) || 2000)), messages, ...(tools.length ? { tools } : {}) })
     });
     const json = await r.json();
     if (!r.ok) {

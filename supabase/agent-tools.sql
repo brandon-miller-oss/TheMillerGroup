@@ -12,6 +12,8 @@
 --   Transactions (deals/*)            the agent on the deal, and the broker
 --   Company hub, partners, brand,     every agent reads; only the broker edits
 --   commission plan (company/*)
+--   Agent websites and landing pages  everyone reads published pages; the agent
+--   (sites/<agent>/pages/*)           who owns them (and the broker) edits
 -- =====================================================================
 
 create table if not exists public.docs (
@@ -56,13 +58,14 @@ create or replace function public.can_read_doc(p text, d jsonb) returns boolean
 language sql stable as $$
   select
     public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'team')
-    or (public.doc_top(p) = 'company' and public.is_agent())
+    or (public.doc_top(p) = 'company' and (public.is_agent() or p like 'company/brandok/items/%'))  -- brand approvals are public so agent pages can show approved brands
     or (public.doc_top(p) = 'deals' and public.is_agent() and d->>'agentId' = auth.uid()::text)
     or public.is_admin()
     or (auth.uid() is not null and public.doc_top(p) in ('boards', 'leads', 'threads') and (
           public.doc_owner(p) = auth.uid()::text
           or (public.is_agent() and public.client_agent(public.doc_owner(p)) = auth.uid()::text)))
-    or (public.doc_top(p) = 'agent' and public.is_agent() and public.doc_owner(p) = auth.uid()::text);
+    or (public.doc_top(p) = 'agent' and public.is_agent() and public.doc_owner(p) = auth.uid()::text)
+    or (public.doc_top(p) = 'sites' and (coalesce((d->>'published')::boolean, false) or (public.is_agent() and public.doc_owner(p) = auth.uid()::text)));
 $$;
 
 -- d is the row's data (new data for inserts, current data for updates/deletes)
@@ -73,7 +76,7 @@ language sql stable as $$
     or (public.doc_top(p) in ('boards', 'leads', 'threads') and (
           public.doc_owner(p) = auth.uid()::text
           or (public.is_agent() and public.client_agent(public.doc_owner(p)) = auth.uid()::text)))
-    or (public.doc_top(p) in ('agent', 'team') and public.is_agent() and public.doc_owner(p) = auth.uid()::text)
+    or (public.doc_top(p) in ('agent', 'team', 'sites') and public.is_agent() and public.doc_owner(p) = auth.uid()::text)
     or (public.doc_top(p) in ('exclusives', 'openhouses', 'showcase', 'deals') and public.is_agent() and d->>'agentId' = auth.uid()::text));
 -- company/* falls through to is_admin() only.
 $$;
@@ -113,6 +116,38 @@ revoke all on function public.add_agent(text) from public, anon;
 revoke all on function public.remove_agent(uuid) from public, anon;
 grant execute on function public.add_agent(text) to authenticated;
 grant execute on function public.remove_agent(uuid) to authenticated;
+
+-- ---------- Leads from agent websites and landing pages ----------
+-- Anyone can submit a form on a PUBLISHED agent page. The lead goes to the
+-- brokerage lead list (public.leads) and straight into that agent's contacts.
+create or replace function public.submit_agent_lead(p_agent text, p_page text, p_name text, p_email text,
+  p_phone text default null, p_address text default null, p_message text default null, p_purpose text default 'contact',
+  p_utm jsonb default '{}'::jsonb, p_referrer text default null) returns boolean
+language plpgsql security definer set search_path = public as $$
+declare pg jsonb; cid text; r text; nm text := trim(coalesce(p_name, '')); em text := lower(trim(coalesce(p_email, '')));
+begin
+  if p_agent !~ '^[A-Za-z0-9_\-]{1,64}$' or p_page !~ '^[A-Za-z0-9_\-]{1,64}$' then raise exception 'Page not found'; end if;
+  if not exists (select 1 from public.agents where user_id::text = p_agent) and not exists (select 1 from public.admins where user_id::text = p_agent) then raise exception 'Page not found'; end if;
+  select data into pg from public.docs where path = 'sites/' || p_agent || '/pages/' || p_page and coalesce((data->>'published')::boolean, false);
+  if pg is null then raise exception 'Page not found'; end if;
+  if char_length(nm) not between 1 and 200 or char_length(em) > 320 or em !~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' then raise exception 'Please add a name and a valid email'; end if;
+  if (select count(*) from public.leads where landing_slug = left(p_agent || '/' || p_page, 200) and created_at > now() - interval '1 hour') >= 30 then raise exception 'Too many requests. Try again later.'; end if;
+  insert into public.leads (name, email, phone, interest, message, address, source, landing_slug, utm_source, utm_medium, utm_campaign, utm_content, utm_term, referrer, extra)
+  values (nm, em, left(nullif(trim(p_phone), ''), 40), left(coalesce(p_purpose, 'contact') || ': ' || coalesce(pg->>'title', p_page), 120), left(p_message, 5000), left(p_address, 300), 'agent-page',
+    left(p_agent || '/' || p_page, 200), left(p_utm->>'utm_source', 120), left(p_utm->>'utm_medium', 120), left(p_utm->>'utm_campaign', 120), left(p_utm->>'utm_content', 120), left(p_utm->>'utm_term', 120),
+    left(p_referrer, 300), jsonb_build_object('agentId', p_agent, 'pageId', p_page));
+  r := case when p_purpose = 'valuation' then 'seller' else 'buyer' end;
+  cid := 'web' || replace(gen_random_uuid()::text, '-', '');
+  insert into public.docs (path, parent, data) values ('agent/' || p_agent || '/crm/contacts/' || cid, 'agent/' || p_agent || '/crm/contacts',
+    jsonb_strip_nulls(jsonb_build_object('name', nm, 'email', em, 'phone', left(nullif(trim(p_phone), ''), 40), 'role', r,
+      'buyerStage', case when r = 'buyer' then 'lead' end, 'sellerStage', case when r = 'seller' then 'prospect' end,
+      'listingAddress', left(p_address, 300), 'source', left('Website: ' || coalesce(pg->>'title', p_page), 200),
+      'notes', left(concat_ws(E'\n', 'Came in from ' || coalesce(pg->>'title', p_page) || ' (' || coalesce(p_purpose, 'contact') || ').', nullif(p_message, ''), nullif(concat_ws(' / ', p_utm->>'utm_source', p_utm->>'utm_campaign'), '')), 5000),
+      'folders', jsonb_build_array('Website leads'), 'createdAt', now(), 'updatedAt', now())));
+  return true;
+end $$;
+revoke all on function public.submit_agent_lead(text, text, text, text, text, text, text, text, jsonb, text) from public;
+grant execute on function public.submit_agent_lead(text, text, text, text, text, text, text, text, jsonb, text) to anon, authenticated;
 
 -- ---------- Live updates ----------
 do $$ begin

@@ -130,6 +130,25 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 
 Agents pick a listing, then tap its photos in the order they want (the first is the main photo) or add their own. Off-market listings take photo links, and MLS photos appear once the feed is connected. Agents edit the headline and message (or draft them with AI), preview each side, and download a vector PDF, with an optional 1/8 in. bleed for print shops. Every piece shows the brokerage name, as Colorado advertising rules require, and Equal Housing Opportunity. The app warns when a listing belongs to another brokerage, since advertising it needs that broker's permission and their photos usually can't be used.
 
+### Websites and landing pages (AI builder)
+**Websites and landing pages** lets each agent build a branded website and ad landing pages in minutes. Ten templates (My website, Selling, Buying, Listing spotlight, What's my home worth?, Open house RSVP, Free buyer guide, Neighborhood guide, Event, Blank) fill themselves from the agent's profile, approved brand, listings, testimonials, and market stats.
+
+- **Fully editable:** 14 section types (hero, featured listing, listings, about, services, numbers, testimonials, neighborhoods, gallery, video, text, Q&A, call to action, lead form). Reorder, hide, duplicate, add, or delete sections; edit every field; pick listing photos or upload your own; choose fonts, corners, and light or dark. Desktop and phone preview.
+- **AI:** "Write the whole page" (or quick asks like "More luxury") rewrites every section from a short description; each section can be rewritten on its own. AI can only change words: photos, listings, prices, and reviews stay as entered. The prompt enforces Fair Housing and "use only real facts."
+- **SEO:** focus keyword, search title and meta description with counters, share image, hide-from-search option, a live 0 to 100 SEO score with an 11-point checklist, a search-result preview, keyword ideas from AI, and structured data (agent and brokerage, the home on listing pages, and FAQ).
+- **Publishing:** pages live at `/p/?a=<agent link name>&p=<page>` on this site. For search engines, deploy the `server/` folder and set `AGENT_PAGES_URL`; pages are then server-rendered at `/a/<agent>/<page>`, with `/sitemap-agents.xml` listing every live, indexable page. Agents can also download any page as a standalone HTML file.
+- **Leads:** form submissions go through `submit_agent_lead` (in `supabase/agent-tools.sql`), which only accepts published pages, limits floods, and saves the lead to the brokerage lead list (with UTM tags) and straight into the agent's contacts under "Website leads." Each form includes the consent line for calls, texts, and email.
+- **Compliance on every page:** the agent's approved brand with "Brokered by The Miller Group" in the header and footer, the brokerage and license line, Equal Housing Opportunity, Privacy and Fair Housing links, and "Listing courtesy of" on other brokerages' listings (Colorado Rule 6.10 and IDX display rules). Public pages only show a brand the broker approved.
+
+### AI marketing assistant
+- **Listing launch:** pick a listing and get 17 pieces at once: MLS headline and remarks, three social posts, hashtags, LinkedIn, Meta ad (primary text, headline, description), Google search ad (headlines and descriptions), email subject, preview, and body, a text message, and a 30-second reel script. Then one tap builds the landing page, a flyer, or a social graphic.
+- **Social calendar:** a 2 or 4 week posting plan with captions and hashtags, downloadable as a spreadsheet.
+- **Ads:** Meta and Google copy by goal (seller leads, buyer leads, open house, brand), with setup notes for Meta's Housing special ad category, landing pages, UTM tags, and budget.
+- **Email:** monthly market update, just sold nearby, buyer welcome, past client check-in, and holiday notes, each with a matching text.
+- **SEO blog:** a local article with title, search title, meta description, keyword ideas, and headings, which becomes a website page in one tap.
+- **Fair Housing check:** flags risky words (who a home is "perfect for," school and safety claims, religion, exclusionary terms, outdated disability language, source-of-income exclusions) with better wording, on everything the assistant writes and on anything pasted in.
+- Every output has character counts against each platform's limit and a Copy button. Without AI connected, the assistant fills templates from real listing and market facts; with AI it writes custom copy in the chosen voice.
+
 ### Agent brands and the starter kit
 Agents can market under their own business name, brokered by The Miller Group (the eXp-style model). In **My brand and starter kit** an agent sets a business name, tagline, two colors (presets or custom), and optional logos for light and dark backgrounds, then submits it.
 
@@ -155,7 +174,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js` and `agent-brand.test.js` (these also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js` and `node server/test/followups.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, and `sites.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, and `node server/test/pages.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

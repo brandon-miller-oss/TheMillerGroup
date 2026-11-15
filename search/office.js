@@ -45,6 +45,7 @@
   }
   O.watch = function () {
     if (O.watching) return; O.watching = true;
+    if (window.SiteBuilder) SiteBuilder.watch();
     ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
     ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
@@ -823,6 +824,7 @@
       p19: { category: "Carpet cleaning", name: "Sample Tech", company: "Pure Steam Denver", phone: "720-555-0172" }
     };
     if (window.AgentBrand) AgentBrand.seedDemo();
+    if (window.SiteBuilder) SiteBuilder.seedDemo();
     O.brand = { b1: { kind: "logo", title: "Primary logo", url: "https://example.com/logo", notes: "Use on light backgrounds." }, b2: { kind: "template", title: "Just listed social template", url: "https://example.com/template" } };
     Store.crm.referrals = { r1: { direction: "out", client: "The Parks", agent: "Sample Agent", brokerage: "Desert Realty", market: "Phoenix, AZ", feePct: 25, expectedFee: 3200, status: "contract", createdAt: ts } };
     Store.crm.expenses = { e1: { amount: 450, date: d(-12), category: "Marketing", note: "Open house signs" }, e2: { amount: 210, date: d(-30), category: "MLS and association dues" } };

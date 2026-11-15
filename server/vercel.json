@@ -11,6 +11,12 @@
     },
     "api/followups-cron.js": {
       "maxDuration": 60
+    },
+    "api/page.js": {
+      "maxDuration": 10
+    },
+    "api/sitemap.js": {
+      "maxDuration": 10
     }
   },
   "headers": [
@@ -28,6 +34,20 @@
     {
       "path": "/api/followups-cron",
       "schedule": "0 15 * * *"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/a/:agent",
+      "destination": "/api/page?a=:agent"
+    },
+    {
+      "source": "/a/:agent/:page",
+      "destination": "/api/page?a=:agent&p=:page"
+    },
+    {
+      "source": "/sitemap-agents.xml",
+      "destination": "/api/sitemap"
     }
   ]
 }

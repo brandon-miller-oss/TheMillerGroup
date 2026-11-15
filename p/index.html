@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Miller Group</title>
+<meta name="robots" content="noindex">
+<style>body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:#FBF8F3;color:#1E222A}main{max-width:560px;margin:18vh auto;padding:0 16px;text-align:center}a{color:#141A26}</style>
+<script src="../assets/config.js"></script>
+<script src="../search/site-render.js"></script>
+</head>
+<body>
+<main id="msg" role="status"><p>Loading…</p></main>
+<script>
+/* Public agent websites and landing pages: /p/?a=<agent link name>&p=<page>.
+   Reads the published page from the database and renders it with the same
+   renderer the builder uses. (For search engines, the server version at
+   /a/<agent>/<page> renders the same page on the server.) */
+(async function () {
+  const C = window.MG_CONFIG || {}, q = new URLSearchParams(location.search), slug = (q.get("a") || "").toLowerCase(), pslug = (q.get("p") || "").toLowerCase();
+  const fail = t => { document.getElementById("msg").innerHTML = `<h1 style="font-family:Georgia,serif">Page not found</h1><p>${t}</p><p><a href="${(C.SITE_URL || "..")}/">Visit The Miller Group</a></p>`; };
+  if (!/^[a-z0-9-]{1,40}$/.test(slug)) return fail("Check the link and try again.");
+  if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return fail("Agent pages go live once the site’s database is connected.");
+  const get = path => fetch(`${C.SUPABASE_URL}/rest/v1/docs?${path}`, { headers: { apikey: C.SUPABASE_ANON_KEY, Authorization: "Bearer " + C.SUPABASE_ANON_KEY } }).then(r => r.ok ? r.json() : []);
+  try {
+    const team = await get(`parent=eq.team&data->>slug=eq.${encodeURIComponent(slug)}&select=path,data&limit=1`);
+    if (!team.length) return fail("This agent page isn’t available.");
+    const uid = team[0].path.split("/")[1];
+    const [pages, ok] = await Promise.all([get(`parent=eq.${encodeURIComponent("sites/" + uid + "/pages")}&select=path,data`), get(`path=eq.${encodeURIComponent("company/brandok/items/" + uid)}&select=data`)]);
+    const live = pages.map(r => ({ id: r.path.split("/").pop(), ...r.data })).filter(x => x.published);
+    const page = live.find(x => x.slug === (pslug || "home")) || (!pslug && live.find(x => x.kind === "website")) || null;
+    if (!page) return fail("This page isn’t published.");
+    const agent = SiteRender.agentContext(uid, team[0].data, ok[0] && ok[0].data, { firm: C.BUSINESS_NAME || "The Miller Group", siteUrl: C.SITE_URL });
+    const nav = page.kind === "website" ? live.filter(x => x.kind === "website").sort((a, b) => (a.order || 0) - (b.order || 0)).map(x => ({ title: x.navTitle || x.title, href: `?a=${slug}&p=${x.slug}`, current: x.id === page.id })) : [];
+    const html = SiteRender.render({ ...page, theme: SiteRender.themeFrom(agent, page.theme) }, { agent, firm: agent.firm, license: C.LICENSE_TEXT && !/\[add/i.test(C.LICENSE_TEXT) ? C.LICENSE_TEXT : "", siteUrl: C.SITE_URL, supabaseUrl: C.SUPABASE_URL, anonKey: C.SUPABASE_ANON_KEY, pageUrl: location.href.split("#")[0], nav });
+    document.open(); document.write(html); document.close();
+  } catch (e) { fail("Something went wrong loading this page. Try again in a moment."); }
+})();
+</script>
+</body>
+</html>
