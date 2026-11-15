@@ -46,9 +46,9 @@
   O.watch = function () {
     if (O.watching) return; O.watching = true;
     if (window.SiteBuilder) SiteBuilder.watch();
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
@@ -56,7 +56,7 @@
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -164,6 +164,7 @@
       ${(d.deadlines || []).map((x, i) => { const n = daysUntil(x.date); return `<div class="task ${x.done ? "done" : ""} ${!x.done && n !== null && n < 0 ? "overdue" : ""}"><input type="checkbox" data-o-dl="${id}|${i}" ${x.done ? "checked" : ""} aria-label="Mark ${esc(x.label)} done">
         <div class="tt"><span>${esc(x.label)}</span><p>${x.date ? `${dayLabel(x.date)}${!x.done && n < 0 ? " · Overdue" : ""}` : "No date"}${DEADLINE_HINT[x.label] ? ` · <span title="Training guide recommendation">Typical: ${esc(DEADLINE_HINT[x.label])}</span>` : ""}</p></div><input type="date" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" aria-label="Date for ${esc(x.label)}" data-o-dldate="${id}|${i}" value="${esc(x.date || "")}"></div>`; }).join("")}
       <div class="quick" style="margin-top:6px"><button class="btn ghost small" data-o-adddl="${id}">Add a date</button></div>
+      ${window.ClientNotify ? ClientNotify.dealHTML(id, d) : ""}
       <h3 class="agent-h">Documents</h3><p class="addr">Check each item off once it’s in the file. Paste a link to where the signed copy is stored.</p>
       ${(d.docs || []).map((x, i) => `<div class="task ${x.done ? "done" : ""}"><input type="checkbox" data-o-doc="${id}|${i}" ${x.done ? "checked" : ""} aria-label="${esc(x.label)} received">
         <div class="tt"><span>${esc(x.label)}</span>${x.url ? `<p><a href="${esc(x.url)}" target="_blank" rel="noopener">Open document</a></p>` : ""}</div><input style="width:150px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--bg)" placeholder="Link" aria-label="Link for ${esc(x.label)}" data-o-docurl="${id}|${i}" value="${esc(x.url || "")}"></div>`).join("")}
@@ -495,6 +496,7 @@
       html += `<div class="cmares"><p>Get started · ${done} of ${steps.length} done</p><div class="bar"><span style="width:${(done / steps.length * 100).toFixed(0)}%"></span></div>
         <div class="quick" style="margin:8px 0 0"><button class="btn gold" data-panel="${next.go}">Next: ${esc(next.label)}</button><button class="btn ghost" data-panel="o-setup">See all</button></div></div>`;
     }
+    if (window.ClientNotify) html += ClientNotify.homeHTML();
     const dl = upcomingDeadlines(3);
     if (dl.length) html += dl.slice(0, 3).map(({ d, x, n }) => `<button class="notif fresh" data-panel="o-deal:${d.id}"><strong>${esc(x.label)}</strong> · ${esc(d.address)}<time>${n < 0 ? "Overdue" : n === 0 ? "Today" : `In ${n} ${n === 1 ? "day" : "days"}`}</time></button>`).join("");
     const fu = followupsDue(0).length; if (fu) html += `<button class="notif" data-panel="o-followups"><strong>${fu} follow-up ${fu === 1 ? "email" : "emails"}</strong> due today</button>`;
@@ -642,8 +644,8 @@
   O.filterContacts = cs => O.contactFolder ? cs.filter(c => (c.folders || []).includes(O.contactFolder)) : cs;
   O.contactFields = c => `<label for="cFolders">Folders</label><input id="cFolders" placeholder="Past clients, Sphere, Farm" value="${esc((c.folders || []).join(", "))}">
       <div class="row2"><div><label for="cBday">Birthday</label><input id="cBday" type="date" value="${esc(c.birthday || "")}"></div><div><label for="cPurch">Bought their home</label><input id="cPurch" type="date" value="${esc(c.purchaseDate || "")}"></div></div>
-      <label class="check"><input type="checkbox" id="cDnc" ${c.doNotContact ? "checked" : ""}> Do not contact (no follow-up emails or outreach)</label>`;
-  O.contactValues = () => ({ folders: splitList(val("cFolders")), birthday: val("cBday"), purchaseDate: val("cPurch"), doNotContact: !!val("cDnc") });
+      <label class="check"><input type="checkbox" id="cDnc" ${c.doNotContact ? "checked" : ""}> Do not contact (no follow-up emails or outreach)</label>${window.ClientNotify ? ClientNotify.contactFields(c) : ""}`;
+  O.contactValues = () => ({ folders: splitList(val("cFolders")), birthday: val("cBday"), purchaseDate: val("cPurch"), doNotContact: !!val("cDnc"), ...(window.ClientNotify ? ClientNotify.contactValues() : {}) });
 
   /* ===================================================================
      MENU, PANELS, EVENTS
@@ -780,7 +782,7 @@
   // Sample office content for demo mode (nothing is saved).
   O.seedDemo = function () {
     if (O.seeded) return; O.seeded = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const y = new Date().getFullYear(), ts = nowIso();

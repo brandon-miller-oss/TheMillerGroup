@@ -17,6 +17,12 @@
     },
     "api/sitemap.js": {
       "maxDuration": 10
+    },
+    "api/notify.js": {
+      "maxDuration": 15
+    },
+    "api/client-reminders.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -33,6 +39,10 @@
   "crons": [
     {
       "path": "/api/followups-cron",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/client-reminders",
       "schedule": "0 15 * * *"
     }
   ],

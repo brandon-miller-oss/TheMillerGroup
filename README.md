@@ -130,6 +130,16 @@ Agents start a CMA from **CMAs → New CMA**, from **Create CMA** on any seller 
 
 Agents pick a listing, then tap its photos in the order they want (the first is the main photo) or add their own. Off-market listings take photo links, and MLS photos appear once the feed is connected. Agents edit the headline and message (or draft them with AI), preview each side, and download a vector PDF, with an optional 1/8 in. bleed for print shops. Every piece shows the brokerage name, as Colorado advertising rules require, and Equal Housing Opportunity. The app warns when a listing belongs to another brokerage, since advertising it needs that broker's permission and their photos usually can't be used.
 
+### Client updates (notifications)
+Clients hear from you automatically when showings are set or change, the day before showings, and before key dates on their transaction.
+
+- **Showings:** when a showing day has a client, a date, and homes, the app asks "Send Jordan an update?" with a preview (on the showing day, on Agent home, and in **Client updates**). In automatic mode it sends 15 seconds after your last change. Changing a home or time offers an updated schedule; deleting a day the client knows about offers a cancellation note. Private stop notes (lockbox codes) are never sent, and they're no longer copied to the client's app either.
+- **Showing requests:** pick a date and time on the request card and it becomes a showing for that client (adding them to contacts if needed), with the update ready to send.
+- **Transactions:** send a milestone update about a contract date with a note, or turn on "Remind the client the day before key dates" (inspection objection, appraisal, loan terms, closing, possession).
+- **Channels:** the client's app (updates appear on their Shortlists page with Add to calendar, Confirm, and Need a different time), email with a calendar file, and text. Texts need consent: either the agent records it on the contact (date and source kept), or the client turns texts on in the app, which shows the consent language. Texts only go out 8 AM to 9 PM Denver time, and do-not-contact is always respected.
+- **Server:** `server/api/notify.js` sends email and text. It looks up the contact itself, so the browser never chooses the recipient. `server/api/client-reminders.js` runs daily at 8 AM and sends day-before reminders once each. Set `NOTIFY_ENDPOINT` (and `SMS_ENABLED` once Twilio works) in `assets/config.js`. Texting needs a Twilio account with US A2P 10DLC registration; see `server/.env.example`.
+- Every update is logged under **Client updates** with what happened on each channel.
+
 ### Websites and landing pages (AI builder)
 **Websites and landing pages** lets each agent build a branded website and ad landing pages in minutes. Ten templates (My website, Selling, Buying, Listing spotlight, What's my home worth?, Open house RSVP, Free buyer guide, Neighborhood guide, Event, Blank) fill themselves from the agent's profile, approved brand, listings, testimonials, and market stats.
 
@@ -174,7 +184,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, and `sites.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, and `node server/test/pages.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, `sites.test.js`, and `client-notify.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, `node server/test/pages.test.js`, and `node server/test/notify.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

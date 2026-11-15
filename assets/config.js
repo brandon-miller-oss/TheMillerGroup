@@ -20,7 +20,9 @@ window.MG_CONFIG = {
   DEMO_MODE: true,                  // testing: anyone who isn't a signed-in agent can open the Agent tab with sample data
                                     // (nothing they change is saved). Set to false before launch.
   AGENT_PAGES_URL: '',              // server-rendered agent pages for search engines, e.g. 'https://miller-tools.vercel.app/a' (blank: pages use /p/)
-  EMAIL_ENDPOINT: '',               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)    // clients who arrive without an agent's link are assigned to this agent
+  EMAIL_ENDPOINT: '',
+  NOTIFY_ENDPOINT: '',              // client updates by email and text, e.g. 'https://miller-tools.vercel.app/api/notify'
+  SMS_ENABLED: false,               // true once Twilio is set up on the server (see server/.env.example)               // follow-up emails, e.g. 'https://miller-tools.vercel.app/api/email' (blank: Send opens the email app)    // clients who arrive without an agent's link are assigned to this agent
 
   // Ad tracking (optional)
   GA4_ID: '',                       // e.g. 'G-XXXXXXXXXX'

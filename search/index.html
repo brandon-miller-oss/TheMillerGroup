@@ -360,10 +360,10 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611151035"></script>
+<script src="../assets/config.js?v=202611151338"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611151035"></script>
+<script src="miller-cloud.js?v=202611151338"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -513,7 +513,7 @@ const SAMPLE = [
    ========================================================================= */
 const Store = {
   cols:{}, mode:"local", db:null, user:null, uid:null, isAgent:false, subs:[], queues:{},
-  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{},presentations:{},buyerpres:{},training:{}}, publicEx:{}, roster:{}, exVer:0,
+  clients:{}, clientSubs:{}, leads:{}, names:{}, markerDone:false, crm:{contacts:{},tasks:{},tours:{},exclusives:{},openhouses:{},ohvisitors:{},cmas:{},referrals:{},expenses:{},recruits:{},emaillog:{},scripts:{},presentations:{},buyerpres:{},training:{},notices:{}}, publicEx:{}, roster:{}, exVer:0,
   searches:{}, searchVer:0, publicOH:{}, showcase:{}, demoShowcase:{}, site:{},
   team:{}, isBroker:false, crmOwner:null, myAgent:null, marker:null,
   threads:{}, msgs:{}, msgSubs:{}, myThread:null, myTours:{}, settings:{}, agentThread:null,
@@ -836,7 +836,7 @@ const Store = {
     if (!this.db || this.demo) return id;
     const old = prev && prev.sharedTo;
     if (old && old!==target) this.queue("share"+id, ()=>this.db.doc(`boards/${old}/tours/${id}`).delete());
-    if (target){ const pub = { name:tour.name||"Tour", date:tour.date||"", stops:tour.stops||[], updatedAt:new Date().toISOString() }; this.queue("share"+id, ()=>this.db.doc(`boards/${target}/tours/${id}`).set(pub)); }
+    if (target){ const pub = { name:tour.name||"Tour", date:tour.date||"", stops:(tour.stops||[]).map(s=>({ listingKey:s.listingKey, time:s.time||"" })), updatedAt:new Date().toISOString() }; /* private stop notes (lockbox codes) never go to the client */ this.queue("share"+id, ()=>this.db.doc(`boards/${target}/tours/${id}`).set(pub)); }
     return id;
   },
   setLeadStatus(cid, rid, status){
@@ -1018,7 +1018,7 @@ async function renderCollections(){
   openCol = null;
   el.innerHTML = `<div class="colhead"><h2>Shortlists</h2><button class="btn gold" data-newcol>New shortlist</button></div>${clientBarHTML()}
     ${cols.length ? `<div class="collist">${cols.map(([id,c])=>{const its=Object.values(c.items||{});const n=r=>its.filter(i=>i.reaction===r).length;return `<button class="colcard" data-col="${id}"><h3>${esc(c.name)}</h3><p>${its.length} ${its.length===1?"home":"homes"}</p><div class="tally"><span style="color:var(--love)">${n("love")} love</span><span style="color:var(--maybe)">${n("maybe")} maybe</span><span style="color:var(--pass)">${n("pass")} pass</span></div></button>`;}).join("")}</div>`
-    : `<div class="empty"><strong>Start a shortlist</strong>Group homes you like, react to each one, and leave notes. Brandon sees the same board.</div>`}${clientToursHTML()}${showcaseStripHTML()}`;
+    : `<div class="empty"><strong>Start a shortlist</strong>Group homes you like, react to each one, and leave notes. Brandon sees the same board.</div>`}${window.ClientNotify?ClientNotify.clientHTML():""}${clientToursHTML()}${showcaseStripHTML()}`;
 }
 
 /* =========================================================================
@@ -1084,7 +1084,8 @@ function toolSections(){
       ["activity","Client shortlists","Homes clients saved and loved","heart",0],
       ["searches","Saved searches","What clients are watching","search",0],
       ["tours","Showing days","Routes and times for tours","route",Object.values(Store.crm.tours).filter(x=>x && (x.date||"")>=t).length],
-      ["notifications","Activity feed","Saves, loves, notes, and requests","bell",unseenCount()]]],
+      ["notifications","Activity feed","Saves, loves, notes, and requests","bell",unseenCount()],
+      ["client-updates","Client updates","Showing times, reminders, and milestones sent to clients","bell",window.ClientNotify ? ClientNotify.count() : 0]]],
     ["Listings and market", [
       ["listings","Listings","Your listings and their activity","building",0],
       ["exclusives","Off-market & coming soon","Homes not on the MLS","star",0],
@@ -1173,6 +1174,7 @@ function requestsHTML(){
       <select data-status="${esc(r.cid)}|${esc(r.rid)}" aria-label="Status for ${esc(r.name)}">${STATUSES.map(([v,t])=>`<option value="${v}" ${r.status===v?"selected":""}>${t}</option>`).join("")}</select></div>
     ${r.message?`<p class="msgtext">${esc(r.message)}</p>`:""}
     <div class="links">${telLink(r.phone)}${mailLink(r.email,"Showing: "+(r.address||""))}<a href="#" data-open="${esc(r.listingKey)}">View home</a><button data-panel="thread:${esc(r.cid)}">Message</button>${inC?`<button data-editcontact="${inC.id}">In contacts</button>`:`<button data-addcontact="${esc(r.cid)}|${esc(r.rid)}">Add to contacts</button>`}</div>
+    ${window.ClientNotify && r.status!=="closed" ? ClientNotify.requestForm(r) : ""}
   </div>`; }).join("");
 }
 
@@ -1351,7 +1353,7 @@ function tourHTML(id){
   const loved = c && c.clientId ? clientItems(c.clientId).filter(i=>i.reaction==="love" && !stops.some(s=>s.listingKey===i.key)) : [];
   const valid = ls.filter(Boolean);
   const gmaps = valid.length ? "https://www.google.com/maps/dir/" + valid.map(l=>encodeURIComponent(`${l.address}, ${l.city}, ${l.state} ${l.zip}`)).join("/") : "";
-  return `${back}<div class="colhead"><h2>${esc(t.name||"Tour")}</h2><button class="btn ghost" data-deltour="${id}">Delete</button></div>
+  return `${back}<div class="colhead"><h2>${esc(t.name||"Tour")}</h2><button class="btn ghost" data-deltour="${id}">Delete</button></div>${window.ClientNotify?ClientNotify.tourBanner(id):""}
     <div class="tourform"><div class="row2"><div><label for="tfName">Name</label><input id="tfName" data-tourfield="${id}|name" value="${esc(t.name||"")}"></div><div><label for="tfDate">Date</label><input id="tfDate" type="date" data-tourfield="${id}|date" value="${esc(t.date||"")}"></div></div>
       <label for="tfContact">Client</label><select id="tfContact" data-tourfield="${id}|contactId"><option value="">None</option>${contacts().map(x=>`<option value="${x.id}" ${t.contactId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
       ${c && c.clientId ? `<label class="check"><input type="checkbox" data-tourfield="${id}|shared" ${t.shared?"checked":""}> Show this in ${esc(c.name)}’s app</label>` : c ? `<p class="addr">Link ${esc(c.name)} to an app account to share this with them.</p>` : ""}
@@ -2075,8 +2077,9 @@ async function renderAgent(){
     case "assistant": html = head("AI assistant") + assistantHTML(); break;
     case "agents": html = head("Team") + agentsHTML(); break;
     case "notifications": html = head("Notifications") + notificationsHTML(); break;
+    case "client-updates": html = head("Client updates") + (window.ClientNotify ? ClientNotify.panelHTML() : ""); break;
     case "biz": html = head("GCI tracker", `<button class="btn ghost" data-editgoals>Goals</button>`) + bizHTML(); break;
-    case "tours": html = head("Showing days") + toursHTML(); break;
+    case "tours": html = head("Showing days") + (window.ClientNotify ? ClientNotify.homeHTML() : "") + toursHTML(); break;
     case "tour": html = tourHTML(agentPanel.slice(5)); break;
     case "requests": html = head("Showing requests", allRequests().length?`<button class="btn ghost" data-export>Download CSV</button>`:"") + requestsHTML(); break;
     case "activity": html = head("Client shortlists") + await activityHTML(); break;
@@ -2340,16 +2343,18 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="office.js?v=202611151035"></script>
-<script src="cma-report.js?v=202611151035"></script>
-<script src="ai-writer.js?v=202611151035"></script>
-<script src="presentation.js?v=202611151035"></script>
-<script src="site-render.js?v=202611151035"></script>
-<script src="site-builder.js?v=202611151035"></script>
-<script src="marketing-ai.js?v=202611151035"></script>
-<script src="agent-brand.js?v=202611151035"></script>
-<script src="print-studio.js?v=202611151035"></script>
-<script src="training.js?v=202611151035"></script>
-<script src="buyer-presentation.js?v=202611151035"></script>
+<script src="office.js?v=202611151338"></script>
+<script src="cma-report.js?v=202611151338"></script>
+<script src="ai-writer.js?v=202611151338"></script>
+<script src="presentation.js?v=202611151338"></script>
+<script src="notify-templates.js?v=202611151338"></script>
+<script src="client-notify.js?v=202611151338"></script>
+<script src="site-render.js?v=202611151338"></script>
+<script src="site-builder.js?v=202611151338"></script>
+<script src="marketing-ai.js?v=202611151338"></script>
+<script src="agent-brand.js?v=202611151338"></script>
+<script src="print-studio.js?v=202611151338"></script>
+<script src="training.js?v=202611151338"></script>
+<script src="buyer-presentation.js?v=202611151338"></script>
 </body>
 </html>
