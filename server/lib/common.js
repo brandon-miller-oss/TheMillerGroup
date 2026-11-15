@@ -71,3 +71,18 @@ const DEFAULT_TEMPLATES = {
 const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (m, k) => v[k] ?? "");
 
 module.exports = { cors, agentId, docs, putDoc, profile, sendEmail, DEFAULT_TEMPLATES, fill, EMAIL_RE };
+
+// Bulk email (newsletters): up to 100 messages per call through Resend's batch endpoint.
+async function sendBatch(messages) {
+  if (!RESEND_KEY || !EMAIL_FROM) throw new Error("Email isn’t set up on the server yet.");
+  const r = await fetch("https://api.resend.com/emails/batch", { method: "POST", headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify(messages) });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.message || `Email service returned ${r.status}`); }
+  return true;
+}
+const fromLine = name => `${String(name || "").replace(/[\r\n<>"]/g, " ").trim().slice(0, 80) || "The Miller Group"} <${EMAIL_FROM}>`;
+// Is this signed-in user the broker (admin)?
+async function isBroker(token) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_admin`, { method: "POST", headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: "{}" });
+  return r.ok && (await r.json()) === true;
+}
+module.exports.sendBatch = sendBatch; module.exports.fromLine = fromLine; module.exports.isBroker = isBroker;

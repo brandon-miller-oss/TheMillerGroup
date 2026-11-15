@@ -23,6 +23,18 @@
     },
     "api/client-reminders.js": {
       "maxDuration": 60
+    },
+    "api/newsletter.js": {
+      "maxDuration": 60
+    },
+    "api/unsubscribe.js": {
+      "maxDuration": 10
+    },
+    "api/news.js": {
+      "maxDuration": 120
+    },
+    "api/daily.js": {
+      "maxDuration": 300
     }
   },
   "headers": [
@@ -38,11 +50,7 @@
   ],
   "crons": [
     {
-      "path": "/api/followups-cron",
-      "schedule": "0 15 * * *"
-    },
-    {
-      "path": "/api/client-reminders",
+      "path": "/api/daily",
       "schedule": "0 15 * * *"
     }
   ],

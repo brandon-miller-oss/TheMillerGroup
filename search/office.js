@@ -16,7 +16,7 @@
    ========================================================================= */
 (function () {
   const O = window.Office = {
-    deals: {}, hub: {}, partners: {}, brand: {}, brandok: {}, plan: {}, conn: {},
+    deals: {}, hub: {}, partners: {}, brand: {}, brandok: {}, news: {}, plan: {}, conn: {},
     watching: false, contactFolder: "", dealFolder: "", importRows: null, rp: { key: "", text: "" }, sending: ""
   };
   const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -46,17 +46,17 @@
   O.watch = function () {
     if (O.watching) return; O.watching = true;
     if (window.SiteBuilder) SiteBuilder.watch();
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices", "newsletters"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     if (!Store.db) return;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices", "newsletters"].forEach(k => Store.db.collection(`agent/${Store.crmOwner}/crm/${k}`).onSnapshot(sn => {
       const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); Store.crm[k] = m; Store.emit();
     }, () => {}));
     sub("deals", "deals");
-    ["hub", "partners", "brand", "brandok"].forEach(k => sub(`company/${k}/items`, k));
+    ["hub", "partners", "brand", "brandok", "news"].forEach(k => sub(`company/${k}/items`, k));
     Store.db.doc("company/plan").onSnapshot(d => { O.plan = d.exists ? d.data() : {}; Store.emit(); }, () => {});
     Store.db.doc("company/settings").onSnapshot(d => { O.conn = d.exists ? d.data() : {}; Store.emit(); }, () => {});
   };
-  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
+  ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices", "newsletters"].forEach(k => { if (typeof Store !== "undefined" && Store.crm) Store.crm[k] = Store.crm[k] || {}; });
   const crm = k => Object.entries(Store.crm[k] || {}).filter(([, v]) => v).map(([id, v]) => ({ id, ...v }));
   function saveDeal(id, d) {
     id = id || newId("d");
@@ -782,7 +782,7 @@
   // Sample office content for demo mode (nothing is saved).
   O.seedDemo = function () {
     if (O.seeded) return; O.seeded = true;
-    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
+    ["referrals", "expenses", "recruits", "emaillog", "scripts", "presentations", "buyerpres", "training", "notices", "newsletters"].forEach(k => { Store.crm[k] = Store.crm[k] || {}; });
     const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const ago = (y, n = 0) => { const x = new Date(); x.setFullYear(x.getFullYear() - y); x.setDate(x.getDate() + n); return x.toLocaleDateString("en-CA"); };
     const y = new Date().getFullYear(), ts = nowIso();
@@ -827,6 +827,7 @@
     };
     if (window.AgentBrand) AgentBrand.seedDemo();
     if (window.SiteBuilder) SiteBuilder.seedDemo();
+    if (window.Newsletter) Newsletter.seedDemo();
     O.brand = { b1: { kind: "logo", title: "Primary logo", url: "https://example.com/logo", notes: "Use on light backgrounds." }, b2: { kind: "template", title: "Just listed social template", url: "https://example.com/template" } };
     Store.crm.referrals = { r1: { direction: "out", client: "The Parks", agent: "Sample Agent", brokerage: "Desert Realty", market: "Phoenix, AZ", feePct: 25, expectedFee: 3200, status: "contract", createdAt: ts } };
     Store.crm.expenses = { e1: { amount: 450, date: d(-12), category: "Marketing", note: "Open house signs" }, e2: { amount: 210, date: d(-30), category: "MLS and association dues" } };
