@@ -3,7 +3,8 @@
 A static website for GitHub Pages, with a Supabase back end for leads (CRM), landing pages, listings, blog posts and testimonials.
 
 ## What's in the folder
-- `index.html` plus 17 pages: buy, sell, home value, commercial, development, communities, listings, about, testimonials, blog, contact, and four legal pages
+- `index.html` plus 16 pages: buy, sell, home value, commercial, development, listings, about, testimonials, blog, contact, and four legal pages
+- There is no communities page: The Miller Group serves all of Colorado. The places it works are in the home page’s search description and its schema.org `areaServed` list (`index.html`), and the old `communities.html` forwards to home search.
 - `lp/` landing page template (one file serves every landing page)
 - `admin/` private admin app: login, CRM, landing page builder, listings, blog, testimonials, SEO tools
 - `search/` home search for clients plus the agent tools (Agent tab) for every agent at the brokerage

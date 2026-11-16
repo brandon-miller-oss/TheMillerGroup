@@ -373,7 +373,7 @@ var MODELS = {
     cols:[['title','Listing'],['city','City'],['status','Status'],['published','Visible']],
     fields:[
       {k:'status',l:'Status',t:'select',opts:[['active','For sale'],['coming_soon','Coming soon'],['sold','Sold']],def:'active'},
-      {k:'title',l:'Title',t:'text',req:1},{k:'address',l:'Address',t:'text'},{k:'city',l:'City',t:'text',help:'Used by the Communities page filters'},
+      {k:'title',l:'Title',t:'text',req:1},{k:'address',l:'Address',t:'text'},{k:'city',l:'City',t:'text',help:'Shown on the listing and used by the Listings page filters'},
       {k:'price',l:'Price ($)',t:'number'},{k:'beds',l:'Bedrooms',t:'number'},{k:'baths',l:'Bathrooms',t:'number'},{k:'sqft',l:'Square feet',t:'number'},
       {k:'photo_url',l:'Photo link',t:'text'},{k:'link_url',l:'Details link',t:'text'},
       {k:'featured',l:'Feature at top',t:'checkbox'},{k:'published',l:'Show on site',t:'checkbox'}
@@ -495,7 +495,7 @@ function editor(key, row, seed){
 }
 
 /* ---------- SEO ---------- */
-var STATIC_PAGES = ['','buy.html','sell.html','home-value.html','commercial.html','development.html','communities.html','properties.html','about.html','testimonials.html','blog.html','contact.html'];
+var STATIC_PAGES = ['','buy.html','sell.html','home-value.html','commercial.html','development.html','properties.html','about.html','testimonials.html','blog.html','contact.html'];
 function lenTag(n, lo, hi){
   if(!n) return '<span class="tag bad">Missing</span>';
   if(n < lo) return '<span class="tag warn">'+n+' (short)</span>';
