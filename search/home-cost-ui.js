@@ -54,6 +54,7 @@
       <div class="row2"><div><label for="cfFire">Wildfire risk</label>${sel("cfFire", f.wildfire, [["", "Not checked"], ["low", "Low"], ["moderate", "Moderate"], ["high", "High"], ["very high", "Very high"]])}</div>${inp("cfIns", "Insurance quote per month ($)", f.insuranceMonthly, "Optional")}</div>
       <div class="row2">${inp("cfRadon", "Radon", f.radon, "e.g. Mitigation system installed 2022")}${inp("cfSewer", "Sewer scope", f.sewer, "e.g. Clear, scoped 10/2026")}</div>
       <div class="row2">${inp("cfWell", "Well and septic", f.wellSeptic, "e.g. Public water and sewer")}${inp("cfHoaDocs", "HOA documents", f.hoaDocs, "e.g. Reserves healthy, no special assessment")}</div>
+      <div class="row2">${inp("cfAdu", "ADU", f.adu, "e.g. Permitted ADU over the garage; or zoning allows one")}${inp("cfStr", "Short-term rental", f.str, "e.g. Breckenridge zone 2, license available; or HOA bans under 30 days")}</div>
       <div class="quick"><button class="btn gold" type="button" data-cost-save="${esc(l.key)}">Save facts</button><button class="btn ghost" type="button" data-cost-cancel>Cancel</button></div><p class="msg" role="status">${esc(CU.msg[l.key] || "")}</p></div>`;
   }
 
@@ -84,7 +85,7 @@
     const data = { listingKey: String(key), taxAnnual: n(g("cfTax")), taxYear: g("cfTaxYr").trim().slice(0, 4), metroDistrict: g("cfMetro"), metroNote: g("cfMetroNote").trim().slice(0, 200),
       hoaMonthly: n(g("cfHoa")), hoaNote: g("cfHoaNote").trim().slice(0, 200), floodZone: g("cfFlood").trim().toUpperCase().slice(0, 8), floodMonthly: n(g("cfFloodMo")),
       wildfire: g("cfFire"), insuranceMonthly: n(g("cfIns")), radon: g("cfRadon").trim().slice(0, 200), sewer: g("cfSewer").trim().slice(0, 200),
-      wellSeptic: g("cfWell").trim().slice(0, 200), hoaDocs: g("cfHoaDocs").trim().slice(0, 300), agentId: Store.uid || Store.crmOwner || "", byName: me.name || "", at: new Date().toISOString() };
+      wellSeptic: g("cfWell").trim().slice(0, 200), hoaDocs: g("cfHoaDocs").trim().slice(0, 300), adu: g("cfAdu").trim().slice(0, 300), str: g("cfStr").trim().slice(0, 300), agentId: Store.uid || Store.crmOwner || "", byName: me.name || "", at: new Date().toISOString() };
     Object.keys(data).forEach(k => { if (data[k] === "") delete data[k]; });
     const k = safeKey(key);
     if (Store.demo || !Store.db) { CU.demo[k] = data; CU.editing = null; rerender(key); return; }

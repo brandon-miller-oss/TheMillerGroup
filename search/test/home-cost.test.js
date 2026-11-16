@@ -43,6 +43,13 @@ const near = (a, b, t = 2) => Math.abs(a - b) <= t;
   const rural = HC.estimate({ key: "r", price: 600000, sqft: 2200, year: 2001, type: "Single Family Residence", city: "Byers", lot: 5 });
   check("rural acreage gets a well and septic check", rural.checks.some(c => c.key === "well"));
   check("broker config overrides the defaults", near(HC.estimate(sfr, {}, {}, { taxRate: { Denver: 0.01 } }).lines.find(x => x.key === "tax").monthly, 800000 * 0.01 / 12));
+  const den = HC.estimate(sfr, {}, {});
+  check("ADU check for a Denver house cites the state ADU law", den.checks.some(c => c.key === "adu" && /ADU law/.test(c.note)) && !condo.checks.some(c => c.key === "adu"));
+  check("Denver short-term rentals: primary residence only, flagged", den.checks.some(c => c.key === "str" && c.status === "warn" && /primary residence/.test(c.note)));
+  const brk = HC.estimate({ key: "b", price: 1200000, city: "Breckenridge", type: "Condominium", hoaFee: 600 }, { lang: "es" });
+  check("Breckenridge: licenses capped and don't transfer, plus HOA note, in Spanish", brk.checks.some(c => c.key === "str" && /no se transfieren/.test(c.note) && /HOA/.test(c.note)));
+  const fx = HC.estimate({ ...sfr, city: "Golden" }, {}, { adu: "Permitted ADU over the garage", str: "HOA prohibits rentals under 30 days" });
+  check("agent ADU and rental facts set the status", fx.checks.find(c => c.key === "adu").status === "ok" && fx.checks.find(c => c.key === "str").status === "warn");
   check("bad inputs fall back to defaults", HC.estimate(sfr, { down: "abc", rate: -1 }).inputs.down === 20);
 }
 setTimeout(async () => {

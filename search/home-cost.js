@@ -32,11 +32,22 @@
   const SFHA = z => /^(A|AE|AH|AO|AR|A99|V|VE)\b/i.test(String(z || "").trim());
 
   const WF_ES = { low: "bajo", moderate: "moderado", high: "alto", "very high": "muy alto" };
+  // Cities named by the Colorado Department of Local Affairs as covered by HB24-1152 (the ADU law). The full list and map: LINKS.adu.
+  const ADU_CITIES = ["Denver", "Aurora", "Boulder", "Colorado Springs", "Fort Collins", "Westminster", "Highlands Ranch"];
+  const STR_RULES = {
+    denver: { warn: true, link: "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Business-Licensing/Business-licenses/Short-term-rentals",
+      en: "Denver allows short-term rentals only in the host’s primary residence, with a city license. An investment property can’t be a short-term rental here.",
+      es: "Denver solo permite rentas a corto plazo en la residencia principal del anfitrión, con licencia de la ciudad. Una propiedad de inversión no puede rentarse a corto plazo aquí." },
+    breckenridge: { warn: true, link: "https://www.townofbreckenridge.com/departments/finance/business-and-accommodation-unit-licenses/accommodation-unit-short-term-rentals-licenses",
+      en: "Breckenridge caps short-term rental licenses by zone, and licenses don’t transfer when the home sells. Check the zone map and whether a license is available before buying for rental income.",
+      es: "Breckenridge limita las licencias de renta a corto plazo por zona, y las licencias no se transfieren al vender la casa. Revise el mapa de zonas y si hay licencias disponibles antes de comprar para rentar." }
+  };
   const LINKS = {
     flood: "https://msc.fema.gov/portal/search",
     wildfire: "https://climate.colorado.gov/colorado-wildfire-risk-public-viewer",
     radon: "https://cdphe.colorado.gov/hm/understanding-radon",
-    metro: "https://dlg.colorado.gov/special-districts-map"
+    metro: "https://dlg.colorado.gov/special-districts-map",
+    adu: "https://dlg.colorado.gov/accessory-dwelling-units"
   };
 
   function estimate(l, opts = {}, facts = {}, config = {}) {
@@ -108,6 +119,21 @@
     if (yr && yr < 1990 && !isCondo(l.type)) checks.push({ key: "sewer", label: T("Sewer scope", "Inspección del drenaje"), status: facts.sewer ? (/clear|good|ok|pass/i.test(facts.sewer) ? "ok" : "warn") : "check", note: facts.sewer || T(`Built in ${yr}: older clay and cast-iron sewer lines often crack or fill with roots. A scope costs about $150–$300; repairs can run into the thousands.`, `Construida en ${yr}: las tuberías de drenaje antiguas de barro o hierro fundido suelen agrietarse o llenarse de raíces. Una inspección con cámara cuesta unos $150–$300; las reparaciones pueden costar miles.`) });
     if (yr && yr < 1978) checks.push({ key: "lead", label: T("Lead-based paint", "Pintura con plomo"), status: "check", note: T("Built before 1978, so the seller must give a lead-based paint disclosure. Plan for safe practices if you renovate.", "Construida antes de 1978, así que el vendedor debe entregar la divulgación de pintura con plomo. Use prácticas seguras si remodela.") });
     if (lot >= 1 && !/denver/i.test(l.city || "")) checks.push({ key: "well", label: T("Well and septic", "Pozo y séptico"), status: facts.wellSeptic ? "ok" : "check", note: facts.wellSeptic || T("On a larger lot, confirm whether water is from a well and waste goes to a septic system. Check the Source of Water Disclosure, the well permit, and get a septic inspection.", "En un terreno grande, confirme si el agua viene de un pozo y si el drenaje va a un sistema séptico. Revise la divulgación de la fuente de agua y el permiso del pozo, y pida una inspección del séptico.") });
+    // ADU: Colorado HB24-1152 requires covered cities to allow one ADU wherever a single-unit home is allowed.
+    const city = String(l.city || "").trim(), hasHoa = !!(mlsHoa || factHoa);
+    const flagOf = v => /\b(no|not|prohibit\w*|ban\w*|denied|none|waitlist\w*|can['’]t|cannot|unpermitted|limit\w*|cap\w*)\b/i.test(v) ? "warn" : "ok";
+    if (facts.adu) checks.push({ key: "adu", label: T("ADU (backyard unit)", "ADU (unidad adicional)"), status: flagOf(facts.adu), note: facts.adu, link: LINKS.adu });
+    else if (!isCondo(l.type) && !isTown(l.type)) {
+      const covered = ADU_CITIES.some(c => c.toLowerCase() === city.toLowerCase());
+      checks.push({ key: "adu", label: T("ADU (backyard unit)", "ADU (unidad adicional)"), status: "check", link: LINKS.adu,
+        note: covered ? T(`${city} is covered by Colorado’s ADU law, so one ADU is allowed wherever a single-family home is. Check the lot’s zoning, utility taps and fees, and any HOA covenants${hasHoa ? " (this home has an HOA)" : ""}.`, `${city} está cubierta por la ley de ADU de Colorado, así que se permite una ADU donde se permite una casa unifamiliar. Revise la zonificación del terreno, las conexiones y cuotas de servicios, y las restricciones de la HOA${hasHoa ? " (esta casa tiene HOA)" : ""}.`)
+          : T("Colorado’s ADU law covers most cities in the Front Range metro areas; check the state’s map for this address, then the local zoning and HOA covenants.", "La ley de ADU de Colorado cubre la mayoría de las ciudades de las áreas metropolitanas del Front Range; revise el mapa del estado para esta dirección y luego la zonificación local y las restricciones de la HOA.") });
+    }
+    // Short-term rentals: local rules decide, and HOAs can prohibit them.
+    const strRule = STR_RULES[city.toLowerCase()];
+    if (facts.str) checks.push({ key: "str", label: T("Short-term rental", "Renta a corto plazo"), status: flagOf(facts.str), note: facts.str, link: (strRule && strRule.link) || "" });
+    else checks.push({ key: "str", label: T("Short-term rental", "Renta a corto plazo"), status: strRule && strRule.warn ? "warn" : "check", link: strRule ? strRule.link : "",
+      note: (strRule ? (es ? strRule.es : strRule.en) : T("Short-term rental rules are set by the city or county and many require a license; check before counting on rental income.", "Las reglas de renta a corto plazo las fija la ciudad o el condado y muchas exigen licencia; verifíquelas antes de contar con ese ingreso.")) + (hasHoa || isCondo(l.type) || isTown(l.type) ? T(" Check the HOA declarations too; many ban or limit rentals under 30 days.", " Revise también las reglas de la HOA; muchas prohíben o limitan las rentas de menos de 30 días.") : "") });
     if (isCondo(l.type) || isTown(l.type) || mlsHoa || factHoa) checks.push({ key: "hoadocs", label: T("HOA documents", "Documentos de la HOA"), status: facts.hoaDocs ? "ok" : "check", note: facts.hoaDocs || T("Review the budget, reserves, any special assessments, rental rules, and the master insurance policy.", "Revise el presupuesto, las reservas, cualquier cuota especial, las reglas de renta y la póliza de seguro principal.") });
 
     return { lines, total, checks, flags, inputs: { down, rate }, updatedBy: facts.byName || "", updatedAt: facts.at || "" };
