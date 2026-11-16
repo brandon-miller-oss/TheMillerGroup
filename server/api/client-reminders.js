@@ -35,7 +35,7 @@ async function runForAgent(uid, tomorrow, results, cache = {}) {
   }
   for (const j of jobs) {
     if (done.has(j.key)) continue;
-    const c = contacts[j.contactId], msg = NT.compose(j.event, { ...j.data, client: c.name, agent });
+    const c = contacts[j.contactId], msg = NT.compose(j.event, { ...j.data, client: c.name, agent, lang: c.lang === "es" ? "es" : "en" });
     const out = {};
     if (c.clientId) { try { await putDoc(`boards/${c.clientId}/inbox/${newId("n")}`, { event: j.event, title: msg.title, text: msg.text, ics: msg.ics || "", tourId: j.tourId || "", dealId: j.dealId || "", from: agent.name, at: new Date().toISOString(), read: false }); out.app = "Sent"; } catch (e) { out.app = e.message; } }
     try { Object.assign(out, await sendOne(uid, j.contactId, { channels: ["email", "sms"], subject: msg.subject, text: msg.text, sms: msg.sms, ics: msg.ics || "" })); } catch (e) { out.email = e.message; }

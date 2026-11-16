@@ -1,11 +1,12 @@
 // The one daily job (8 AM Denver time; see vercel.json): follow-up emails, client reminders,
-// scheduled newsletters, and on Mondays the Colorado news search for the broker's News desk.
+// scheduled newsletters, homeowner reminders on the 1st, and on Mondays the Colorado news search for the broker's News desk.
 const followups = require("./followups-cron");
 const reminders = require("./client-reminders");
 const { docs } = require("../lib/common");
 const NL = require("../lib/newsletter");
 const news = require("./news");
 const claude = require("../lib/claude");
+const homes = require("./home-reminders");
 const TZ = process.env.TIME_ZONE || "America/Denver";
 const todayIn = tz => new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const fakeRes = () => { const r = { code: 0, body: null }; r.status = c => { r.code = c; return r; }; r.json = b => { r.body = b; return r; }; r.end = () => r; r.setHeader = () => r; r.send = b => { r.body = b; return r; }; return r; };
@@ -24,5 +25,6 @@ module.exports = async function handler(req, res) {
       catch (e) { out.newsletters.errors.push(e.message); }
     }
   } catch (e) { out.newsletters.errors.push(e.message); }
+  if (today.endsWith("-01")) { try { out.homeowners = await homes.run(today); } catch (e) { out.homeowners = { error: e.message }; } }
   return res.status(200).json(out);
 };

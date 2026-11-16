@@ -49,8 +49,9 @@ img,svg{max-width:100%}
 
 /* Header */
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:14px 18px 10px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;max-width:1100px;margin:0 auto}
-.brand h1{font:600 26px/1 var(--serif);margin:0;letter-spacing:.01em}
+.brand{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;max-width:1100px;margin:0 auto}
+.brand h1{font:600 26px/1 var(--serif);margin:0 auto 0 0;letter-spacing:.01em;white-space:nowrap}
+#langBtn{padding:5px 12px;font-size:13px}
 .brand h1 span{color:var(--accent)}
 .sync{font-size:12px;color:var(--ink-2);white-space:nowrap}
 .searchrow{max-width:1100px;margin:12px auto 0;display:flex;gap:8px}
@@ -360,10 +361,11 @@ details.pay .btn{display:inline-block;text-decoration:none;margin-top:8px}
 <dialog id="dlgChat" aria-label="Messages"><div class="sheet" id="chatBody"></div></dialog>
 
 <!-- Settings come from the site's assets/config.js (Supabase keys, IDX and AI endpoints). -->
-<script src="../assets/config.js?v=202611151620"></script>
+<script src="../assets/config.js?v=202611151700"></script>
 <script>(function(C){ C = C||{}; window.MILLER_CLOUD = { url:C.SUPABASE_URL, anonKey:C.SUPABASE_ANON_KEY, aiEndpoint:C.AI_ENDPOINT||"" }; })(window.MG_CONFIG);</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="miller-cloud.js?v=202611151620"></script>
+<script src="miller-cloud.js?v=202611151700"></script>
+<script src="i18n.js?v=202611151700"></script>
 <script>
 /* =========================================================================
    IDX CONFIGURATION
@@ -583,7 +585,7 @@ const Store = {
     this.crm.cmas = { dcm1:{ name:"2210 S Fillmore St", subject:{ address:"2210 S Fillmore St", hood:"Washington Park", beds:4, baths:3, sqft:2600, year:1926, type:"Single Family Residence" }, compKeys:["S-1003","S-1004","S-1006"], adj:{ "S-1003":-25000 }, notes:"", createdAt:ts(-2), updatedAt:ts(-2) } };
     this.demoShowcase = { dsc1:{ name:"Bungalows near the parks", description:"Character homes a short walk from Wash Park and Cheesman.", keys:["S-1003","S-1004","S-1012"], createdAt:ts(-5) } };
     this.exVer++;
-    window.Office?.seedDemo?.(); window.CostUI?.seedDemo?.(); window.Coverage?.seedDemo?.(); window.ClientGuide?.seedDemo?.();
+    window.Office?.seedDemo?.(); window.CostUI?.seedDemo?.(); window.Coverage?.seedDemo?.(); window.ClientGuide?.seedDemo?.(); window.Homeowner?.seedDemo?.();
   },
   async connect(){
     this.load(); this.emit();
@@ -1020,7 +1022,7 @@ async function renderCollections(){
   openCol = null;
   el.innerHTML = `<div class="colhead"><h2>Shortlists</h2><button class="btn gold" data-newcol>New shortlist</button></div>${clientBarHTML()}
     ${cols.length ? `<div class="collist">${cols.map(([id,c])=>{const its=Object.values(c.items||{});const n=r=>its.filter(i=>i.reaction===r).length;return `<button class="colcard" data-col="${id}"><h3>${esc(c.name)}</h3><p>${its.length} ${its.length===1?"home":"homes"}</p><div class="tally"><span style="color:var(--love)">${n("love")} love</span><span style="color:var(--maybe)">${n("maybe")} maybe</span><span style="color:var(--pass)">${n("pass")} pass</span></div></button>`;}).join("")}</div>`
-    : `<div class="empty"><strong>Start a shortlist</strong>Group homes you like, react to each one, and leave notes. Brandon sees the same board.</div>`}${window.ClientGuide?ClientGuide.clientHTML():""}${window.ClientNotify?ClientNotify.clientHTML():""}${clientToursHTML()}${showcaseStripHTML()}`;
+    : `<div class="empty"><strong>Start a shortlist</strong>Group homes you like, react to each one, and leave notes. Brandon sees the same board.</div>`}${window.Homeowner?Homeowner.clientHTML():""}${window.ClientGuide?ClientGuide.clientHTML():""}${window.ClientNotify?ClientNotify.clientHTML():""}${clientToursHTML()}${showcaseStripHTML()}`;
 }
 
 /* =========================================================================
@@ -1086,6 +1088,7 @@ function toolSections(){
       ["activity","Client shortlists","Homes clients saved and loved","heart",0],
       ["searches","Saved searches","What clients are watching","search",0],
       ["tours","Showing days","Routes and times for tours","route",Object.values(Store.crm.tours).filter(x=>x && (x.date||"")>=t).length],
+      ["homeowners","Homeowners","Past clients’ home value, equity, care reminders, and tax dates","home",window.Homeowner ? Homeowner.requests() : 0],
       ["coverage","Showing coverage","Post a showing or open house you can’t make, or pick one up","route",window.Coverage ? Coverage.count() : 0],
       ["notifications","Activity feed","Saves, loves, notes, and requests","bell",unseenCount()],
       ["client-updates","Client updates","Showing times, reminders, and milestones sent to clients","bell",(window.ClientNotify ? ClientNotify.count() : 0) + (window.ClientGuide ? ClientGuide.flagged() : 0)]]],
@@ -1409,7 +1412,7 @@ function updateClientChat(){
   const log = $("#clientChatLog"); if (!log) return;
   log.innerHTML = bubblesHTML(Store.msgs[Store.uid], "client"); log.scrollTop = log.scrollHeight;
 }
-function openClientChat(listingKey){
+function openClientChat(listingKey, prefill){
   chatListing = listingKey||"";
   const b = IDX.BROKER;
   $("#chatBody").innerHTML = `<div class="sheettop"><h2>${esc(b.name)}</h2><button class="close" data-close aria-label="Close">×</button></div>
@@ -1422,6 +1425,7 @@ function openClientChat(listingKey){
     e.preventDefault(); const t = $("#clientChatText").value.trim(); if (!t) return;
     Store.sendMessage(Store.uid, "client", t, chatListing); $("#clientChatText").value = ""; chatListing = ""; $("#chatAbout")?.remove();
   });
+  if (prefill && $("#clientChatText")) $("#clientChatText").value = prefill;
   updateClientChat(); Store.markRead(Store.uid, "client");
   if ($("#dlgListing").open) $("#dlgListing").close();
   if (!$("#dlgChat").open) $("#dlgChat").showModal();
@@ -2082,6 +2086,7 @@ async function renderAgent(){
     case "agents": html = head("Team") + agentsHTML(); break;
     case "notifications": html = head("Notifications") + notificationsHTML(); break;
     case "newsletters": html = head("Newsletters") + (window.Newsletter ? Newsletter.html() : ""); break;
+    case "homeowners": html = head("Homeowner portals") + (window.Homeowner ? Homeowner.agentHTML() : ""); break;
     case "coverage": html = head("Showing coverage") + (window.Coverage ? Coverage.html() : ""); break;
     case "client-updates": html = head("Client updates") + (window.ClientNotify ? ClientNotify.panelHTML() : ""); break;
     case "biz": html = head("GCI tracker", `<button class="btn ghost" data-editgoals>Goals</button>`) + bizHTML(); break;
@@ -2349,25 +2354,27 @@ $("#disclaimer").textContent = `${IDX.DISCLAIMER} Listing data provided by ${IDX
 try{ const a = new URLSearchParams(location.search).get("agent"); if (a) localStorage.setItem("tmg-agent-slug", a.toLowerCase()); }catch(e){}
 route(); runSearch(); Store.init();
 </script>
-<script src="home-cost.js?v=202611151620"></script>
-<script src="home-cost-ui.js?v=202611151620"></script>
-<script src="coverage.js?v=202611151620"></script>
-<script src="office.js?v=202611151620"></script>
-<script src="cma-report.js?v=202611151620"></script>
-<script src="ai-writer.js?v=202611151620"></script>
-<script src="presentation.js?v=202611151620"></script>
-<script src="notify-templates.js?v=202611151620"></script>
-<script src="client-notify.js?v=202611151620"></script>
-<script src="deal-guide.js?v=202611151620"></script>
-<script src="client-guide.js?v=202611151620"></script>
-<script src="newsletter-render.js?v=202611151620"></script>
-<script src="newsletter.js?v=202611151620"></script>
-<script src="site-render.js?v=202611151620"></script>
-<script src="site-builder.js?v=202611151620"></script>
-<script src="marketing-ai.js?v=202611151620"></script>
-<script src="agent-brand.js?v=202611151620"></script>
-<script src="print-studio.js?v=202611151620"></script>
-<script src="training.js?v=202611151620"></script>
-<script src="buyer-presentation.js?v=202611151620"></script>
+<script src="home-cost.js?v=202611151700"></script>
+<script src="home-cost-ui.js?v=202611151700"></script>
+<script src="coverage.js?v=202611151700"></script>
+<script src="office.js?v=202611151700"></script>
+<script src="cma-report.js?v=202611151700"></script>
+<script src="ai-writer.js?v=202611151700"></script>
+<script src="presentation.js?v=202611151700"></script>
+<script src="notify-templates.js?v=202611151700"></script>
+<script src="client-notify.js?v=202611151700"></script>
+<script src="home-care.js?v=202611151700"></script>
+<script src="homeowner.js?v=202611151700"></script>
+<script src="deal-guide.js?v=202611151700"></script>
+<script src="client-guide.js?v=202611151700"></script>
+<script src="newsletter-render.js?v=202611151700"></script>
+<script src="newsletter.js?v=202611151700"></script>
+<script src="site-render.js?v=202611151700"></script>
+<script src="site-builder.js?v=202611151700"></script>
+<script src="marketing-ai.js?v=202611151700"></script>
+<script src="agent-brand.js?v=202611151700"></script>
+<script src="print-studio.js?v=202611151700"></script>
+<script src="training.js?v=202611151700"></script>
+<script src="buyer-presentation.js?v=202611151700"></script>
 </body>
 </html>

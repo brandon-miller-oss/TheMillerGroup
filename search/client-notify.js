@@ -17,6 +17,7 @@
   const CN = window.ClientNotify = { cancels: {}, timers: {}, inbox: {}, demoInbox: [], watching: false, open: {}, msg: {} };
   const C = window.MG_CONFIG || {};
   const T = () => window.NotifyTemplates;
+  const L = () => (window.I18N && I18N.lang) || "en", tr = (en, es) => L() === "es" ? es : en;
   const now = () => new Date().toISOString();
   const today = () => typeof localDay === "function" ? localDay() : new Date().toLocaleDateString("en-CA");
   const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -66,7 +67,7 @@
   };
   async function deliver(contactId, event, data, o = {}) {
     const c = contact(contactId); if (!c) throw new Error("That contact wasn’t found.");
-    const msg = T().compose(event, { ...data, client: c.name, agent: data.agent || agentInfo() });
+    const msg = T().compose(event, { ...data, client: c.name, agent: data.agent || agentInfo(), lang: c.lang === "es" ? "es" : "en" });
     const can = CN.channels(c), want = o.channels || Object.keys(can).filter(k => can[k].ok);
     const results = {}, id = newId("n");
     // App inbox
@@ -114,7 +115,7 @@
   CN.tourBanner = function (id) {
     const t = Store.crm.tours[id], ev = CN.tourNeeds(id, t);
     let html = "";
-    if (ev) { const c = contact(t.contactId), msg = T().compose(ev, { ...tourData(id, t), client: c.name }); html += card("tour:" + id, c, msg, `<button class="btn gold" data-cn-sendtour="${id}">Send update</button><button class="btn ghost" data-cn-skiptour="${id}">Not now</button>`); }
+    if (ev) { const c = contact(t.contactId), msg = T().compose(ev, { ...tourData(id, t), client: c.name, lang: c.lang }); html += card("tour:" + id, c, msg, `<button class="btn gold" data-cn-sendtour="${id}">Send update</button><button class="btn ghost" data-cn-skiptour="${id}">Not now</button>`); }
     else if (t && t.contactId && t.notifiedAt) html += `<p class="addr cn-ok">✓ ${esc((contact(t.contactId) || {}).name || "Client")} was sent these details ${when(t.notifiedAt)}.</p>`;
     else if (t && !t.contactId) html += `<p class="addr">Pick a client to send them their showing times.</p>`;
     return html;
@@ -131,8 +132,8 @@
       <label class="check"><input type="checkbox" data-cn-set="reminders" ${s.reminders !== false ? "checked" : ""}> Remind clients the day before their showings (sent at 8 AM)</label>
       <p class="addr">${C.NOTIFY_ENDPOINT ? "Email" + (C.SMS_ENABLED ? " and text" : "") + " sending is connected." : "Email and text sending turns on once the server is connected; app updates work now."} Texts only go to clients with consent on file, between 8 AM and 9 PM.</p></div>`;
     html += `<h3 class="agent-h">Ready to send <span class="addr">${list.length + cancels.length}</span></h3>`;
-    html += list.length || cancels.length ? list.map(({ id, t, event }) => { const c = contact(t.contactId); return card("tour:" + id, c, T().compose(event, { ...tourData(id, t), client: c.name }), `<button class="btn gold" data-cn-sendtour="${id}">Send update</button><button class="btn ghost" data-panel="tour:${id}">Open showing day</button><button class="btn ghost" data-cn-skiptour="${id}">Not now</button>`); }).join("")
-      + cancels.map(t => { const c = contact(t.contactId); return card("cancel:" + t.id, c, T().compose("showing_canceled", { ...tourData(t.id, t), client: c ? c.name : "" }), `<button class="btn gold" data-cn-sendcancel="${t.id}">Send cancellation</button><button class="btn ghost" data-cn-dropcancel="${t.id}">Don’t send</button>`); }).join("")
+    html += list.length || cancels.length ? list.map(({ id, t, event }) => { const c = contact(t.contactId); return card("tour:" + id, c, T().compose(event, { ...tourData(id, t), lang: c && c.lang, client: c.name }), `<button class="btn gold" data-cn-sendtour="${id}">Send update</button><button class="btn ghost" data-panel="tour:${id}">Open showing day</button><button class="btn ghost" data-cn-skiptour="${id}">Not now</button>`); }).join("")
+      + cancels.map(t => { const c = contact(t.contactId); return card("cancel:" + t.id, c, T().compose("showing_canceled", { ...tourData(t.id, t), client: c ? c.name : "", lang: c && c.lang }), `<button class="btn gold" data-cn-sendcancel="${t.id}">Send cancellation</button><button class="btn ghost" data-cn-dropcancel="${t.id}">Don’t send</button>`); }).join("")
       : `<div class="empty"><strong>All caught up</strong>Updates appear here when you schedule or change a client’s showings.</div>`;
     html += `<h3 class="agent-h">Send a quick update</h3><div class="tourform"><label for="cnTo">Client</label><select id="cnTo"><option value="">Choose a client</option>${contacts().map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
       <label for="cnSubj">Subject</label><input id="cnSubj" placeholder="An update on your search"><label for="cnMsg">Message</label><textarea id="cnMsg" rows="3" placeholder="Short and clear. Texts are trimmed to about 300 characters."></textarea>
@@ -148,11 +149,11 @@
         ${chanBoxes("deal:" + id, c)}<div class="quick"><button class="btn ghost" data-cn-milestone="${esc(id)}">Send update</button></div>${CN.msg["deal:" + id] ? `<p class="msg" role="status">${esc(CN.msg["deal:" + id])}</p>` : ""}</div>` : `<p class="addr">Add contract dates to send milestone updates.</p>`}`;
   };
   // Contact form: how this client gets updates, and text consent.
-  CN.contactFields = c => { const n = c.notify || {}; return `<fieldset class="cn-fs"><legend>Client updates</legend><label class="check"><input type="checkbox" id="cnEmail" ${n.email !== false ? "checked" : ""}> Email updates</label>
+  CN.contactFields = c => { const n = c.notify || {}; return `<fieldset class="cn-fs"><legend>Client updates</legend><label for="cnLang">Language for updates</label><select id="cnLang"><option value="en">English</option><option value="es" ${c.lang === "es" ? "selected" : ""}>Español</option></select><label class="check"><input type="checkbox" id="cnEmail" ${n.email !== false ? "checked" : ""}> Email updates</label>
     <label class="check"><input type="checkbox" id="cnSms" ${n.sms ? "checked" : ""}> Text updates</label><label class="check"><input type="checkbox" id="cnConsent" ${n.smsConsentAt ? "checked" : ""}> ${esc((c.name || "This client").split(" ")[0])} agreed to receive texts${n.smsConsentAt ? ` (recorded ${new Date(n.smsConsentAt).toLocaleDateString()}${n.smsConsentSource ? ", " + esc(n.smsConsentSource) : ""})` : ""}</label>
     <input type="hidden" id="cnConsentAt" value="${esc(n.smsConsentAt || "")}"><input type="hidden" id="cnConsentSrc" value="${esc(n.smsConsentSource || "")}"><p class="addr">Only check this if they told you yes, in writing or out loud. Texts need consent under federal law (TCPA).</p></fieldset>`; };
   CN.contactValues = () => { const g = id => document.getElementById(id); if (!g("cnEmail")) return {}; const consent = g("cnConsent").checked, was = g("cnConsentAt").value;
-    return { notify: { email: g("cnEmail").checked, sms: g("cnSms").checked && consent, smsConsentAt: consent ? (was || now()) : "", smsConsentSource: consent ? (g("cnConsentSrc").value || "Recorded by agent") : "" } }; };
+    return { lang: g("cnLang") ? g("cnLang").value : "en", notify: { email: g("cnEmail").checked, sms: g("cnSms").checked && consent, smsConsentAt: consent ? (was || now()) : "", smsConsentSource: consent ? (g("cnConsentSrc").value || "Recorded by agent") : "" } }; };
 
   /* Showing request → scheduled showing in one step */
   CN.requestForm = r => `<div class="cn-req"><label class="addr" for="cnRqD_${esc(r.rid)}">Schedule it</label><input type="date" id="cnRqD_${esc(r.rid)}" value="${esc(today())}"><input type="time" id="cnRqT_${esc(r.rid)}" aria-label="Time"><button class="btn ghost small" data-cn-schedule="${esc(r.cid)}|${esc(r.rid)}">Add to showings</button></div>`;
@@ -184,14 +185,14 @@
     watchInbox();
     const list = items().slice(0, 8), p = CN.prefs || {};
     if (!list.length && !Store.uid && !Store.demo) return "";
-    return `<h3 class="agent-h">Updates from ${esc(IDX.BROKER.name.split(" ")[0])}${CN.unread() ? ` <span class="cn-dot">${CN.unread()} new</span>` : ""}</h3>
+    return `<h3 class="agent-h">${tr("Updates from", "Novedades de")} ${esc(IDX.BROKER.name.split(" ")[0])}${CN.unread() ? ` <span class="cn-dot">${CN.unread()} ${tr("new", "nuevas")}</span>` : ""}</h3>
       ${list.length ? list.map(([id, x]) => `<div class="client cn-item ${x.read ? "" : "fresh"}"><h3>${esc(x.title)}</h3><p class="addr" style="margin:2px 0 6px">${when(x.at)}</p><pre class="cn-pre">${esc(String(x.text || "").split("\n\n").slice(1, -1).join("\n\n") || x.text)}</pre>
-        <div class="quick">${x.ics ? `<button class="btn ghost" data-cn-ics="${esc(id)}">Add to calendar</button>` : ""}${/^showing_(scheduled|updated|reminder)$/.test(x.event) ? `<button class="btn ghost" data-cn-reply="${esc(id)}|confirm">Confirm</button><button class="btn ghost" data-cn-reply="${esc(id)}|change">Need a different time</button>` : ""}${!x.read ? `<button class="btn ghost" data-cn-read="${esc(id)}">Mark read</button>` : ""}</div>${x.response ? `<p class="addr">You replied: ${esc(x.response === "confirm" ? "Confirmed" : "Asked for a different time")}</p>` : ""}</div>`).join("")
-        : `<p class="addr">Showing times and updates on your purchase or sale appear here.</p>`}
-      <details class="cn-prefs"><summary>How I get updates</summary><div class="tourform"><label class="check"><input type="checkbox" id="cnPE" ${p.email !== false ? "checked" : ""}> Email</label>
-        <label class="check"><input type="checkbox" id="cnPS" ${p.sms ? "checked" : ""}> Text messages</label><label for="cnPP">Mobile number</label><input id="cnPP" type="tel" autocomplete="tel" value="${esc(p.phone || "")}">
-        <p class="addr">By turning on texts, you agree that ${esc(IDX.BROKER.name)} of ${esc(IDX.BROKER.firm || "The Miller Group")} may send you automated texts about your showings and transaction. Consent isn’t a condition of any purchase. Message frequency varies; message and data rates may apply. Reply STOP to opt out, HELP for help.</p>
-        <div class="quick"><button class="btn gold" data-cn-saveprefs>Save</button></div><p class="msg" id="cnPrefsMsg" role="status"></p></div></details>`;
+        <div class="quick">${x.ics ? `<button class="btn ghost" data-cn-ics="${esc(id)}">${tr("Add to calendar", "Agregar al calendario")}</button>` : ""}${/^showing_(scheduled|updated|reminder)$/.test(x.event) ? `<button class="btn ghost" data-cn-reply="${esc(id)}|confirm">${tr("Confirm", "Confirmar")}</button><button class="btn ghost" data-cn-reply="${esc(id)}|change">${tr("Need a different time", "Necesito otro horario")}</button>` : ""}${!x.read ? `<button class="btn ghost" data-cn-read="${esc(id)}">${tr("Mark read", "Marcar como leída")}</button>` : ""}</div>${x.response ? `<p class="addr">${tr("You replied:", "Usted respondió:")} ${esc(x.response === "confirm" ? tr("Confirmed", "Confirmado") : tr("Asked for a different time", "Pidió otro horario"))}</p>` : ""}</div>`).join("")
+        : `<p class="addr">${tr("Showing times and updates on your purchase or sale appear here.", "Aquí aparecen los horarios de visitas y las novedades de su compra o venta.")}</p>`}
+      <details class="cn-prefs"><summary>${tr("How I get updates", "Cómo recibo las novedades")}</summary><div class="tourform"><label class="check"><input type="checkbox" id="cnPE" ${p.email !== false ? "checked" : ""}> ${tr("Email", "Correo electrónico")}</label>
+        <label class="check"><input type="checkbox" id="cnPS" ${p.sms ? "checked" : ""}> ${tr("Text messages", "Mensajes de texto")}</label><label for="cnPP">${tr("Mobile number", "Número de celular")}</label><input id="cnPP" type="tel" autocomplete="tel" value="${esc(p.phone || "")}">
+        <p class="addr">${tr(`By turning on texts, you agree that ${esc(IDX.BROKER.name)} of ${esc(IDX.BROKER.firm || "The Miller Group")} may send you automated texts about your showings and transaction. Consent isn’t a condition of any purchase. Message frequency varies; message and data rates may apply. Reply STOP to opt out, HELP for help.`, `Al activar los mensajes de texto, usted acepta que ${esc(IDX.BROKER.name)} de ${esc(IDX.BROKER.firm || "The Miller Group")} le envíe mensajes de texto automáticos sobre sus visitas y su transacción. El consentimiento no es condición para ninguna compra. La frecuencia de los mensajes varía; pueden aplicarse tarifas de mensajes y datos. Responda STOP para cancelar y HELP para ayuda.`)}</p>
+        <div class="quick"><button class="btn gold" data-cn-saveprefs>${tr("Save", "Guardar")}</button></div><p class="msg" id="cnPrefsMsg" role="status"></p></div></details>`;
   };
   async function markRead(id, extra = {}) {
     if (Store.demo) { const x = CN.demoInbox.find(i => i.id === id); if (x) Object.assign(x, { read: true }, extra); Store.emit(); return; }
@@ -241,10 +242,10 @@
     else if (d.cnRead !== undefined) markRead(d.cnRead);
     else if (d.cnSaveprefs !== undefined) {
       const g = id => document.getElementById(id), m = g("cnPrefsMsg"), phone = g("cnPP").value.trim(), sms = g("cnPS").checked;
-      if (sms && phone.replace(/\D/g, "").length < 10) { m.textContent = "Add a mobile number for texts."; return; }
-      const p = { email: g("cnPE").checked, sms, phone, smsConsentAt: sms ? ((CN.prefs || {}).smsConsentAt || now()) : "", smsConsentText: sms ? "Agreed in the client app to automated texts about showings and transactions; STOP to opt out." : "", updatedAt: now() };
+      if (sms && phone.replace(/\D/g, "").length < 10) { m.textContent = tr("Add a mobile number for texts.", "Agregue un número de celular para los mensajes."); return; }
+      const p = { email: g("cnPE").checked, sms, phone, smsConsentAt: sms ? ((CN.prefs || {}).smsConsentAt || now()) : "", smsConsentText: sms ? (L() === "es" ? "Aceptó en la app (en español) recibir mensajes de texto automáticos sobre visitas y transacciones; STOP para cancelar." : "Agreed in the client app to automated texts about showings and transactions; STOP to opt out.") : "", lang: L(), updatedAt: now() };
       CN.prefs = p;
-      if (!Store.demo && Store.db && Store.uid) { try { await Store.db.doc(`boards/${Store.uid}/prefs/notify`).set(p); m.textContent = "Saved."; } catch (err) { m.textContent = "Couldn’t save. Try again."; } } else m.textContent = "Saved (demo).";
+      if (!Store.demo && Store.db && Store.uid) { try { await Store.db.doc(`boards/${Store.uid}/prefs/notify`).set(p); m.textContent = tr("Saved.", "Guardado."); } catch (err) { m.textContent = tr("Couldn’t save. Try again.", "No se guardó. Inténtelo de nuevo."); } } else m.textContent = tr("Saved (demo).", "Guardado (demo).");
     }
   });
   document.addEventListener("change", e => {

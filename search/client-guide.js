@@ -18,6 +18,7 @@
   const CG = window.ClientGuide = { deals: {}, qa: {}, watching: false, agentQA: {}, agentSubs: {}, pushed: {}, demoShared: {}, demoQA: {}, draft: {}, msg: {}, busy: {} };
   const C = window.MG_CONFIG || {};
   const G = () => window.DealGuide;
+  const L = () => (window.I18N && I18N.lang) || "en", tr = (en, es) => L() === "es" ? es : en;
   const now = () => new Date().toISOString();
   const today = () => typeof localDay === "function" ? localDay() : new Date().toLocaleDateString("en-CA");
   const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -25,7 +26,7 @@
   const contact = id => (Store.crm.contacts || {})[id] || null;
   const agentInfo = () => { const a = window.AgentBrand ? AgentBrand.current(Store.crmOwner) : {}; const t = (Store.team || {})[Store.crmOwner] || {}; return { name: a.name || t.name || IDX.BROKER.name, phone: a.phone || t.phone || IDX.BROKER.phone, email: t.email || "", firm: a.brand ? `${a.display}, brokered by The Miller Group` : (IDX.BROKER.firm || "The Miller Group") }; };
   const clientOf = d => { const c = d && d.contactId ? contact(d.contactId) : null; return c ? { c, id: c.clientId || (Store.demo ? "demo-" + d.contactId : "") } : { c: null, id: "" }; };
-  const fmtDay = d => typeof dayLabel === "function" ? dayLabel(d) : d;
+  const fmtDay = d => L() === "es" ? new Date(d + "T12:00:00").toLocaleDateString("es-US", { weekday: "short", month: "short", day: "numeric" }) : (typeof dayLabel === "function" ? dayLabel(d) : d);
   const when = iso => iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
 
   /* --------------------------- Agent: sharing --------------------------- */
@@ -80,12 +81,12 @@
     const text = (document.getElementById("cgX") || {}).value || "", title = (document.getElementById("cgT") || {}).value || "";
     CG.draft[id] = { title, text, summary: (document.getElementById("cgS") || {}).value || "" };
     if (text.trim().length < 80) { CG.msg[id] = "Paste more of the document first."; return; }
-    const d = Office.deals[id], side = d.side === "seller" ? "seller" : "buyer";
+    const d = Office.deals[id], side = d.side === "seller" ? "seller" : "buyer", es = (clientOf(d).c || {}).lang === "es";
     let ai = null; try { ai = window.claude && await window.claude.use("sample"); } catch (e) {}
     if (!ai) { CG.msg[id] = Store.demo ? "Demo: AI summaries work once the AI connection is set up. Write the summary yourself for now." : "AI isn’t connected. Write the summary yourself."; return; }
     CG.busy[id] = true; renderAgent();
     try {
-      const r = await ai(`Summarize this document for a Colorado home ${side} in plain English, as their real estate agent would. 120 to 220 words. Start with the two or three things that matter most (cost, safety, deadlines), then the rest briefly. Don’t advise them what to decide, don’t add anything that isn’t in the document, and note anything that looks incomplete. Plain text, short paragraphs or simple dashes.\n\nDocument: ${title}\n\n${text.slice(0, 30000)}`, { maxTokens: 900 });
+      const r = await ai(`Summarize this document for a Colorado home ${side} in plain English, as their real estate agent would. 120 to 220 words. Start with the two or three things that matter most (cost, safety, deadlines), then the rest briefly. Don’t advise them what to decide, don’t add anything that isn’t in the document, and note anything that looks incomplete. Plain text, short paragraphs or simple dashes.${es ? " Write it in Spanish (neutral Latin American Spanish, usted), since this client prefers Spanish." : ""}\n\nDocument: ${title}\n\n${text.slice(0, 30000)}`, { maxTokens: 900 });
       CG.draft[id].summary = String(r.text || "").trim(); CG.msg[id] = "Review the draft and edit anything before you share it.";
     } catch (e) { CG.msg[id] = "The summary didn’t come through. Try again."; }
     CG.busy[id] = false;
@@ -98,7 +99,7 @@
     Store.db.collection(`boards/${Store.uid}/deal`).onSnapshot(sn => { const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); CG.deals = m; Store.emit(); }, () => {});
     Store.db.collection(`boards/${Store.uid}/guide`).onSnapshot(sn => { const m = {}; sn.docs.forEach(d => { m[d.id] = d.data(); }); CG.qa = m; Store.emit(); }, () => {});
   }
-  const myDeals = () => Object.entries(Store.demo ? CG.demoShared : CG.deals).filter(([, s]) => s);
+  const myDeals = () => Object.entries(Store.demo ? CG.demoShared : CG.deals).filter(([, s]) => s && s.status !== "closed");
   const myQA = dealId => Object.entries(Store.demo ? CG.demoQA : CG.qa).filter(([, x]) => x && x.dealId === dealId).sort((a, b) => (b[1].at || "").localeCompare(a[1].at || ""));
 
   CG.clientHTML = function () {
@@ -109,38 +110,38 @@
       const left = s.deadlines.filter(x => !x.done && x.date >= today()), next = left[0];
       const done = s.deadlines.filter(x => x.done || x.date < today()).length;
       const qa = myQA(id).slice(0, 5);
-      return `<section class="cg" aria-labelledby="cgH_${esc(id)}"><h3 class="agent-h" id="cgH_${esc(id)}">Your ${s.side === "seller" ? "sale" : "purchase"}: ${esc(s.address)}</h3>
-        ${next ? `<div class="cg-next"><span>Next up</span><strong>${esc(next.label)}</strong><b>${daysTo(next.date) === 0 ? "Today" : daysTo(next.date) === 1 ? "Tomorrow" : `In ${daysTo(next.date)} days`}</b><small>${esc(fmtDay(next.date))}</small></div>` : `<div class="cg-next"><strong>All dates are behind you</strong></div>`}
-        <div class="cg-bar" role="progressbar" aria-label="Contract dates completed" aria-valuemin="0" aria-valuemax="${s.deadlines.length}" aria-valuenow="${done}"><i style="width:${s.deadlines.length ? Math.round(done / s.deadlines.length * 100) : 0}%"></i></div>
-        <ol class="cg-tl">${s.deadlines.map(x => { const past = x.done || x.date < today(); return `<li class="${past ? "past" : ""}"><details><summary><span>${esc(x.label)}</span><time>${esc(fmtDay(x.date))}${past ? " ✓" : ""}</time></summary><p>${esc(G().explain(x.label, s.side) || "Ask your agent what this date means for you.")}</p></details></li>`; }).join("")}</ol>
-        ${s.docs && s.docs.length ? `<h4 class="cg-h">Documents ${esc((s.agent.name || "your agent").split(" ")[0])} explained</h4>${s.docs.map(d => `<details class="cg-doc"><summary>${esc(d.title)}</summary><p>${esc(d.summary)}</p></details>`).join("")}` : ""}
-        <h4 class="cg-h">Ask about your ${s.side === "seller" ? "sale" : "purchase"}</h4>
-        <div class="cg-ask"><label class="sr" for="cgQ_${esc(id)}">Your question</label><textarea id="cgQ_${esc(id)}" rows="2" placeholder="e.g. What happens at the inspection deadline?"></textarea><button class="btn gold" data-cg-ask="${esc(id)}" ${CG.busy["q" + id] ? "disabled" : ""}>${CG.busy["q" + id] ? "Thinking…" : "Ask"}</button></div>
+      return `<section class="cg" aria-labelledby="cgH_${esc(id)}"><h3 class="agent-h" id="cgH_${esc(id)}">${s.side === "seller" ? tr("Your sale", "Su venta") : tr("Your purchase", "Su compra")}: ${esc(s.address)}</h3>
+        ${next ? `<div class="cg-next"><span>${tr("Next up", "Lo que sigue")}</span><strong>${esc(G().label(next.label, L()))}</strong><b>${daysTo(next.date) === 0 ? tr("Today", "Hoy") : daysTo(next.date) === 1 ? tr("Tomorrow", "Mañana") : tr(`In ${daysTo(next.date)} days`, `En ${daysTo(next.date)} días`)}</b><small>${esc(fmtDay(next.date))}</small></div>` : `<div class="cg-next"><strong>${tr("All dates are behind you", "Ya pasaron todas las fechas")}</strong></div>`}
+        <div class="cg-bar" role="progressbar" aria-label="${tr("Contract dates completed", "Fechas del contrato cumplidas")}" aria-valuemin="0" aria-valuemax="${s.deadlines.length}" aria-valuenow="${done}"><i style="width:${s.deadlines.length ? Math.round(done / s.deadlines.length * 100) : 0}%"></i></div>
+        <ol class="cg-tl">${s.deadlines.map(x => { const past = x.done || x.date < today(); return `<li class="${past ? "past" : ""}"><details><summary><span>${esc(G().label(x.label, L()))}</span><time>${esc(fmtDay(x.date))}${past ? " ✓" : ""}</time></summary><p>${esc(G().explain(x.label, s.side, L()) || tr("Ask your agent what this date means for you.", "Pregunte a su agente qué significa esta fecha para usted."))}</p></details></li>`; }).join("")}</ol>
+        ${s.docs && s.docs.length ? `<h4 class="cg-h">${tr(`Documents ${esc((s.agent.name || "your agent").split(" ")[0])} explained`, `Documentos que explicó ${esc((s.agent.name || "su agente").split(" ")[0])}`)}</h4>${s.docs.map(d => `<details class="cg-doc"><summary>${esc(d.title)}</summary><p>${esc(d.summary)}</p></details>`).join("")}` : ""}
+        <h4 class="cg-h">${s.side === "seller" ? tr("Ask about your sale", "Pregunte sobre su venta") : tr("Ask about your purchase", "Pregunte sobre su compra")}</h4>
+        <div class="cg-ask"><label class="sr" for="cgQ_${esc(id)}">${tr("Your question", "Su pregunta")}</label><textarea id="cgQ_${esc(id)}" rows="2" placeholder="${tr("e.g. What happens at the inspection deadline?", "p. ej., ¿Qué pasa en la fecha límite de inspección?")}"></textarea><button class="btn gold" data-cg-ask="${esc(id)}" ${CG.busy["q" + id] ? "disabled" : ""}>${CG.busy["q" + id] ? tr("Thinking…", "Pensando…") : tr("Ask", "Preguntar")}</button></div>
         ${CG.msg["q" + id] ? `<p class="msg" role="status">${esc(CG.msg["q" + id])}</p>` : ""}
-        ${qa.map(([, x]) => `<div class="cg-qa"><p class="cg-q">${esc(x.q)}</p><p>${esc(x.a)}</p>${x.forAgent ? `<p class="addr">${esc(s.agent.name || "Your agent")} can see this question${x.note ? "" : " and will follow up"}.</p>` : ""}${x.note ? `<p class="cg-note"><strong>${esc((s.agent.name || "Your agent").split(" ")[0])}:</strong> ${esc(x.note)}</p>` : ""}</div>`).join("")}
-        <p class="addr cg-fine">${esc(G().DISCLAIMER)} Questions go to ${esc(s.agent.name || "your agent")} too.${s.agent.phone ? ` Call or text ${esc(s.agent.phone)} anytime.` : ""}</p></section>`;
+        ${qa.map(([, x]) => `<div class="cg-qa"><p class="cg-q">${esc(x.q)}</p><p>${esc(x.a)}</p>${x.forAgent ? `<p class="addr">${tr(`${esc(s.agent.name || "Your agent")} can see this question${x.note ? "" : " and will follow up"}.`, `${esc(s.agent.name || "Su agente")} puede ver esta pregunta${x.note ? "" : " y le dará seguimiento"}.`)}</p>` : ""}${x.note ? `<p class="cg-note"><strong>${esc((s.agent.name || "Your agent").split(" ")[0])}:</strong> ${esc(x.note)}</p>` : ""}</div>`).join("")}
+        <p class="addr cg-fine">${esc(L() === "es" ? G().DISCLAIMER_ES : G().DISCLAIMER)} ${tr(`Questions go to ${esc(s.agent.name || "your agent")} too.${s.agent.phone ? ` Call or text ${esc(s.agent.phone)} anytime.` : ""}`, `Las preguntas también le llegan a ${esc(s.agent.name || "su agente")}.${s.agent.phone ? ` Llame o mande un mensaje al ${esc(s.agent.phone)} cuando quiera.` : ""}`)}</p></section>`;
     }).join("");
   };
 
   async function ask(id) {
     const box = document.getElementById("cgQ_" + id), q = (box && box.value || "").trim();
-    if (q.length < 3) return; if (q.length > 1500) { CG.msg["q" + id] = "Keep it under 1,500 characters."; return; }
+    if (q.length < 3) return; if (q.length > 1500) { CG.msg["q" + id] = tr("Keep it under 1,500 characters.", "Use menos de 1,500 caracteres."); return; }
     const s = (Store.demo ? CG.demoShared : CG.deals)[id]; if (!s) return;
     CG.busy["q" + id] = true; CG.msg["q" + id] = ""; Store.emit();
     try {
       if (Store.demo || !C.GUIDE_ENDPOINT) {
-        const r = G().localAnswer(s, q), qid = newId("q");
+        const r = G().localAnswer(s, q, L()), qid = newId("q");
         CG.demoQA[qid] = { dealId: id, q, a: r.answer, forAgent: r.forAgent, at: now() };
-        if (!Store.demo) CG.msg["q" + id] = "The guide isn’t fully connected yet, so this answer only uses your dates.";
+        if (!Store.demo) CG.msg["q" + id] = tr("The guide isn’t fully connected yet, so this answer only uses your dates.", "La guía aún no está conectada por completo, así que esta respuesta solo usa sus fechas.");
       } else {
         const token = window.MillerCloud ? await MillerCloud.token() : "";
         const res = await fetch(C.GUIDE_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ dealId: id, question: q }) });
         const j = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(j.error || "The guide didn’t answer. Try again.");
+        if (!res.ok) throw new Error(j.error || tr("The guide didn’t answer. Try again.", "La guía no respondió. Inténtelo de nuevo."));
         CG.qa[j.id] = j.item;
       }
       if (box) box.value = "";
-    } catch (e) { CG.msg["q" + id] = e.message || "The guide didn’t answer. Try again."; }
+    } catch (e) { CG.msg["q" + id] = e.message || tr("The guide didn’t answer. Try again.", "La guía no respondió. Inténtelo de nuevo."); }
     CG.busy["q" + id] = false; Store.emit();
   }
 

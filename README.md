@@ -154,6 +154,18 @@ Agents post a showing, open house, inspection access, or lockbox appointment the
 ### Client portal: transaction guide
 On a transaction, check "Show [client] this transaction in their app." The client sees a timeline of their contract dates with a plain-English explanation of each, days until the next one, and summaries of documents you share. Paste an inspection report or HOA document, let AI draft a summary, edit it, and share it. Clients can ask questions; the guide answers only from their dates and documents, never advises on decisions, and flags those questions for you. You see every question and can add a note under the answer. Commission, broker review, notes, and document links never reach the client. Server: `server/api/guide.js` (`GUIDE_ENDPOINT` in config), 15 questions an hour per client.
 
+### Homeowner portal (after closing)
+Past clients keep a portal for their home in the app:
+- **Value and equity:** the value you send them (from your CMA, with a note), and equity from a loan they enter themselves. "Ask for an updated value" flags it for you and messages you.
+- **Colorado home care:** each month's checklist (filters, sprinkler startup and blowout, hail checks, gutters, furnace service, radon in January, freeze prep), adjusted for condos, townhomes, and rural acreage. Clients check items off.
+- **Property tax dates:** first half due the end of February, second half June 15, and in odd (reassessment) years the protest window from the May 1 Notice of Value to the June 8 appeal deadline, with a button to ask you for comparable sales.
+- **Documents:** links you add (closing statement, warranty, deed).
+- **Monthly email:** on the 1st, `api/daily.js` emails each homeowner with reminders on their month's checklist (English or Spanish), with your name, the brokerage address (`BUSINESS_ADDRESS`), and a signed unsubscribe link.
+- **Agent:** the Homeowners tile lists every portal, value requests, and past clients you can set one up for. A shared buyer transaction becomes a portal automatically when you mark it closed. Data lives at `boards/<client>/home/<id>`.
+
+### Spanish
+The client side of the app is in Spanish for visitors whose browser is set to Spanish, anyone who taps **Español** in the header, or links with `?lang=es` (useful in Spanish ads and on agent pages). Covered: search and filters, listing details, What it really costs, shortlists, sign-in, messages, the transaction guide (with Spanish explanations of every contract date), the homeowner portal, client update settings (including the text-message consent), and the monthly home care email. Client updates by email and text go out in Spanish when the contact's "Language for updates" is set to Español, and AI document summaries are drafted in Spanish for those clients. The agent workspace, MLS listing descriptions, and the required IDX disclaimer stay in English. Have a fluent Spanish speaker on the team review the wording before launch.
+
 ### Newsletters
 Every agent gets their own automated newsletter, tailored to them: their brand (with "Brokered by The Miller Group"), their areas, their current listings and off-market exclusives, their open houses in the next three weeks, their events, this month's market numbers, and Colorado real estate news.
 
@@ -207,7 +219,7 @@ Without this, Send opens the agent’s email app with the message filled in.
 Emails go out from your brokerage address with the agent’s name, and replies go to the agent. Agents who choose "Send anniversaries and birthdays automatically" have them sent each morning by the daily job in `server/vercel.json`.
 
 ### Tests
-`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, `sites.test.js`, `client-notify.test.js`, `newsletter.test.js`, `home-cost.test.js`, `coverage.test.js`, and `client-guide.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, `node server/test/pages.test.js`, `node server/test/notify.test.js`, `node server/test/newsletter.test.js`, and `node server/test/guide.test.js` check the server functions.
+`npm i jsdom`, then `node search/test/multi-agent.test.js` (permissions), `office.test.js` (office tools), `cma.test.js`, `presentation.test.js`, and `buyer-presentation.test.js` (these also need `npm i jspdf@2.5.1`), `writer.test.js`, `training.test.js`, `print-studio.test.js`, `agent-brand.test.js`, `sites.test.js`, `client-notify.test.js`, `newsletter.test.js`, `home-cost.test.js`, `coverage.test.js`, `client-guide.test.js`, `homeowner.test.js`, and `spanish.test.js` (the first two also need `npm i qrcode-generator@1.4.4`), and `demo.test.js` run the app against a simulated database. `node server/test/proxy.test.js`, `node server/test/followups.test.js`, `node server/test/pages.test.js`, `node server/test/notify.test.js`, `node server/test/newsletter.test.js`, `node server/test/guide.test.js`, and `node server/test/homeowner.test.js` check the server functions.
 
 ## Using it
 - **Leads**: every form on the site lands in Admin, Leads. Move leads between stages (list or board), add notes and tasks, set follow-up dates, export CSV.

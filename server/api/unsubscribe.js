@@ -9,9 +9,14 @@ module.exports = async function handler(req, res) {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   if (t === "test") return res.status(200).send(page("This is a test", "Unsubscribe links work in real sends."));
   if (!who) return res.status(400).send(page("Link not recognized", "This unsubscribe link isn’t valid. Reply to the email and we’ll take you off the list."));
-  if (req.method === "GET") return res.status(200).send(page("Unsubscribe?", `You’ll stop getting newsletters from this ${FIRM} agent.`, `<form method="post"><input type="hidden" name="t" value="${t.replace(/[^\w.-]/g, "")}"><button style="font:600 16px system-ui;background:#141A26;color:#fff;border:0;border-radius:24px;padding:12px 24px;cursor:pointer">Unsubscribe</button></form>`));
+  if (req.method === "GET") return res.status(200).send(page("Unsubscribe?", who.cid.startsWith("home~") ? "You’ll stop getting monthly home reminders." : `You’ll stop getting newsletters from this ${FIRM} agent.`, `<form method="post"><input type="hidden" name="t" value="${t.replace(/[^\w.-]/g, "")}"><button style="font:600 16px system-ui;background:#141A26;color:#fff;border:0;border-radius:24px;padding:12px 24px;cursor:pointer">Unsubscribe</button></form>`));
   if (req.method !== "POST") return res.status(405).end();
   try {
+    if (who.cid.startsWith("home~")) {
+      const hp = `boards/${who.uid}/home/${who.cid.slice(5)}`, hr = await docs(`path=eq.${encodeURIComponent(hp)}`);
+      if (hr[0]) await putDoc(hp, { ...hr[0].data, remind: false, remindChangedAt: new Date().toISOString() });
+      return res.status(200).send(page("You’re unsubscribed", "You won’t get monthly home reminders anymore. You can turn them back on in your homeowner portal."));
+    }
     const path = `agent/${who.uid}/crm/contacts/${who.cid}`, rows = await docs(`path=eq.${encodeURIComponent(path)}`);
     if (rows[0]) await putDoc(path, { ...rows[0].data, newsletterOptOut: true, newsletterOptOutAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     return res.status(200).send(page("You’re unsubscribed", "You won’t get these newsletters anymore. Thanks for reading."));

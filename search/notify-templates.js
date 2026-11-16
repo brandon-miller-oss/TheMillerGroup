@@ -59,8 +59,37 @@
     custom: d => ({ title: d.subject || "An update from your agent", subject: d.subject || "An update from your agent",
       text: `Hi ${first(d.client)},\n\n${d.message || ""}\n\n${sign(d.agent)}`, sms: fit(`${smsFrom(d.agent)}${d.message || ""}`, 300) + smsEnd })
   };
+  // Spanish versions (data.lang === "es").
+  const dayEs = d => d ? new Date(d + "T12:00:00").toLocaleDateString("es-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" }) : "";
+  const dayShortEs = d => d ? new Date(d + "T12:00:00").toLocaleDateString("es-US", { weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC" }) : "";
+  const firstEs = n => String(n || "").trim().split(/\s+/)[0] || "";
+  const hola = n => firstEs(n) ? `Hola ${firstEs(n)},` : "Hola,";
+  const casas = n => `${n} ${n === 1 ? "casa" : "casas"}`;
+  const smsEndEs = " Responda STOP para cancelar.";
+  const LABEL_ES = { "Inspection objection deadline": "fecha límite para objeciones de inspección", "Appraisal deadline": "fecha límite del avalúo", "Loan terms deadline": "fecha límite de los términos del préstamo", "Closing date": "fecha de cierre", "Possession date": "fecha de entrega de la casa" };
+  const lab = l => LABEL_ES[l] || l;
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const EVENTS_ES = {
+    showing_scheduled: d => ({ title: `Visitas programadas para el ${dayEs(d.date)}`, subject: `Sus visitas: ${dayEs(d.date)}`,
+      text: `${hola(d.client)}\n\nTodo está listo para ver ${casas(d.stops.length)} el ${dayEs(d.date)}:\n\n${stopLines(d.stops)}\n\n${d.meet || "Nos vemos en la primera casa."} El archivo de calendario adjunto agrega cada visita a su calendario.\n\n¿Necesita otro horario? Solo responda.\n\n${sign(d.agent)}`,
+      sms: fit(`${smsFrom(d.agent)}Visitas el ${dayShortEs(d.date)}: ${smsStops(d.stops)}. Detalles por correo.`, 300) + smsEndEs, ics: ics(d) }),
+    showing_updated: d => ({ title: `Cambio en sus visitas del ${dayEs(d.date)}`, subject: `Actualización: sus visitas del ${dayEs(d.date)}`,
+      text: `${hola(d.client)}\n\nHay un cambio en sus visitas. Este es el plan actualizado para el ${dayEs(d.date)}:\n\n${stopLines(d.stops)}\n\nEl archivo de calendario adjunto tiene los nuevos horarios.\n\n${sign(d.agent)}`,
+      sms: fit(`${smsFrom(d.agent)}Cambio en sus visitas del ${dayShortEs(d.date)}: ${smsStops(d.stops)}.`, 300) + smsEndEs, ics: ics(d) }),
+    showing_canceled: d => ({ title: `Visitas del ${dayEs(d.date)} canceladas`, subject: `Canceladas: visitas del ${dayEs(d.date)}`,
+      text: `${hola(d.client)}\n\nLas visitas planeadas para el ${dayEs(d.date)} quedan canceladas. Me comunicaré con usted para programar otro horario.\n\n${sign(d.agent)}`,
+      sms: fit(`${smsFrom(d.agent)}Las visitas del ${dayShortEs(d.date)} quedan canceladas. Le escribo para reprogramar.`, 300) + smsEndEs }),
+    showing_reminder: d => ({ title: "Recordatorio: visitas mañana", subject: "Mañana: sus visitas",
+      text: `${hola(d.client)}\n\nLe recuerdo que mañana, ${dayEs(d.date)}, vamos a ver ${casas(d.stops.length)}:\n\n${stopLines(d.stops)}\n\n¡Nos vemos! Responda si algo cambia.\n\n${sign(d.agent)}`,
+      sms: fit(`${smsFrom(d.agent)}Recordatorio, visitas mañana: ${smsStops(d.stops)}.`, 300) + smsEndEs, ics: ics(d) }),
+    milestone: d => ({ title: `${cap(lab(d.label))}: ${dayEs(d.date)}`, subject: `${d.address}: ${lab(d.label)} ${d.soon ? "es mañana" : "el " + dayEs(d.date)}`,
+      text: `${hola(d.client)}\n\nUna actualización sobre ${d.address}: la ${lab(d.label)} es ${d.soon ? "mañana, " : "el "}${dayEs(d.date)}.${d.note ? `\n\n${d.note}` : ""}\n\n¿Preguntas? Solo responda.\n\n${sign(d.agent)}`,
+      sms: fit(`${smsFrom(d.agent)}${d.address}: ${lab(d.label)} ${d.soon ? "mañana" : dayShortEs(d.date)}.${d.note ? " " + d.note : ""}`, 300) + smsEndEs }),
+    custom: d => ({ title: d.subject || "Novedades de su agente", subject: d.subject || "Novedades de su agente",
+      text: `${hola(d.client)}\n\n${d.message || ""}\n\n${sign(d.agent)}`, sms: fit(`${smsFrom(d.agent)}${d.message || ""}`, 300) + smsEndEs })
+  };
   // Dates on a transaction that clients care about.
   const CLIENT_DATES = ["Inspection objection deadline", "Appraisal deadline", "Loan terms deadline", "Closing date", "Possession date"];
-  function compose(event, data) { const f = EVENTS[event]; if (!f) throw new Error("Unknown update type"); return { event, ...f({ stops: [], agent: {}, ...data }) }; }
+  function compose(event, data) { const f = ((data || {}).lang === "es" ? EVENTS_ES : EVENTS)[event]; if (!f) throw new Error("Unknown update type"); return { event, lang: (data || {}).lang === "es" ? "es" : "en", ...f({ stops: [], agent: {}, ...data }) }; }
   return { compose, ics, EVENTS: Object.keys(EVENTS), CLIENT_DATES, day, time };
 });

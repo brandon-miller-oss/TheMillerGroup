@@ -34,8 +34,39 @@
     "Appraisal deadline": "The buyer’s appraisal needs to come in by this date. A low appraisal can mean a renegotiation.",
     "Possession date": "When the buyer gets the keys. Have the home cleaned out and leave keys, garage openers, and manuals."
   };
+  const LABEL_ES = {
+    "Earnest money due": "Entrega del depósito de garantía", "Record title deadline": "Fecha límite del título registrado", "Off-record title deadline": "Fecha límite de información fuera del registro",
+    "Seller’s property disclosure deadline": "Fecha límite de la divulgación del vendedor", "Inspection objection deadline": "Fecha límite para objeciones de inspección", "Inspection resolution deadline": "Fecha límite para resolver la inspección",
+    "Loan application deadline": "Fecha límite para solicitar el préstamo", "Loan terms deadline": "Fecha límite de los términos del préstamo", "Appraisal deadline": "Fecha límite del avalúo",
+    "Loan conditions deadline": "Fecha límite de las condiciones del préstamo", "Closing date": "Fecha de cierre", "Possession date": "Fecha de entrega de la casa"
+  };
+  const EXPLAIN_ES = {
+    "Earnest money due": "Su depósito de garantía (earnest money) debe llegar a la compañía de títulos (o a quien indique el contrato) a más tardar en esta fecha. Se guarda en una cuenta de fideicomiso y normalmente se aplica a su compra al cierre.",
+    "Record title deadline": "El vendedor debe entregarle el compromiso de título a más tardar en esta fecha, junto con copias de los documentos registrados, como restricciones y servidumbres. Muestra quién es el dueño y qué está registrado sobre la propiedad, y comienza su plazo para revisarlo.",
+    "Off-record title deadline": "El vendedor le entrega información que afecta la propiedad pero no está en los registros públicos, como arrendamientos, planos topográficos y problemas de linderos que conozca.",
+    "Seller’s property disclosure deadline": "El vendedor le entrega por escrito lo que sabe sobre el estado de la casa. Léalo con cuidado antes de su inspección.",
+    "Inspection objection deadline": "El último día para avisar al vendedor, por escrito, qué problemas de la inspección quiere que se atiendan, o para terminar el contrato según la sección de inspección. Las inspecciones deben estar terminadas antes de esta fecha.",
+    "Inspection resolution deadline": "Si se envió una objeción de inspección, comprador y vendedor necesitan un acuerdo por escrito sobre cómo se atenderán los puntos a más tardar en esta fecha. El contrato explica qué pasa si no hay acuerdo.",
+    "Loan application deadline": "Solicite su préstamo a más tardar en esta fecha y envíe al prestamista lo que le pida. Responder rápido al prestamista mantiene todo a tiempo.",
+    "Loan terms deadline": "La fecha límite para objetar si los términos del préstamo que le ofrecieron (tasa, pago, costos de cierre) no le convienen.",
+    "Appraisal deadline": "El avalúo debe llegar a más tardar en esta fecha. Si sale por debajo del precio, esta suele ser la fecha límite para objetar según la sección de avalúo.",
+    "Loan conditions deadline": "A más tardar en esta fecha su prestamista debería tener todo lo que necesita para fondear el préstamo. Es el último punto de control del contrato para la aprobación del préstamo.",
+    "Closing date": "Usted firma los documentos finales, se mueve el dinero y se transfiere la propiedad. El fraude por transferencias es común: siempre llame a su compañía de títulos a un número que ya conozca para confirmar las instrucciones de transferencia, y nunca confíe en instrucciones que lleguen solo por correo electrónico.",
+    "Possession date": "Cuando el comprador recibe las llaves. Normalmente al cierre, a menos que el contrato le dé al vendedor tiempo adicional después del cierre."
+  };
+  const SELLER_ES = {
+    "Earnest money due": "El depósito de garantía del comprador debe llegar a la compañía de títulos (o a quien indique el contrato) a más tardar en esta fecha.",
+    "Record title deadline": "El compromiso de título y los documentos registrados se entregan al comprador a más tardar en esta fecha para que los revise.",
+    "Seller’s property disclosure deadline": "Su divulgación de la propiedad (Seller’s Property Disclosure) completa se entrega al comprador a más tardar en esta fecha. Divulgue lo que sabe; si tiene dudas, divúlguelo.",
+    "Inspection objection deadline": "El último día para que el comprador envíe una objeción de inspección por escrito o termine el contrato según la sección de inspección. Espere al inspector en la casa antes de esta fecha.",
+    "Inspection resolution deadline": "Si el comprador objetó, usted y el comprador necesitan un acuerdo por escrito sobre cómo se atenderán los puntos a más tardar en esta fecha.",
+    "Appraisal deadline": "El avalúo del comprador debe llegar a más tardar en esta fecha. Un avalúo bajo puede significar una renegociación.",
+    "Possession date": "Cuando el comprador recibe las llaves. Deje la casa limpia y vacía, con llaves, controles del garaje y manuales."
+  };
+  const DISCLAIMER_ES = "Un resumen en lenguaje sencillo para ayudarle a seguir el proceso. Su contrato firmado es el que rige, y las fechas pueden cambiar mediante una enmienda por escrito. Para asesoría legal o de impuestos, consulte a un abogado de bienes raíces de Colorado o a un profesional de impuestos.";
   const DISCLAIMER = "A plain-language summary to help you follow along. Your signed contract controls, and dates can change by written amendment. For legal or tax advice, talk to a Colorado real estate attorney or tax professional.";
-  const explain = (label, side) => (side === "seller" && SELLER[label]) || EXPLAIN[label] || "";
+  const explain = (label, side, lang) => lang === "es" ? ((side === "seller" && SELLER_ES[label]) || EXPLAIN_ES[label] || "") : ((side === "seller" && SELLER[label]) || EXPLAIN[label] || "");
+  const label = (l, lang) => lang === "es" ? (LABEL_ES[l] || l) : l;
   const clip = (s, n) => String(s == null ? "" : s).slice(0, n);
 
   function shareable(deal, agent = {}, docs = []) {
@@ -78,11 +109,11 @@ Reply with only JSON: {"answer": "...", "forAgent": true|false}`;
   }
 
   // Offline answer used in the demo: the matching date's explanation.
-  function localAnswer(s, q) {
+  function localAnswer(s, q, lang) {
     const t = String(q || "").toLowerCase();
-    const hit = (s.deadlines || []).find(x => t.includes(x.label.toLowerCase().replace(/ (deadline|date|due)$/, "").replace(/’/g, "'").split(" ")[0]));
-    if (hit) return { answer: `${hit.label} is ${hit.date}. ${explain(hit.label, s.side)}`, forAgent: false };
-    return { answer: `I don’t see that in what ${s.agent.name || "your agent"} has shared yet, so I’ve flagged it for them.`, forAgent: true };
+    const hit = (s.deadlines || []).find(x => t.includes(x.label.toLowerCase().replace(/ (deadline|date|due)$/, "").replace(/’/g, "'").split(" ")[0]) || (lang === "es" && t.includes(label(x.label, "es").toLowerCase().split(" ").slice(-1)[0])));
+    if (hit) return lang === "es" ? { answer: `${label(hit.label, "es")}: ${hit.date}. ${explain(hit.label, s.side, "es")}`, forAgent: false } : { answer: `${hit.label} is ${hit.date}. ${explain(hit.label, s.side)}`, forAgent: false };
+    return lang === "es" ? { answer: `No veo eso en lo que ${s.agent.name || "su agente"} ha compartido, así que se lo marqué para que le responda.`, forAgent: true } : { answer: `I don’t see that in what ${s.agent.name || "your agent"} has shared yet, so I’ve flagged it for them.`, forAgent: true };
   }
-  return { EXPLAIN, SELLER, DISCLAIMER, explain, shareable, prompt, localAnswer };
+  return { EXPLAIN, SELLER, EXPLAIN_ES, SELLER_ES, LABEL_ES, DISCLAIMER, DISCLAIMER_ES, explain, label, shareable, prompt, localAnswer };
 });

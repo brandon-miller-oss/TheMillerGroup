@@ -18,26 +18,27 @@
   const cfg = () => (Store.costConfig || {});
   const stored = key => { const k = safeKey(key); return (Store.demo ? CU.demo[k] : (Store.costFacts || {})[k]) || null; };
   CU.facts = key => { const base = stored(key) || {}, hz = CU.hz[safeKey(key)]; return hz && hz.floodZone && !base.floodZone ? { ...base, floodZone: hz.floodZone } : { ...base }; };
-  const SRC = { mls: "From the listing", agent: "Verified by agent", estimate: "Estimate" };
+  const L = () => (window.I18N && I18N.lang) || "en", t = (en, es) => L() === "es" ? es : en;
+  const SRC = () => ({ mls: t("From the listing", "Del anuncio"), agent: t("Verified by agent", "Verificado por agente"), estimate: t("Estimate", "Estimado") });
   const ICON = { ok: "✓", warn: "!", check: "?" };
 
-  CU.cardLine = l => { if (!H() || !l || !l.price) return ""; const t = H().monthly(l, CU.facts(l.key), cfg()); return t ? `<div class="cost-line">About ${money(t)}/mo all-in</div>` : ""; };
+  CU.cardLine = l => { if (!H() || !l || !l.price) return ""; const tot = H().estimate(l, { lang: L() }, CU.facts(l.key), cfg()).total; return tot ? `<div class="cost-line">${t(`About ${money(tot)}/mo all-in`, `Aprox. ${money(tot)}/mes en total`)}</div>` : ""; };
 
   CU.html = function (l) {
     if (!H() || !l || !l.price) return "";
     const f = CU.facts(l.key), def = H().DEFAULTS;
     const down = CU.inputs.down ?? (cfg().down ?? def.down), rate = CU.inputs.rate ?? (cfg().rate ?? def.rate);
-    const e = H().estimate(l, { down, rate }, f, cfg());
+    const e = H().estimate(l, { down, rate, lang: L() }, f, cfg());
     lookupHazards(l);
     return `<section class="cost" id="costBox" data-cost-key="${esc(l.key)}" aria-labelledby="costH">
-      <div class="cost-top"><h3 id="costH">What it really costs</h3><div class="cost-total"><b>${money(e.total)}</b><span>/mo</span></div></div>
-      <div class="row2"><div><label for="costDown">Down payment (%)</label><input id="costDown" data-cost inputmode="decimal" value="${esc(down)}"></div><div><label for="costRate">Interest rate (%)</label><input id="costRate" data-cost inputmode="decimal" value="${esc(rate)}"></div></div>
-      <table class="cost-tbl"><tbody>${e.lines.map(x => `<tr><th scope="row">${esc(x.label)}<span class="cost-src ${x.source}">${SRC[x.source]}</span><small>${esc(x.basis)}</small></th><td>${money(x.monthly)}</td></tr>`).join("")}</tbody></table>
+      <div class="cost-top"><h3 id="costH">${t("What it really costs", "Lo que realmente cuesta")}</h3><div class="cost-total"><b>${money(e.total)}</b><span>${t("/mo", "/mes")}</span></div></div>
+      <div class="row2"><div><label for="costDown">${t("Down payment (%)", "Enganche (%)")}</label><input id="costDown" data-cost inputmode="decimal" value="${esc(down)}"></div><div><label for="costRate">${t("Interest rate (%)", "Tasa de interés (%)")}</label><input id="costRate" data-cost inputmode="decimal" value="${esc(rate)}"></div></div>
+      <table class="cost-tbl"><tbody>${e.lines.map(x => `<tr><th scope="row">${esc(x.label)}<span class="cost-src ${x.source}">${SRC()[x.source]}</span><small>${esc(x.basis)}</small></th><td>${money(x.monthly)}</td></tr>`).join("")}</tbody></table>
       ${e.flags.map(x => `<p class="cost-flag">${esc(x.text)}</p>`).join("")}
-      <h4 class="cost-h">Checks before you buy</h4>
-      <ul class="cost-checks">${e.checks.map(c => `<li class="${c.status}"><span class="cost-ic" aria-hidden="true">${ICON[c.status]}</span><div><strong>${esc(c.label)}</strong><span>${esc(c.note)}${c.link ? ` <a href="${esc(c.link)}" target="_blank" rel="noopener">Look it up</a>` : ""}</span></div></li>`).join("")}</ul>
-      <p class="addr cost-fine">An estimate to help you compare homes, not a loan offer or an insurance quote. Taxes and dues come from the listing or your agent when we have them; everything marked “Estimate” is a rough figure. Utilities aren’t included.${e.updatedBy ? ` Facts verified by ${esc(e.updatedBy)}${e.updatedAt ? ` on ${new Date(e.updatedAt).toLocaleDateString()}` : ""}.` : ""}</p>
-      <div class="quick"><a class="btn gold" href="https://nestkey.ai" target="_blank" rel="noopener">Get pre-qualified</a>${Store.isAgent ? `<button class="btn ghost" type="button" data-cost-edit="${esc(l.key)}">${stored(l.key) ? "Edit cost facts" : "Add cost facts"}</button>` : ""}</div>
+      <h4 class="cost-h">${t("Checks before you buy", "Qué revisar antes de comprar")}</h4>
+      <ul class="cost-checks">${e.checks.map(c => `<li class="${c.status}"><span class="cost-ic" aria-hidden="true">${ICON[c.status]}</span><div><strong>${esc(c.label)}</strong><span>${esc(c.note)}${c.link ? ` <a href="${esc(c.link)}" target="_blank" rel="noopener">${t("Look it up", "Consultar")}</a>` : ""}</span></div></li>`).join("")}</ul>
+      <p class="addr cost-fine">${t("An estimate to help you compare homes, not a loan offer or an insurance quote. Taxes and dues come from the listing or your agent when we have them; everything marked “Estimate” is a rough figure. Utilities aren’t included.", "Un estimado para comparar casas, no una oferta de préstamo ni una cotización de seguro. Los impuestos y cuotas vienen del anuncio o de su agente cuando los tenemos; todo lo marcado “Estimado” es aproximado. No incluye servicios públicos.")}${e.updatedBy ? t(` Facts verified by ${esc(e.updatedBy)}${e.updatedAt ? ` on ${new Date(e.updatedAt).toLocaleDateString()}` : ""}.`, ` Datos verificados por ${esc(e.updatedBy)}${e.updatedAt ? ` el ${new Date(e.updatedAt).toLocaleDateString("es-US")}` : ""}.`) : ""}</p>
+      <div class="quick"><a class="btn gold" href="https://nestkey.ai" target="_blank" rel="noopener">${t("Get pre-qualified", "Precalifíquese")}</a>${Store.isAgent ? `<button class="btn ghost" type="button" data-cost-edit="${esc(l.key)}">${stored(l.key) ? "Edit cost facts" : "Add cost facts"}</button>` : ""}</div>
       ${Store.isAgent && CU.editing === l.key ? editorHTML(l, f) : ""}
     </section>`;
   };
