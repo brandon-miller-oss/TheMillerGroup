@@ -21,7 +21,7 @@
   const fail = t => { document.getElementById("msg").innerHTML = `<h1 style="font-family:Georgia,serif">Page not found</h1><p>${t}</p><p><a href="${(C.SITE_URL || "..")}/">Visit The Miller Group</a></p>`; };
   if (!/^[a-z0-9-]{1,40}$/.test(slug)) return fail("Check the link and try again.");
   if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return fail("Agent pages go live once the site’s database is connected.");
-  const get = path => fetch(`${C.SUPABASE_URL}/rest/v1/docs?${path}`, { headers: { apikey: C.SUPABASE_ANON_KEY, Authorization: "Bearer " + C.SUPABASE_ANON_KEY } }).then(r => r.ok ? r.json() : []);
+  const get = path => fetch(`${C.SUPABASE_URL}/rest/v1/docs?${path}`, { headers: /^eyJ/.test(C.SUPABASE_ANON_KEY) ? { apikey: C.SUPABASE_ANON_KEY, Authorization: "Bearer " + C.SUPABASE_ANON_KEY } : { apikey: C.SUPABASE_ANON_KEY } }).then(r => r.ok ? r.json() : []);
   try {
     const team = await get(`parent=eq.team&data->>slug=eq.${encodeURIComponent(slug)}&select=path,data&limit=1`);
     if (!team.length) return fail("This agent page isn’t available.");

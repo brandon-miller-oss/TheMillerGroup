@@ -1,6 +1,8 @@
 // Shared helpers for the server functions: Supabase access, agent check, email, templates.
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // server only
+const SERVICE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY; // server only (sb_secret_… key, or the legacy service_role key)
+// New Supabase keys (sb_publishable_…, sb_secret_…) go only in the apikey header; legacy JWT keys also go in Authorization.
+const keyHeaders = k => /^eyJ/.test(k || "") ? { apikey: k, Authorization: `Bearer ${k}` } : { apikey: k };
 const RESEND_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM;                 // an address on a domain verified in Resend
 const EMAIL_FOOTER = process.env.EMAIL_FOOTER || "";       // brokerage name and mailing address
@@ -30,7 +32,7 @@ async function agentId(token) {
 }
 
 // Service-role reads and writes on the docs table (bypass row rules; server only).
-const svc = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
+const svc = keyHeaders(SERVICE_KEY);
 async function docs(query) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/docs?select=path,data&${query}`, { headers: svc });
   if (!r.ok) throw new Error(`Supabase ${r.status}`);
@@ -96,3 +98,4 @@ async function userId(token) {
   return id || null;
 }
 module.exports.userId = userId;
+module.exports.keyHeaders = keyHeaders;

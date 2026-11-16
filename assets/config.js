@@ -11,7 +11,7 @@ window.MG_CONFIG = {
 
   // Back end (free Supabase project). Leave blank to run the site without a database.
   SUPABASE_URL: '',                 // e.g. 'https://abcdxyz.supabase.co'
-  SUPABASE_ANON_KEY: '',            // the public "anon" key (safe to publish when the SQL policies are installed)
+  SUPABASE_ANON_KEY: '',            // the publishable key (sb_publishable_…) or legacy anon key; safe to publish because the SQL policies protect the data
 
   // Home search and agent tools (search/). Leave the two addresses blank to run on sample listings with no AI.
   IDX_ENDPOINT: '',                 // live listings, e.g. 'https://miller-tools.vercel.app/api/idx'

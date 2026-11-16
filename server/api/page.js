@@ -2,12 +2,13 @@
 // /a/<agent link name>/<page>  ->  /api/page?a=<agent>&p=<page>
 // Uses the same renderer as the agent builder (server/lib/site-render.js is a copy of search/site-render.js).
 const SiteRender = require("../lib/site-render.js");
-const URL_ = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_ANON_KEY;
+const URL_ = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const KH = /^eyJ/.test(KEY || "") ? { apikey: KEY, Authorization: "Bearer " + KEY } : { apikey: KEY };
 const SITE = (process.env.SITE_URL || "").replace(/\/$/, ""), FIRM = process.env.BUSINESS_NAME || "The Miller Group", LICENSE = process.env.LICENSE_TEXT || "";
 const SLUG = /^[a-z0-9-]{1,40}$/;
 
 async function get(q) {
-  const r = await fetch(`${URL_}/rest/v1/docs?${q}`, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } });
+  const r = await fetch(`${URL_}/rest/v1/docs?${q}`, { headers: KH });
   return r.ok ? r.json() : [];
 }
 const notFound = (res, msg) => res.status(404).setHeader("Content-Type", "text/html; charset=utf-8").send(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found</title><body style="font:16px system-ui;text-align:center;margin-top:20vh"><h1>Page not found</h1><p>${msg}</p><p><a href="${SITE || "/"}">Visit ${FIRM}</a></p>`);
@@ -26,7 +27,7 @@ async function load(slug, pslug) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") return res.status(405).end();
-  if (!URL_ || !KEY) return res.status(500).send("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
+  if (!URL_ || !KEY) return res.status(500).send("Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY.");
   const slug = String((req.query || {}).a || "").toLowerCase(), pslug = String((req.query || {}).p || "").toLowerCase();
   if (!SLUG.test(slug) || (pslug && !SLUG.test(pslug))) return notFound(res, "Check the link and try again.");
   try {

@@ -28,8 +28,8 @@ A static website for GitHub Pages, with a Supabase back end for leads (CRM), lan
 3. Authentication, Users, Add user: your email and a strong password.
 4. SQL Editor, run (with your email):
    `insert into public.admins (user_id) select id from auth.users where email = 'you@yourdomain.com';`
-5. Authentication, Sign In / Providers: turn OFF "Allow new users to sign up".
-6. Project Settings, API: copy the Project URL and the `anon` public key.
+5. Authentication, Sign In / Providers: leave "Allow new users to sign up" ON once you use home search (clients sign in with emailed links; see below). The SQL policies, not sign-ups, protect your data.
+6. Project Settings, API Keys: copy the Project URL and the **publishable** key (`sb_publishable_…`) for `assets/config.js`, and the **secret** key (`sb_secret_…`) for the server only. Supabase is retiring the old `anon` and `service_role` keys at the end of 2026; the code accepts either kind.
 7. Authentication, URL Configuration: set Site URL to your site address and add `https://brandon-miller-oss.github.io/TheMillerGroup/admin/` (and your custom domain's `/admin/` later) under Redirect URLs, so password reset emails work.
 
 ### 3. Connect the site
@@ -41,7 +41,7 @@ Open `assets/config.js` and fill in:
 
 Commit the change. Then visit `/admin/` and sign in.
 
-The anon key is meant to be public. The SQL policies are what protect your data: visitors can only add new leads and read items you mark live, and only admin users can read or change anything else. Never put the `service_role` key in this site.
+The anon key is meant to be public. The SQL policies are what protect your data: visitors can only add new leads and read items you mark live, and only admin users can read or change anything else. Never put the secret (or `service_role`) key in this site.
 
 ## Home search and agent tools (`search/`)
 

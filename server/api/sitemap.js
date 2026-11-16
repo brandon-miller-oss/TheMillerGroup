@@ -1,9 +1,10 @@
 // Sitemap of every published, indexable agent page: /sitemap-agents.xml
-const URL_ = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_ANON_KEY;
+const URL_ = process.env.SUPABASE_URL, KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const KH = /^eyJ/.test(KEY || "") ? { apikey: KEY, Authorization: "Bearer " + KEY } : { apikey: KEY };
 const x = s => String(s).replace(/[<>&'"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]);
 module.exports = async function handler(req, res) {
-  if (!URL_ || !KEY) return res.status(500).send("Set SUPABASE_URL and SUPABASE_ANON_KEY.");
-  const get = q => fetch(`${URL_}/rest/v1/docs?${q}`, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } }).then(r => r.ok ? r.json() : []);
+  if (!URL_ || !KEY) return res.status(500).send("Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY.");
+  const get = q => fetch(`${URL_}/rest/v1/docs?${q}`, { headers: KH }).then(r => r.ok ? r.json() : []);
   try {
     const [team, pages] = await Promise.all([get("parent=eq.team&select=path,data"), get("path=like.sites/*/pages/*&select=path,data,updated_at")]);
     const slugOf = Object.fromEntries(team.map(t => [t.path.split("/")[1], t.data && t.data.slug]));
