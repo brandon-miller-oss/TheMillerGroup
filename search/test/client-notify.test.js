@@ -71,7 +71,7 @@ setTimeout(async () => {
   check("consent records a date and source", nv.sms === true && !!nv.smsConsentAt && /agent/i.test(nv.smsConsentSource));
   E(`$("#dlgForm") && $("#dlgForm").close && $("#dlgForm").close()`);
   // Client view
-  await E(`renderCollections()`); await wait(20);
+  await E(`renderPortal()`); await wait(20);
   const cv = w.document.body.textContent;
   check("client sees updates with calendar, confirm, and preferences", cv.includes("Updates from Brandon") && !!$("[data-cn-ics]") && !!$('[data-cn-reply$="|confirm"]') && !!$("[data-cn-saveprefs]"));
   const rid = $('[data-cn-reply$="|confirm"]').dataset.cnReply.split("|")[0];

@@ -25,7 +25,7 @@
     "For sale + coming soon": "En venta + próximamente", "For sale": "En venta", "Coming soon": "Próximamente", "Coming Soon": "Próximamente", "Pending": "Pendiente", "Active": "Activa", "Off-market": "Fuera del mercado",
     "Newest": "Más recientes", "Price: low to high": "Precio: de menor a mayor", "Price: high to low": "Precio: de mayor a menor", "Largest": "Más grandes",
     "Neighborhood, city, or address": "Vecindario, ciudad o dirección", "Search homes": "Buscar casas", "Max price": "Precio máximo", "Minimum bedrooms": "Mínimo de recámaras", "Home type": "Tipo de casa", "Status": "Estado", "Sort": "Ordenar",
-    "Search": "Buscar", "Map": "Mapa", "Shortlists": "Mis listas", "Agent": "Agente", "Sections": "Secciones",
+    "Search": "Buscar", "Map": "Mapa", "Shortlists": "Mis listas", "Agent": "Agente", "My portal": "Mi portal", "See your transaction timeline, your home’s value and equity after closing, updates from your agent, and your showing days. We’ll email you a sign-in link. No password needed.": "Vea el calendario de su transacción, el valor y la plusvalía de su casa después del cierre, las novedades de su agente y sus días de visitas. Le enviaremos un enlace por correo para iniciar sesión. No necesita contraseña.", "When your agent shares your transaction guide or sets up your homeowner portal, it shows up here. Your saved homes are under Shortlists.": "Cuando su agente comparta la guía de su transacción o prepare su portal de propietario, aparecerá aquí. Sus casas guardadas están en Mis listas.", "Agent tools": "Herramientas para agentes", "Sign in to your client portal": "Inicie sesión en su portal de cliente", "Email me a sign-in link": "Envíenme un enlace para iniciar sesión", "Nothing here yet": "Todavía no hay nada aquí", "Sections": "Secciones",
     "Sample listings for preview. Live MLS listings appear here once the IDX feed is connected.": "Anuncios de muestra. Los anuncios reales del MLS aparecerán aquí cuando se conecte el servicio IDX.",
     "Save this search": "Guardar esta búsqueda", "Manage": "Administrar", "Miller Group off-market listing": "Anuncio fuera del mercado de The Miller Group", "Draft": "Borrador",
     "No homes match": "Ninguna casa coincide", "Try a wider price range or fewer filters.": "Pruebe un rango de precios más amplio o menos filtros.",
@@ -77,7 +77,7 @@
     const d = date(k); return d !== k ? d : null;
   }
   I.tr = tr;
-  const ZONES = "header, nav.tabs, #dataBanner, #v-search, #v-map, #v-collections, #dlgListing, #dlgSave, #dlgChat, #dlgAuth";
+  const ZONES = "header, nav.tabs, #dataBanner, #v-search, #v-map, #v-collections, #v-portal, #dlgListing, #dlgSave, #dlgChat, #dlgAuth";
   const SKIP = ".remarks, .cost, .cg, .ho, .cn-pre, .chatlog, [data-i18n-skip], #disclaimer, script, style, textarea:not(#lMsg)";
   function inZone(el) { return el && el.closest && el.closest(ZONES) && !el.closest(SKIP) && !el.closest("#v-agent"); }
   function walk(root) {

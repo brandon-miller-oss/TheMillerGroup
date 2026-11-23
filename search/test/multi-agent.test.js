@@ -64,6 +64,8 @@ async function saveProfile(dom, name, slug) {
   check("public page: Agent tools button opens the back office sign-in", T(P, "#agentTab").includes("Agent tools") && P.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
   check("public page: no client list for the agent", Object.keys(P.window.eval("Store.clients")).length === 0);
 
+  V.window.location.hash = "#portal"; await wait(100);
+  check("signed-out visitor: My portal asks them to sign in", T(V, "#v-portal").includes("Sign in to your client portal") && !!V.window.document.querySelector("[data-portalsignin]"));
   check("signed-out visitor sees Agent tools button to sign in", !V.window.document.querySelector("#agentTab").classList.contains("hidden") && V.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
   const errs = [B, S, C1, C2, S2, B2, BV, Tm, V, P].flatMap(d => d.errs);
   check("no page errors", errs.length === 0); if (errs.length) console.log(errs);

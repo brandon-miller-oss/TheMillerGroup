@@ -31,14 +31,14 @@ setTimeout(async () => {
   console.log("  listing leftovers:", JSON.stringify(leftovers($("#dlgListing"))));
   console.log("  search leftovers:", JSON.stringify(leftovers($("#v-search")).slice(0, 8)));
   E(`$("#dlgListing").close()`);
-  E(`location.hash = "#collections"`); await wait(300);
-  const ct = $("#v-collections").textContent;
+  E(`location.hash = "#portal"`); await wait(300);
+  const ct = $("#v-portal").textContent;
   check("client portal sections in Spanish", /Su casa: 1440 N Gaylord/.test(ct) && /Plusvalía/.test(ct) && /Este mes/.test(ct) && /Su venta: 2210 S Fillmore/.test(ct) && /Lo que sigue/.test(ct));
   check("timeline explanations in Spanish", /Fecha límite para objeciones de inspección/.test(ct));
   check("client updates in Spanish, consent text included", /Novedades de/.test(ct) && /Al activar los mensajes de texto/.test(ct));
-  console.log("  shortlist-tab leftovers:", JSON.stringify(leftovers($("#v-collections")).slice(0, 12)));
+  console.log("  shortlist-tab leftovers:", JSON.stringify(leftovers($("#v-portal")).slice(0, 12)));
   // Spanish question in demo
-  const q = $('#v-collections [id^="cgQ_"]'); if (q) { q.value = "¿Cuándo es el avalúo?"; $("#v-collections [data-cg-ask]").click(); await wait(50); }
+  const q = $('#v-portal [id^="cgQ_"]'); if (q) { q.value = "¿Cuándo es el avalúo?"; $("#v-portal [data-cg-ask]").click(); await wait(50); }
   check("demo guide answers in Spanish", /Fecha límite del avalúo/.test(E(`Object.values(ClientGuide.demoQA).map(x => x.a).join(" ")`)));
   // Agent side stays English
   E(`Store.isAgent = true; location.hash = "#agent"; agentPanel = "homeowners"; renderAgent()`); await wait(200);
