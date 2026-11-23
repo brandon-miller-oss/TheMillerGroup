@@ -10,8 +10,8 @@ window.MG_CONFIG = {
   LICENSE_TEXT: 'Colorado real estate brokerage license: [add license number]',
 
   // Back end (free Supabase project). Leave blank to run the site without a database.
-  SUPABASE_URL: '',                 // e.g. 'https://abcdxyz.supabase.co'
-  SUPABASE_ANON_KEY: '',            // the publishable key (sb_publishable_…) or legacy anon key; safe to publish because the SQL policies protect the data
+  SUPABASE_URL: 'https://tpbfxboyzxradpwucjov.supabase.co',                 // e.g. 'https://abcdxyz.supabase.co'
+  SUPABASE_ANON_KEY: 'sb_publishable_YNZzIbCm6_T_CDqn2l0jkw_02LIt1td',            // the publishable key (sb_publishable_…) or legacy anon key; safe to publish because the SQL policies protect the data
 
   // Home search and agent tools (search/). Leave the two addresses blank to run on sample listings with no AI.
   IDX_ENDPOINT: '',                 // live listings, e.g. 'https://miller-tools.vercel.app/api/idx'
