@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="../assets/config.js?v=202611230326"></script>
+<script src="../assets/config.js?v=202611230346"></script>
 <style>
 :root{--spruce:#10231F;--pine:#1B3A33;--snow:#F6F8F7;--mist:#E3EBE8;--aspen:#F0B23A;--danger:#B3261E;--ok:#1E7A4B;--warn:#B26A00;--serif:'Fraunces',Georgia,serif;--sans:'Figtree',system-ui,sans-serif}
 *{box-sizing:border-box}
@@ -23,6 +23,7 @@ a{color:inherit}
 .tabs button{border:0;background:none;padding:10px 16px;font:600 .95rem var(--sans);color:var(--spruce);cursor:pointer;border-radius:10px 10px 0 0;white-space:nowrap}
 .tabs button[aria-current="true"]{background:var(--snow)}
 main{padding:22px 20px 80px;max-width:1200px;margin:0 auto}
+.agentframe{display:block;width:100%;border:0;background:#fff}
 .card{background:#fff;border:1px solid rgba(16,35,31,.12);border-radius:16px;padding:20px;margin-bottom:18px}
 .card h2{font-size:1.35rem;margin-bottom:10px}
 .center{max-width:420px;margin:8vh auto;padding:0 20px}
@@ -85,7 +86,7 @@ var C = window.MG_CONFIG || {}, esc = MG.esc;
 var $ = function(s,r){ return (r||document).querySelector(s); };
 var app = $('#app');
 var sb, user;
-var S = { tab:'dashboard', leads:[], tasks:[], lview:'list', q:'', stage:'all' };
+var S = { tab:'agent', leads:[], tasks:[], lview:'list', q:'', stage:'all' };
 var STAGES = [['new','New'],['contacted','Contacted'],['nurturing','Nurturing'],['meeting','Meeting or showing'],['under_contract','Under contract'],['closed','Closed'],['lost','Lost']];
 var stageLabel = function(k){ var f = STAGES.filter(function(s){return s[0]===k})[0]; return f ? f[1] : k; };
 var fmtDate = function(d){ return d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : ''; };
@@ -153,22 +154,42 @@ function setPasswordView(){
 }
 async function boot(){
   var r = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
-  if(r.error || !r.data){
-    app.innerHTML = '<div class="center"><div class="card"><h2>Not authorized</h2><p>You’re signed in, but this account isn’t an admin yet. Run this in the Supabase SQL editor:</p><pre>insert into public.admins (user_id)\nselect id from auth.users\nwhere email = \''+esc(user.email)+'\';</pre><button class="b" id="so">Sign out</button></div></div>';
+  var isBroker = !r.error && !!r.data, isAgent = isBroker;
+  if(!isBroker){ var ag = await sb.rpc('is_agent'); isAgent = !ag.error && ag.data === true; }
+  if(!isAgent){
+    app.innerHTML = '<div class="center"><div class="card"><h2>Not authorized</h2><p>You’re signed in, but this account isn’t set up as an agent yet. Ask the broker to give you agent access. Broker setup: run this in the Supabase SQL editor:</p><pre>insert into public.admins (user_id)\nselect id from auth.users\nwhere email = \''+esc(user.email)+'\';</pre><button class="b" id="so">Sign out</button></div></div>';
     $('#so').onclick = signOut; return;
   }
-  var tabs = [['dashboard','Dashboard'],['leads','Leads'],['landing_pages','Landing pages'],['listings','Listings'],['posts','Blog'],['testimonials','Testimonials'],['seo','SEO']];
-  app.innerHTML = '<div class="top"><strong>The Miller Group admin</strong><span>'+esc(user.email)+' &nbsp; <button class="b s" id="so" style="color:#fff;border-color:#fff">Sign out</button></span></div>'+
+  var tabs = isBroker ? [['agent','Agent tools'],['dashboard','Dashboard'],['leads','Leads'],['landing_pages','Landing pages'],['listings','Listings'],['posts','Blog'],['testimonials','Testimonials'],['seo','SEO']] : [['agent','Agent tools']];
+  if(!isBroker) S.tab = 'agent';
+  app.innerHTML = '<div class="top"><strong>The Miller Group back office</strong><span>'+esc(user.email)+' &nbsp; <button class="b s" id="so" style="color:#fff;border-color:#fff">Sign out</button></span></div>'+
     '<div class="tabs" role="tablist">'+tabs.map(function(t){return '<button data-tab="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div><main id="view"></main>';
   $('#so').onclick = signOut;
   document.querySelector('.tabs').onclick = function(e){ var b = e.target.closest('[data-tab]'); if(b) go(b.dataset.tab); };
   go(S.tab);
 }
-async function signOut(){ await sb.auth.signOut(); user = null; closeDrawer(); loginView(); }
+async function signOut(){ await sb.auth.signOut(); user = null; agentFrame = null; closeDrawer(); loginView(); }
+/* Agent tools: the agent workspace from the home search app, shown here behind the sign-in.
+   It runs in a frame on the same site, so it shares this sign-in. Kept loaded between tabs. */
+var agentFrame = null;
+function sizeAgentFrame(){ if(agentFrame && !agentFrame.hidden) agentFrame.style.height = Math.max(400, innerHeight - agentFrame.getBoundingClientRect().top) + 'px'; }
+addEventListener('resize', sizeAgentFrame);
 async function go(tab){
   S.tab = tab; closeDrawer();
   document.querySelectorAll('.tabs button').forEach(function(b){ b.setAttribute('aria-current', String(b.dataset.tab === tab)); });
-  var v = $('#view'); v.innerHTML = '<p>Loading...</p>';
+  var v = $('#view');
+  if(tab === 'agent'){
+    v.hidden = true;
+    if(!agentFrame || !agentFrame.isConnected){
+      agentFrame = document.createElement('iframe');
+      agentFrame.className = 'agentframe'; agentFrame.title = 'Agent tools';
+      agentFrame.src = '../search/?embed=1#agent';
+      v.parentNode.insertBefore(agentFrame, v.nextSibling);
+    }
+    agentFrame.hidden = false; sizeAgentFrame(); return;
+  }
+  if(agentFrame) agentFrame.hidden = true;
+  v.hidden = false; v.innerHTML = '<p>Loading...</p>';
   try{
     if(tab === 'dashboard') await viewDashboard(v);
     else if(tab === 'leads') await viewLeads(v);
