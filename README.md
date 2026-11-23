@@ -235,3 +235,11 @@ Emails go out from your brokerage address with the agent’s name, and replies g
 - You are collecting personal information. Have an attorney review the privacy policy, terms and fair housing pages before launch, and check Colorado advertising rules for brokerages (your brokerage name and license must be clear on the site).
 - Photos: add `assets/img/brandon.jpg` for the About page. Listing and blog images use links to images you host somewhere.
 - Back up your leads by exporting the CSV now and then.
+
+### Connect your website (agents with their own site)
+
+Agent tools → **Connect your website** gives each agent, filled in with their own link name:
+a client login link (`search/?agent=<name>#portal`), a home search link, copy-and-paste buttons,
+embed code for the home search (`&frame=1`: sign-in and the portal open in a new tab), and a
+contact form. The form posts to `submit_website_lead` (in `supabase/agent-tools.sql`), which adds
+the lead to the brokerage lead list and to that agent's contacts (folder: Website leads), up to 30 an hour.

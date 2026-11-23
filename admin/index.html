@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Admin | The Miller Group</title>
+<title>Back office | The Miller Group</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="../assets/config.js?v=202611230408"></script>
+<script src="../assets/config.js?v=202611230419"></script>
 <style>
 :root{--spruce:#10231F;--pine:#1B3A33;--snow:#F6F8F7;--mist:#E3EBE8;--aspen:#F0B23A;--danger:#B3261E;--ok:#1E7A4B;--warn:#B26A00;--serif:'Fraunces',Georgia,serif;--sans:'Figtree',system-ui,sans-serif}
 *{box-sizing:border-box}
@@ -127,10 +127,10 @@ async function init(){
   if(r.data.session){ user = r.data.session.user; await boot(); } else loginView();
 }
 function loginView(){
-  app.innerHTML = '<div class="center"><div class="card"><h2>Admin sign in</h2><form id="lf" class="fg" style="margin-top:12px">'+
+  app.innerHTML = '<div class="center"><div class="card"><h2>Agent sign in</h2><p class="help" style="font-size:.9rem;opacity:.8;margin:6px 0 0">The back office for agents and the broker. Buying or selling with us? <a href="../search/#portal">Go to your client portal</a>.</p><form id="lf" class="fg" style="margin-top:12px">'+
    '<div><label for="em">Email</label><input id="em" type="email" autocomplete="username" required></div>'+
    '<div><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>'+
-   '<button class="b p" type="submit">Sign in</button><button class="b" type="button" id="fp">Email me a password reset link</button><p class="msg" id="lm" role="status"></p></form></div></div>';
+   '<button class="b p" type="submit">Sign in</button><button class="b" type="button" id="fp">First time, or forgot your password? Email me a link</button><p class="msg" id="lm" role="status"></p></form></div></div>';
   $('#lf').onsubmit = async function(e){
     e.preventDefault(); $('#lm').textContent = 'Signing in...';
     var r = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });

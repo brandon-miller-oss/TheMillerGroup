@@ -217,7 +217,7 @@
     if (!host || !sb) return;
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "btn ghost small";
+    btn.className = "btn ghost small"; btn.id = "authBtn";
     btn.textContent = session ? "Sign out" : "Sign in";
     btn.addEventListener("click", async () => {
       if (session) { await sb.auth.signOut(); return; }

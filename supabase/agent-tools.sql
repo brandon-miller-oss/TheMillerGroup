@@ -191,3 +191,28 @@ grant execute on function public.claim_coverage(text, boolean) to authenticated;
 do $$ begin
   alter publication supabase_realtime add table public.docs;
 exception when duplicate_object then null; end $$;
+
+-- ---------- Leads from an agent's own website (Connect your website) ----------
+-- The contact form snippet posts here. The lead goes to the brokerage lead list and
+-- into that agent's contacts (folder: Website leads). Limited to 30 an hour per agent.
+create or replace function public.submit_website_lead(p_agent text, p_name text, p_email text,
+  p_phone text default null, p_message text default null, p_page_url text default null) returns boolean
+language plpgsql security definer set search_path = public as $$
+declare cid text; nm text := trim(coalesce(p_name, '')); em text := lower(trim(coalesce(p_email, '')));
+  ph text := left(nullif(trim(coalesce(p_phone, '')), ''), 40); src text := left(coalesce(nullif(trim(p_page_url), ''), 'Agent website'), 300);
+begin
+  if p_agent !~ '^[A-Za-z0-9_\-]{1,64}$' then raise exception 'Unknown agent'; end if;
+  if not exists (select 1 from public.agents where user_id::text = p_agent) and not exists (select 1 from public.admins where user_id::text = p_agent) then raise exception 'Unknown agent'; end if;
+  if char_length(nm) not between 1 and 200 or char_length(em) > 320 or em !~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' then raise exception 'Please add a name and a valid email'; end if;
+  if (select count(*) from public.leads where source = 'agent-website' and extra->>'agentId' = p_agent and created_at > now() - interval '1 hour') >= 30 then raise exception 'Too many requests. Try again later.'; end if;
+  insert into public.leads (name, email, phone, interest, message, source, referrer, extra)
+  values (nm, em, ph, 'Website inquiry', left(p_message, 5000), 'agent-website', src, jsonb_build_object('agentId', p_agent));
+  cid := 'web' || replace(gen_random_uuid()::text, '-', '');
+  insert into public.docs (path, parent, data) values ('agent/' || p_agent || '/crm/contacts/' || cid, 'agent/' || p_agent || '/crm/contacts',
+    jsonb_strip_nulls(jsonb_build_object('name', nm, 'email', em, 'phone', ph, 'role', 'buyer', 'buyerStage', 'lead',
+      'source', left('Website: ' || src, 200), 'notes', left(coalesce(p_message, ''), 5000),
+      'folders', jsonb_build_array('Website leads'), 'createdAt', now(), 'updatedAt', now())));
+  return true;
+end $$;
+revoke all on function public.submit_website_lead(text, text, text, text, text, text) from public;
+grant execute on function public.submit_website_lead(text, text, text, text, text, text) to anon, authenticated;
