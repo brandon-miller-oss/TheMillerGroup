@@ -1,7 +1,7 @@
 // Demo mode as the live site runs it during testing: no database, nobody signed in.
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..");
-const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
+const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8").replace(/DEMO_MODE: false/, "DEMO_MODE: true"); // these tests run on sample data
 // Inline every local <script src="x.js?v=..."> so the page runs without a web server.
 function inlineScripts(html, config) {
   return html

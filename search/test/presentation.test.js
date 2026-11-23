@@ -1,7 +1,7 @@
 // Listing presentation: builder, net sheet math, and the PDF. Run: npm i jsdom jspdf@2.5.1 && node search/test/presentation.test.js
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path"), os = require("os"), dir = path.join(__dirname, "..");
-const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
+const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8").replace(/DEMO_MODE: false/, "DEMO_MODE: true"); // these tests run on sample data
 const jspdfSrc = fs.readFileSync(require.resolve("jspdf/dist/jspdf.umd.min.js"), "utf8");
 const html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")

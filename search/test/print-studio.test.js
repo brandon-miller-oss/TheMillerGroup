@@ -1,7 +1,7 @@
 // Print studio: flyers, brochures, postcards, event mailers, business cards. Run: npm i jsdom jspdf@2.5.1 qrcode-generator@1.4.4 && node search/test/print-studio.test.js
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path"), os = require("os"), cp = require("child_process"), dir = path.join(__dirname, "..");
-const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
+const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8").replace(/DEMO_MODE: false/, "DEMO_MODE: true"); // these tests run on sample data
 const libs = fs.readFileSync(require.resolve("jspdf/dist/jspdf.umd.min.js"), "utf8") + "\n" + fs.readFileSync(require.resolve("qrcode-generator/qrcode.js"), "utf8");
 const html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")

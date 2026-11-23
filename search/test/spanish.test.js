@@ -1,7 +1,7 @@
 // Spanish: switch, search, listing, costs, shortlists, transaction guide, homeowner portal, client updates. Agent side stays English.
 let JSDOM; try { ({ JSDOM } = require("jsdom")); } catch (e) { ({ JSDOM } = require(require("child_process").execSync("npm root -g").toString().trim() + "/jsdom")); }
 const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..");
-const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8");
+const cfg = fs.readFileSync(path.join(dir, "..", "assets", "config.js"), "utf8").replace(/DEMO_MODE: false/, "DEMO_MODE: true"); // these tests run on sample data
 const html = fs.readFileSync(path.join(dir, "index.html"), "utf8")
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net[^"]*"><\/script>/, "")
   .replace(/<script src="\.\.\/assets\/config\.js(\?v=\d+)?"><\/script>/, () => `<script>${cfg}</script>`)
