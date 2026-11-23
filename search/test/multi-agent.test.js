@@ -61,9 +61,10 @@ async function saveProfile(dom, name, slug) {
   // On the public page (no ?embed=1) agents get the client view and a Back office link, never the agent tools
   const P = open("sara", "#search"); await wait(400);
   check("public page: agent tools off for an agent", P.window.eval("Store.isAgent") === false && P.window.eval("Store.isStaff") === true);
-  check("public page: Agent tab becomes a Back office link", T(P, "#agentTab").includes("Back office") && P.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
+  check("public page: Agent tools button opens the back office sign-in", T(P, "#agentTab").includes("Agent tools") && P.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
   check("public page: no client list for the agent", Object.keys(P.window.eval("Store.clients")).length === 0);
 
+  check("signed-out visitor sees Agent tools button to sign in", !V.window.document.querySelector("#agentTab").classList.contains("hidden") && V.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
   const errs = [B, S, C1, C2, S2, B2, BV, Tm, V, P].flatMap(d => d.errs);
   check("no page errors", errs.length === 0); if (errs.length) console.log(errs);
   fails = require("./harness").done(); console.log(fails ? `${fails} failed` : "All multi-agent tests passed"); process.exit(fails ? 1 : 0);
