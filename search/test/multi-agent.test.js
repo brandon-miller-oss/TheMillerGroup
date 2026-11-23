@@ -58,7 +58,13 @@ async function saveProfile(dom, name, slug) {
   const deny = await S2.window.eval('MillerCloud.rpc("add_agent",{agent_email:"newagent@x.com"}).then(()=>"ok",()=>"denied")');
   check("agent can't add agents", deny === "denied");
 
-  const errs = [B, S, C1, C2, S2, B2, BV, Tm, V].flatMap(d => d.errs);
+  // On the public page (no ?embed=1) agents get the client view and a Back office link, never the agent tools
+  const P = open("sara", "#search"); await wait(400);
+  check("public page: agent tools off for an agent", P.window.eval("Store.isAgent") === false && P.window.eval("Store.isStaff") === true);
+  check("public page: Agent tab becomes a Back office link", T(P, "#agentTab").includes("Back office") && P.window.document.querySelector("#agentTab").getAttribute("href") === "../admin/");
+  check("public page: no client list for the agent", Object.keys(P.window.eval("Store.clients")).length === 0);
+
+  const errs = [B, S, C1, C2, S2, B2, BV, Tm, V, P].flatMap(d => d.errs);
   check("no page errors", errs.length === 0); if (errs.length) console.log(errs);
   fails = require("./harness").done(); console.log(fails ? `${fails} failed` : "All multi-agent tests passed"); process.exit(fails ? 1 : 0);
 })();

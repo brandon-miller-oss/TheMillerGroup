@@ -51,7 +51,7 @@ function fake(uid) {
     channel() { const c = { filter: "", cb: null, on(_, o, cb) { c.filter = o.filter; c.cb = cb; return c; }, subscribe() { chans.push(c); return c; } }; return c; },
     removeChannel(c) { const i = chans.indexOf(c); if (i >= 0) chans.splice(i, 1); } };
 }
-const open = (uid, url, store = {}) => { const errs = []; const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/" + url, beforeParse(w) {
+const open = (uid, url, store = {}) => { const errs = []; const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/" + (url.startsWith("#agent") ? "?embed=1" + url : url), beforeParse(w) {
   w.supabase = { createClient: () => fake(uid) }; w.structuredClone = o => JSON.parse(JSON.stringify(o)); w.scrollTo = () => {}; w.confirm = () => true; w.prompt = (a, b) => b || "x";
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; }; w.HTMLDialogElement.prototype.close = function () { this.open = false; };
   Object.entries(store).forEach(([k, v]) => w.sessionStorage.setItem(k, v));

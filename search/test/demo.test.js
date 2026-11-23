@@ -11,7 +11,7 @@ function inlineScripts(html, config) {
 }
 let html = inlineScripts(fs.readFileSync(path.join(dir, "index.html"), "utf8"), cfg);
 const errs = [];
-const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/#agent", beforeParse(w) {
+const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://site.test/search/?embed=1#agent", beforeParse(w) {
   w.structuredClone = o => JSON.parse(JSON.stringify(o)); w.scrollTo = () => {}; w.confirm = () => true; w.prompt = () => "x";
   w.HTMLDialogElement.prototype.showModal = function () { this.open = true; }; w.HTMLDialogElement.prototype.close = function () { this.open = false; };
   w.addEventListener("error", e => errs.push(e.message)); } });
